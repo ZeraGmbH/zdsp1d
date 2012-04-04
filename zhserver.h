@@ -10,7 +10,7 @@
 #define ZHSERVER_H
 
 #include <netinet/in.h>
-#include <qptrlist.h>
+#include <q3ptrlist.h>
 #include <qstringlist.h>
 #include <qstring.h>
 
@@ -39,7 +39,7 @@ public:
     ~cZHClient(); //  allokierten speicher ggf. freigeben
     int sock; // socket für den die verbindung besteht
     struct sockaddr_in addr; // address informationen
-    void SetOutput(char*); // setzt den output, d.h. legt auch daten dafür an
+    void SetOutput(const char*); // setzt den output, d.h. legt auch daten dafür an
     char* GetOutput(); // gibt den output zurück
     bool OutpAvail(); // true wenn mind. 1 zeichen im ausgabepuffer
     void ClearInput(); // löscht den input buffer
@@ -58,7 +58,7 @@ public:
     virtual ~cZHServer(){};
     virtual int Execute(); // server ausführen
     QString& GetSoftwareVersion();
-    virtual int SetServerNr(char*); // setzen der device nr -> neuen server namen 
+    virtual int SetServerNr(const char*); // setzen der device nr -> neuen server namen
     virtual void AddClient(int, sockaddr_in*); // fügt einen client hinzu
     virtual void DelClient(int); // entfernt einen client
 protected:
@@ -67,7 +67,7 @@ protected:
     static QString sSoftwareVersion; // version des hw-servers (programm name + version )
     cCmdInterpreter* pCmdInterpreter; // der benutzte kommando interpreter
 private:
-    QPtrList<cZHClient> clientlist; // liste der clients
+    Q3PtrList<cZHClient> clientlist; // liste der clients
 };    
     
 #endif // ifndef ZHSERVER_H

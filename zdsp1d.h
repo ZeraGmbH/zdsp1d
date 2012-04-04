@@ -8,7 +8,10 @@
 #include <qstring.h>
 #include <qstringlist.h>
 #include <qmap.h>
-#include <qvaluelist.h>
+#include <q3valuelist.h>
+//Added by qt3to4:
+#include <Q3PtrList>
+#include <Q3MemArray>
 
 #include "dsp1scpi.h"
 #include "zhserver.h"
@@ -22,9 +25,9 @@
 #define DEBUG2 (DebugLevel & 2) // alle devnode aktivitäten loggen
 #define DEBUG3 (DebugLevel & 4) // alle client an-,abmeldungen
 
-typedef QValueList<cDspCmd> tDspCmdList;
-typedef QValueList<cDspClientVar> tDspVarList;
-typedef QMemArray<float> tDspMemArray;    
+typedef Q3ValueList<cDspCmd> tDspCmdList;
+typedef Q3ValueList<cDspClientVar> tDspVarList;
+typedef Q3MemArray<float> tDspMemArray;    
 
 class cZDSP1Server; // forward
 
@@ -54,7 +57,7 @@ public:
     bool DspVar(QString&,int&); // einen int (32bit) wert lesen
     bool DspVar(QString&,float&); // eine float wert lesen
     sDspVar* DspVarRead(QString&,QByteArray*); // lesen dsp variable;  name , länge stehen im parameter string; werte im anschluss im qbytearray
-    char* DspVarWriteRM(QString&); // dito schreiben mit rückmeldung
+    const char* DspVarWriteRM(QString&); // dito schreiben mit rückmeldung
     bool DspVarWrite(QString&);  // schreiben  true wenn ok
     tDspCmdList& GetDspCmdList(); // damit der server die komplette liste aller clients
     tDspCmdList& GetDspIntCmdList(); // an den dsp übertragen kann
@@ -79,7 +82,7 @@ private:
     tDspVarList m_DspVarList; // liste mit variablen beschreibungen
     tDspCmdList m_DspCmdList; // liste mit dsp kommandos (periodisch)
     tDspCmdList  m_DspIntCmdList; // liste mit dsp kommandos (interrupt)
-    QMemArray<sDspVar> varArray; // array von sDspVar
+    Q3MemArray<sDspVar> varArray; // array von sDspVar
     sMemSection msec; // eine memory section für den DspVarResolver 
 };
 
@@ -112,7 +115,7 @@ public:
     
 private:
     uchar ActivatedCmdList;
-    QPtrList<cZDSP1Client> clientlist; // liste der clients
+    Q3PtrList<cZDSP1Client> clientlist; // liste der clients
     
     // die routinen für das system modell
     const char* mCommand2Dsp(QString&); // indirekt für system modell    

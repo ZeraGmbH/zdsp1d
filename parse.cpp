@@ -17,7 +17,7 @@ const QString cParse::GetKeyword(char** s) {
     return(ls); // schlüsselwort ohne delimiter 
 }
 
-const char cParse::GetChar(char** s)	{
+char cParse::GetChar(char** s)	{
     char tc=0;
     if (**s) { // abfrage für den fall, dass string schon zu ende
 	do { 

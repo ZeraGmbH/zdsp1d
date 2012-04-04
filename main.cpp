@@ -48,14 +48,14 @@ int main( int argc, char *argv[] )
 	if (pid==0) { // wenn es der kindprozess ist
 	    zdsp1d->SetFASync(); // erst hier, weil sich die pid durch fork ändert 
 	    syslog(LOG_INFO,"zdsp1d server child process created\n");
-	    chdir ("/"); // bekommt er einen platz zum "leben"
+            r = chdir ("/"); // bekommt er einen platz zum "leben"
 	    setsid();
 	    close (STDIN_FILENO); // löst sich von der konsole
 	    close (STDOUT_FILENO);
 	    close (STDERR_FILENO);
 	    open ("/dev/null",O_RDWR); 
-	    dup (STDIN_FILENO);
-	    dup (STDOUT_FILENO);
+            r = dup (STDIN_FILENO);
+            r = dup (STDOUT_FILENO);
                   r=zdsp1d->Execute(); // und läuft von nun an eigenständig
                   syslog(LOG_INFO,"zdsp1d server child process terminated\n");		  
 	}

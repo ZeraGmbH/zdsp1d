@@ -179,19 +179,19 @@ static sDspCmd DspCmd[60] = {	{"INVALID", 0, CMD ,0},
 				{"SINUS", 44, CMD3i16, 0 },
 				{"COSINUS", 45, CMD3i16, 0 }, 
 				{"AUTOKORRELATION", 46, CMD3i16, 0 },
-			              {"SUBVVV", 47, CMD3i16, 0 },
+                                {"SUBVVV", 47, CMD3i16, 0 },
 				{"NORMVC", 48, CMD1i161fi32, 0 },
-			              {"ARCTAN", 49, CMD3i16, 0 },
+                                {"ARCTAN", 49, CMD3i16, 0 },
 				{"DIVVVV", 50, CMD3i16, 0 },
-			              {"SYMPHI", 51, CMD2i16, 0 },
-                                                        {"BREAK", 52, CMD1i16,0 },
-                                                        {"FLATTOP", 53, CMD2i16, 0 },
+                                {"SYMPHI", 51, CMD2i16, 0 },
+                                {"BREAK", 52, CMD1i16,0 },
+                                {"FLATTOP", 53, CMD2i16, 0 },
 				{"INC", 54, CMD1i16, 0 },
-			              {"COPYINDDATA", 55, CMD3i16, 0 },
-                                                        {"TESTSYNCPPSSKIPEQ",56,CMD,0},
-                                                        {"RESETSYNCPPS",57,CMD,0},
-			              {"RMSN",58,CMD3i16,0},
-                                                        {"MULNCC",59,CMD3i16,0}};
+                                {"COPYINDDATA", 55, CMD3i16, 0 },
+                                {"TESTSYNCPPSSKIPEQ",56,CMD,0},
+                                {"RESETSYNCPPS",57,CMD,0},
+                                {"RMSN",58,CMD3i16,0},
+                                {"MULNCC",59,CMD3i16,0}};
 
 
 sDspCmd* findDspCmd(QString& s) {
@@ -296,7 +296,7 @@ cDspClientVar::cDspClientVar()
 bool cDspClientVar::Init(QString& s) {
     bool ret = false;
     int n,fs;
-    if ( (n = s.contains(',')) > 0 ) {
+    if ( (n = s.count(',')) > 0 ) {
 	m_sName = s.section(',',0,0).stripWhiteSpace();
 	fs = s.section(',',1,1).stripWhiteSpace().toInt(&ret);
 	if (ret)  m_nSize = fs;

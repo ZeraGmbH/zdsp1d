@@ -20,6 +20,8 @@
 #include <qdatastream.h>
 #include <qfile.h>                                                                                   
 #include <qbuffer.h>
+//Added by qt3to4:
+#include <Q3TextStream>
 #include <unistd.h>
 
 #include "zeraglobal.h"
@@ -117,7 +119,7 @@ QString& cZDSP1Client::SetRavList(QString& s) {
 }
 
 QString& cZDSP1Client::GetRavList() {
-    QTextStream ts( &sOutput, IO_WriteOnly );
+    Q3TextStream ts( &sOutput, QIODevice::WriteOnly );
     if ( !m_DspVarList.empty() ) {
 	tDspVarList::iterator it;
 	for ( it = m_DspVarList.begin(); it != m_DspVarList.end(); ++it ) {
@@ -164,7 +166,7 @@ QString& cZDSP1Client::GetCmdIntListDef() {
 
 bool cZDSP1Client::syntaxCheck(QString& s) {
     int p1,p2=-1;
-    bool ok = ( ((p1 = s.find('(')) > 0) && ((p2 = s.find(')')) > 0) || (p2>p1) );
+    bool ok = ( (((p1 = s.find('(')) > 0) && ((p2 = s.find(')')) > 0)) || (p2>p1) );
     return ok;
 }
 
@@ -210,7 +212,7 @@ cDspCmd cZDSP1Client::GenDspCmd(QString& scmd,bool* ok) {
 		    t &= sSearch.isEmpty();
 		    if (t) {
 			lcmd = cDspCmd(dspcmd->CmdCode, (ushort)par[0], (ushort)par[1]);
-			if (dspcmd->modify) lcmd.w[1] = lcmd.w[1] & 0xFFFF | (sock << 16);
+                        if (dspcmd->modify) lcmd.w[1] = (lcmd.w[1] & 0xFFFF) | (sock << 16);
 		    }
 		    *ok = t;
 		    return lcmd;
@@ -227,10 +229,13 @@ cDspCmd cZDSP1Client::GenDspCmd(QString& scmd,bool* ok) {
 		    }
 		    sSearch = CmdParser.GetKeyword(&cmds);
 		    t &= sSearch.isEmpty();
-		    if (t) {
-			lcmd = cDspCmd(dspcmd->CmdCode, (ushort)par[0], (ushort)par[1], (ushort)par[2]);				if (dspcmd->modify) lcmd.w[1] = lcmd.w[1] & 0xFFFF | (sock << 16);
-		    }
-		    *ok = t;
+                    if (t)
+                    {
+                        lcmd = cDspCmd( dspcmd->CmdCode, (ushort)par[0], (ushort)par[1], (ushort)par[2]);
+                        if (dspcmd->modify) lcmd.w[1] = (lcmd.w[1] & 0xFFFF) | (sock << 16);
+                    }
+
+                    *ok = t;
 		    return lcmd;
 		}
 	    case CMD1i32:
@@ -334,7 +339,7 @@ bool cZDSP1Client::InitiateActValues(QString& s) {
 	QByteArray ba(m_nlen<<2);
 	if (myServer->DspDevSeek(fd, msec.StartAdr/*m_nStartAdr*/) >= 0) {
 		if (myServer->DspDevRead(fd, ba.data(), m_nlen<<2) >= 0) {
-				QDataStream bas ( ba, IO_Raw | IO_ReadOnly );
+                                QDataStream bas ( &ba, QIODevice::Unbuffered | QIODevice::ReadOnly );
 				bas.setByteOrder(QDataStream::LittleEndian);
 				for (unsigned int i = 0; i < m_fDspMemData.size(); i++) 
 				    bas >> m_fDspMemData[i] ;
@@ -362,7 +367,7 @@ bool cZDSP1Client::InitiateActValues(QString& s) {
 	    QByteArray ba(len*4); // der benötigte speicher
 	    if (myServer->DspDevSeek(fd,msec.StartAdr/* m_nStartAdr*/ + of) < 0) break; // file positionieren
 	    if (myServer->DspDevRead(fd, ba.data(), len*4 ) < 0) break; // fehler beim lesen
-	    QDataStream bas ( ba, IO_Raw | IO_ReadOnly );
+            QDataStream bas ( &ba, QIODevice::Unbuffered | QIODevice::ReadOnly );
 	    bas.setByteOrder(QDataStream::LittleEndian);
 	    for (int j = of; j < of+len; j++) bas >> m_fDspMemData[j];
 	}
@@ -373,7 +378,7 @@ bool cZDSP1Client::InitiateActValues(QString& s) {
 
 QString& cZDSP1Client::FetchActValues(QString& s) {
     sOutput="";
-    QTextStream ts( &sOutput, IO_WriteOnly );
+    Q3TextStream ts( &sOutput, QIODevice::WriteOnly );
     QString tmps=s;
     tDspVarList:: iterator it;
     if (s.isEmpty())
@@ -470,7 +475,7 @@ char* cZDSP1Client::qSEncryption(char* ch,int n ) {
     char c;
     for (int j=0;j<n;j++,ch++) {
 	c=*ch;
-	*tm2++ = ((c << 4) | c) & 0x0F0F | 0x3030;
+        *tm2++ = (((c << 4) | c) & 0x0F0F) | 0x3030;
 	//  *tm2++=((c>>4) & 0xF) | 0x30;
 	//  *tm2++=(c & 0xF) | 0x30;
     }
@@ -482,7 +487,7 @@ char* cZDSP1Client::qSEncryption(char* ch,int n ) {
 QString& cZDSP1Client::DspVarListRead(QString& s) {
     bool ok=false;
     sOutput="";
-    QTextStream ts( &sOutput, IO_WriteOnly );
+    Q3TextStream ts( &sOutput, QIODevice::WriteOnly );
     QByteArray *ba = new QByteArray();
     
     for (int i=0;;i++) {
@@ -525,7 +530,7 @@ QString& cZDSP1Client::DspVarListRead(QString& s) {
 }
 
 
-char* cZDSP1Client::DspVarWriteRM(QString& s) {
+const char* cZDSP1Client::DspVarWriteRM(QString& s) {
     if ( DspVarWrite(s) ) return ACKString;
     else return ERREXECString;
 }
@@ -549,7 +554,7 @@ bool cZDSP1Client::DspVarWrite(QString& s) {
 	int n,alloc;
 	n = alloc = 0; // keine elemente 
 	QByteArray ba;
-	QDataStream bas ( ba, IO_Raw | IO_ReadWrite );
+        QDataStream bas ( &ba, QIODevice::Unbuffered | QIODevice::ReadWrite );
 	bas.setByteOrder(QDataStream::LittleEndian);
 	    
 	bool ok2 = true;
@@ -560,10 +565,10 @@ bool cZDSP1Client::DspVarWrite(QString& s) {
 		alloc += gran;
 		ba.resize(alloc*4);
 	    }
-	    long vl = p.toLong(&ok2); // test auf long
+            qint32 vl = p.toLong(&ok2); // test auf long
 	    if (ok2) bas << vl;
 	    else {
-		ulong vul = p.toULong(&ok2); // test auf ulong
+                quint32 vul = p.toULong(&ok2); // test auf ulong
 		if (ok2) bas << vul;
 		else {
 		    float vf = p.toFloat(&ok2); // test auf float
@@ -676,7 +681,7 @@ const char* cZDSP1Server::mResetDsp(char*) {
 
 const char* cZDSP1Server::mBootDsp(char*) {
     QFile f (m_sDspBootPath);
-    if (!f.open(IO_Raw | IO_ReadOnly)) { // dsp bootfile öffnen
+    if (!f.open(QIODevice::Unbuffered | QIODevice::ReadOnly)) { // dsp bootfile öffnen
 	if (DEBUG1)  syslog(LOG_ERR,"error opening dsp boot file: %s\n",m_sDspBootPath.latin1());
 	Answer = ERRPATHString;
 	return Answer.latin1();
@@ -900,7 +905,7 @@ const char* cZDSP1Server::mGetEN61850EthTypeAppId()
     if (cl->DspVarRead(as = "ETHTYPEAPPID,1",ba)) {
 	ulong *dataCount = (ulong*) ba->data(); // data zeigt auf 1*4 byte
 	Answer = "";
-	QTextStream ts( &Answer, IO_WriteOnly );
+	Q3TextStream ts( &Answer, QIODevice::WriteOnly );
 	ts << dataCount[0];
     }
     else 
@@ -933,7 +938,7 @@ const char* cZDSP1Server::mGetEN61850PriorityTagged()
     if (cl->DspVarRead(as = "ETHPRIORITYTAGGED,1",ba)) {
 	ulong *dataCount = (ulong*) ba->data(); // data zeigt auf 1*4 byte
 	Answer = "";
-	QTextStream ts( &Answer, IO_WriteOnly );
+	Q3TextStream ts( &Answer, QIODevice::WriteOnly );
 	ts << dataCount[0];
     }
     else 
@@ -967,7 +972,7 @@ const char* cZDSP1Server::mGetEN61850EthSync()
     if (cl->DspVarRead(as = "SYNCASDU,1",ba)) {
 	ulong *dataCount = (ulong*) ba->data(); // data zeigt auf 1*4 byte
 	Answer = "";
-	QTextStream ts( &Answer, IO_WriteOnly );
+	Q3TextStream ts( &Answer, QIODevice::WriteOnly );
 	ts << dataCount[0];
     }
     else 
@@ -1002,7 +1007,7 @@ const char* cZDSP1Server::mGetEN61850DataCount()
     if (cl->DspVarRead(as = "ETHDATACOUNT,2",ba)) {
 	ulong *dataCount = (ulong*) ba->data(); // data zeigt auf 2*4 byte
 	Answer = "";
-	QTextStream ts( &Answer, IO_WriteOnly );
+	Q3TextStream ts( &Answer, QIODevice::WriteOnly );
 	ts << dataCount[0] << "," << dataCount[1];
     }
     else 
@@ -1034,7 +1039,7 @@ const char* cZDSP1Server::mGetEN61850SyncLostCount() {
     if (cl->DspVarRead(as = "ETHSYNCLOSTCOUNT,1",ba)) {
 	ulong *dataCount = (ulong*) ba->data(); // data zeigt auf 1*4 byte
 	Answer = "";
-	QTextStream ts( &Answer, IO_WriteOnly );
+	Q3TextStream ts( &Answer, QIODevice::WriteOnly );
 	ts << dataCount[0];
     }
     else 
@@ -1058,7 +1063,7 @@ const char* cZDSP1Server::mGetEN61850SourceAdr() {
 	for (i = 0;i < 2;i++) adr[i] = ( AdrByte[1] >> ((1-i) * 8) ) & 0xFF;  // dsp byte order
 	for (i = 0;i < 4;i++) adr[2+i] = ( AdrByte[2] >> ((3-i) * 8) ) & 0xFF; // -> network byte order
 	Answer = "";
-	QTextStream ts( &Answer, IO_WriteOnly );
+	Q3TextStream ts( &Answer, QIODevice::WriteOnly );
 	for (i = 0; i < 5; i++) ts << adr[i] << ",";
 	ts << adr[i] << ";";
     }
@@ -1082,7 +1087,7 @@ const char* cZDSP1Server::mGetEN61850DestAdr() {
 	for (i = 0;i < 4;i++) adr[i] = ( AdrByte[0] >> ((3-i) * 8) ) & 0xFF;  // dsp byte order
 	for (i = 0;i < 2;i++) adr[4+i] = ( AdrByte[1] >> ((3-i) * 8) ) & 0xFF; // -> network byte order
 	Answer = "";
-	QTextStream ts( &Answer, IO_WriteOnly );
+	Q3TextStream ts( &Answer, QIODevice::WriteOnly );
 	for (i = 0; i < 5; i++) ts << adr[i] << ",";
 	ts << adr[i] << ";";
     }
@@ -1126,7 +1131,7 @@ const char* cZDSP1Server::mGetDspCommandStat() {
 const char* cZDSP1Server::mTriggerIntListHKSK(char* s) {
     QString ss = s;
     ulong par = ss.toULong();
-    par = par & 0xFFFF | (ActSock << 16);
+    par = (par & 0xFFFF )| (ActSock << 16);
     return mCommand2Dsp(ss = QString("DSPCMDPAR,4,%1;").arg(par)); // liste mit prozessNr u. HKSK 
 }
 
@@ -1305,15 +1310,15 @@ bool cZDSP1Server::LoadDSProgram() { // die programmlisten aller aktiven clients
     ulong umo = dm32UserWorkSpace.StartAdr; // usermememory offset
     QByteArray CmdMem;
     QByteArray CmdIntMem;
-    QDataStream mds1 ( CmdMem, IO_Raw | IO_ReadWrite );    
+    QDataStream mds1 ( &CmdMem, QIODevice::Unbuffered | QIODevice::ReadWrite );
     mds1.setByteOrder(QDataStream::LittleEndian);
-    QDataStream mds2 ( CmdIntMem, IO_Raw | IO_ReadWrite );    
+    QDataStream mds2 ( &CmdIntMem, QIODevice::Unbuffered | QIODevice::ReadWrite );
     mds2.setByteOrder(QDataStream::LittleEndian);
     cZDSP1Client* client;
     cDspCmd cmd;
     QString s,s2;
     
-    QPtrListIterator<cZDSP1Client> it(clientlist);
+    Q3PtrListIterator<cZDSP1Client> it(clientlist);
     
     s =  QString( "DSPMEMOFFSET(%1)" ).arg(dm32DspWorkspace.StartAdr);
     client = it.toFirst();
@@ -1330,9 +1335,9 @@ bool cZDSP1Server::LoadDSProgram() { // die programmlisten aller aktiven clients
 	    mds2 << cmd;
 	    umo += (client->GetDspMemData()).size(); // relokalisieren der daten im dsp
 	    tDspCmdList& cmdl = client->GetDspCmdList();
-	    for (uint i = 0; i < cmdl.size(); i++ ) mds1 << cmdl[i]; // cycl. liste
+            for (int i = 0; i < cmdl.size(); i++ ) mds1 << cmdl[i]; // cycl. liste
 	    tDspCmdList& cmdl2 = client->GetDspIntCmdList();
-	    for ( uint i = 0; i < cmdl2.size(); i++ ) mds2 << cmdl2[i]; // interrupt liste
+            for ( int i = 0; i < cmdl2.size(); i++ ) mds2 << cmdl2[i]; // interrupt liste
 	}
     }
     s =  QString( "INVALID()");
@@ -1554,7 +1559,7 @@ int cZDSP1Server::Execute() { // server ausführen
 		    out+="\n";
 		    // char* out=client->GetOutput();
 		    send(fd,out.latin1(),out.length(),0);
-		    client->SetOutput(""); // kein output mehr da .
+                    client->SetOutput(""); // kein output mehr da .
 		} 
 	    }
 		  

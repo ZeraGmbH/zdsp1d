@@ -5,7 +5,7 @@
 #define DSP_H
 
 #include <qstring.h>
-#include <qptrlist.h>
+#include <q3ptrlist.h>
 #include <qdatastream.h>
 
 #include "parse.h"
@@ -23,7 +23,7 @@ enum CmdType { CMD, CMD1i16, CMD2i16, CMD3i16 ,CMD1i32 , CMD1i161fi32 };
 // 1fi32 kann 1 float oder 1 integer sein
 
 struct sDspCmd { // wird zum ausdekodieren der dsp kommandos benötigt
-    char* Name; // name des befehls
+    const char* Name; // name des befehls
     ushort	CmdCode; // der zugehörige befehlscode
     CmdType CmdClass; // der typ des befehls
     char modify; // !=0 -> verändern, diese befehle erhalten die prozessnr. (fd) als parameter 
@@ -33,7 +33,7 @@ sDspCmd* findDspCmd(QString&);
 enum dType { eInt, eFloat};
 
 struct sDspVar { // dient ebenfalls der dekodierung 
-    char* Name; // name der variablen
+    const char* Name; // name der variablen
     ushort size;  // offset adresse
     dType type; // 
     ulong adr; // die abs. adresse auf welcher sich die variable befindet
@@ -59,7 +59,7 @@ private:
     sDspVar *SearchedVar; // zeiger auf die gesuchte variable;
     long offs(QString&, sMemSection**);
     sMemSection *sec;
-    QPtrList<sMemSection> MemSectionList;
+    Q3PtrList<sMemSection> MemSectionList;
 };
 
 
