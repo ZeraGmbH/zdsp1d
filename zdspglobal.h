@@ -21,7 +21,7 @@
 
 //#define CheckSumOffset 56
 //#define LeiterkartenName "wm3000i"
-#define DSPDeviceNode "/dev/adsp21262-1/0"
+#define DSPDeviceNode "/dev/zFPGA1dsp1"
 #define ServerBasisName "zdsp1d"
 #define ServerVersion "V1.04"
 #define InpBufSize 4096

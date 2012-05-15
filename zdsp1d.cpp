@@ -604,7 +604,7 @@ cZDSP1Server::cZDSP1Server()
     cParse* parser=new(cParse); // das ist der parser
     pCmdInterpreter=new cCmdInterpreter(this,InitCmdTree(),parser); // das ist der kommando interpreter
     m_sDspDeviceVersion = m_sDspSerialNumber = "Unknown"; // kennen wir erst mal nicht
-    m_sDspBootPath = "./wm3000.ldr"; // default dsp program name
+    m_sDspBootPath = "/home/zera/wm3000.ldr"; // default dsp program name
     DebugLevel = 0; // MaxDebugLevel; // default alle debug informationen
     m_sDspDeviceNode = DSPDeviceNode; // default device node
     DSPServer = this;
