@@ -608,8 +608,7 @@ cZDSP1Server::cZDSP1Server()
     DebugLevel = 0; // MaxDebugLevel; // default alle debug informationen
     m_sDspDeviceNode = DSPDeviceNode; // default device node
     DSPServer = this;
-    DevFileDescriptor = DspDevOpen(); // 1x öffnen und halten
-   
+
     mySigAction.sa_handler = &SigHandler; // signal handler einrichten
     sigemptyset(&mySigAction.sa_mask);
     mySigAction. sa_flags = SA_RESTART;
@@ -631,10 +630,9 @@ void cZDSP1Server::DspIntService(int) {
 
 
 int cZDSP1Server::DspDevOpen() {
-    int fd;
-    if ( (fd = open(m_sDspDeviceNode.latin1(),O_RDWR)) < 0 ) {
+    if ( (DevFileDescriptor = open(m_sDspDeviceNode.latin1(),O_RDWR)) < 0 ) {
 	if (DEBUG1)  syslog(LOG_ERR,"error opening dsp device: %s\n",m_sDspDeviceNode.latin1());    }
-    return fd;
+    return DevFileDescriptor;
 }
 
 

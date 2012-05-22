@@ -33,11 +33,16 @@ int main( int argc, char *argv[] )
 	r=1;
     }
     
-     if ( ( argc > 4) && ( zdsp1d->SetBootPath(argv[4]) ) ) { // neuer boot path
+    if ( ( argc > 4) && ( zdsp1d->SetBootPath(argv[4]) ) ) { // neuer boot path
 	syslog(LOG_EMERG,"illegal dsp boot path\n");
 	r=1;
     }
     
+    if (zdsp1d->DspDevOpen() < 0) { // versuchen wir hier das dsp device zu öffnen
+        syslog(LOG_EMERG,"dsp device not available\n");
+        r=1;
+    }
+
     if (r==0) { // nur wenn bis jetzt kein fehler aufgetreten ist
 #ifndef DEBUG
 	if ( (pid=fork() ) < 0 ) { // kindprozess generieren 
