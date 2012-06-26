@@ -19,12 +19,13 @@
 //	es gab probleme im zusammenhang mit interrupts. ein einlaufender interrupt vom dsp konnte nicht bearbeitet werden wenn der select aufruf blockierte . input oder verbindungsaufbau liess das system weiter laufen. es wurde deshalb ein timeout (50 usec) eingeführt damit der select aufruf in jedem fall zurückkehrt. behandlung der flagge gotSIGIO wurde gändert, weil u.U. interrupts nicht bearbeitet wurden und sich der dsp dann aufhing.
 //v1.05 ergänzt :
 //	neuer befehl für dsp (SQRT) eingeführt .... läuft aber nur mit dsp ab V3.06
+//v1.06 fehler bereinigt @ gencmd für cmdi16if32 fehler bei 1. parameter wurde nicht gemeldet
 
 //#define CheckSumOffset 56
 //#define LeiterkartenName "wm3000i"
 #define DSPDeviceNode "/dev/zFPGA1dsp1"
 #define ServerBasisName "zdsp1d"
-#define ServerVersion "V1.05"
+#define ServerVersion "V1.06"
 #define InpBufSize 4096
 
 // wenn DEBUG -> kein fork() 

@@ -256,8 +256,10 @@ cDspCmd cZDSP1Client::GenDspCmd(QString& scmd,bool* ok) {
 		    long par2 = 0;
 		    bool t;
 		    sSearch = CmdParser.GetKeyword(&cmds);
-		    t = ( (par1 = DspVarResolver.offs(sSearch)) > -1); // -1 ist fehlerbedingung
-		    sSearch = CmdParser.GetKeyword(&cmds); 
+                    *ok = ( (par1 = DspVarResolver.offs(sSearch)) > -1); // -1 ist fehlerbedingung
+                    if (!(*ok))
+                        return lcmd; // wenn fehler -> fertig
+                    sSearch = CmdParser.GetKeyword(&cmds);
 		    par2 = sSearch.toLong(&t); // test auf integer 
 		    if (!t) par2 = sSearch.toLong(&t,16); // test auf hex
 		    if (!t)  {
