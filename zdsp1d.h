@@ -11,7 +11,8 @@
 #include <q3valuelist.h>
 //Added by qt3to4:
 #include <Q3PtrList>
-#include <Q3MemArray>
+//#include <Q3MemArray>
+#include <QVector>
 
 #include "dsp1scpi.h"
 #include "zhserver.h"
@@ -27,7 +28,7 @@
 
 typedef Q3ValueList<cDspCmd> tDspCmdList;
 typedef Q3ValueList<cDspClientVar> tDspVarList;
-typedef Q3MemArray<float> tDspMemArray;    
+typedef QVector<float> tDspMemArray;
 
 class cZDSP1Server; // forward
 
@@ -82,7 +83,7 @@ private:
     tDspVarList m_DspVarList; // liste mit variablen beschreibungen
     tDspCmdList m_DspCmdList; // liste mit dsp kommandos (periodisch)
     tDspCmdList  m_DspIntCmdList; // liste mit dsp kommandos (interrupt)
-    Q3MemArray<sDspVar> varArray; // array von sDspVar
+    QVector<sDspVar> varArray; // array von sDspVar
     sMemSection msec; // eine memory section für den DspVarResolver 
 };
 
