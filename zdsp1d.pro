@@ -2,6 +2,7 @@ TEMPLATE	= app
 LANGUAGE	= C++
 
 CONFIG	+= qt warn_on release
+CONFIG	+= debug_and_release
 
 HEADERS	+= zdspglobal.h \
 	parse.h \
