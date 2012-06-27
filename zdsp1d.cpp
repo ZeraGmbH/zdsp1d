@@ -352,6 +352,9 @@ bool cZDSP1Client::InitiateActValues(QString& s) {
     }
     else {
 	for (int i=0;;i++) {
+        char workspace[1000];
+        char* wsptr = workspace;
+
 	    QString vs = s.section(";",i,i);
 	    vs=vs.stripWhiteSpace();
 	    if (vs.isEmpty()) {
@@ -368,6 +371,9 @@ bool cZDSP1Client::InitiateActValues(QString& s) {
 	    int of = (*it).offs(); // dito
 	    QByteArray ba(len*4); // der benötigte speicher
 	    if (myServer->DspDevSeek(fd,msec.StartAdr/* m_nStartAdr*/ + of) < 0) break; // file positionieren
+
+        myServer->DspDevRead(fd, wsptr, len*4 );
+
 	    if (myServer->DspDevRead(fd, ba.data(), len*4 ) < 0) break; // fehler beim lesen
             QDataStream bas ( &ba, QIODevice::Unbuffered | QIODevice::ReadOnly );
 	    bas.setByteOrder(QDataStream::LittleEndian);
