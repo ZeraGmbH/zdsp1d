@@ -337,7 +337,8 @@ tDspMemArray& cZDSP1Client::GetDspMemData() {
 bool cZDSP1Client::InitiateActValues(QString& s) {
     int fd = myServer->DevFileDescriptor;;
     bool ok = false;
-    float dspdata = 0.0;
+    float dspdata;
+    float* pdspdata;
 
     if (s.isEmpty()) { // sonderfall liste leer -> alle messwerte lesen
 	QByteArray ba(m_nlen<<2);
@@ -354,6 +355,9 @@ bool cZDSP1Client::InitiateActValues(QString& s) {
     }
     else {
 	for (int i=0;;i++) {
+        dspdata = 0.0;
+        pdspdata = &dspdata;
+
         char workspace[1000];
         char* wsptr = workspace;
 
