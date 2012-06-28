@@ -338,25 +338,25 @@ bool cZDSP1Client::InitiateActValues(QString& s) {
     int fd = myServer->DevFileDescriptor;;
     bool ok = false;
 
-    if (s.isEmpty()) { // sonderfall liste leer -> alle messwerte lesen
-	QByteArray ba(m_nlen<<2);
-	if (myServer->DspDevSeek(fd, msec.StartAdr/*m_nStartAdr*/) >= 0) {
-		if (myServer->DspDevRead(fd, ba.data(), m_nlen<<2) >= 0) {
-                                QDataStream bas ( &ba, QIODevice::Unbuffered | QIODevice::ReadOnly );
-                // bas.setByteOrder(QDataStream::LittleEndian);
-                                for (int i = 0; i < m_fDspMemData.size(); i++)
-				    bas >> m_fDspMemData[i] ;
-				return true;
-		}
-	}
-	return(false);
+    if (s.isEmpty())
+    { // sonderfall liste leer -> alle messwerte lesen
+        QByteArray ba(m_nlen<<2);
+        if (myServer->DspDevSeek(fd, msec.StartAdr/*m_nStartAdr*/) >= 0)
+        {
+            if (myServer->DspDevRead(fd, ba.data(), m_nlen<<2) >= 0)
+            {
+                float *buf = (float*) ba.data();
+                for (int i = 0; i < m_fDspMemData.size(); i++)
+                    m_fDspMemData[j] = *buf++;
+                return true;
+            }
+        }
+        return(false);
     }
-    else {
+    else
+    {
 	for (int i=0;;i++) {
-        char workspace[1000];
-        char* wsptr = workspace;
-
-	    QString vs = s.section(";",i,i);
+        QString vs = s.section(";",i,i);
 	    vs=vs.stripWhiteSpace();
 	    if (vs.isEmpty()) {
 		ok = true;
@@ -371,13 +371,9 @@ bool cZDSP1Client::InitiateActValues(QString& s) {
 	    int len = (*it).size(); // in float
 	    int of = (*it).offs(); // dito
 	    QByteArray ba(len*4); // der benötigte speicher
-	    if (myServer->DspDevSeek(fd,msec.StartAdr/* m_nStartAdr*/ + of) < 0) break; // file positionieren
 
-        myServer->DspDevRead(fd, wsptr, len*4 );
-
+        if (myServer->DspDevSeek(fd,msec.StartAdr/* m_nStartAdr*/ + of) < 0) break; // file positionieren
 	    if (myServer->DspDevRead(fd, ba.data(), len*4 ) < 0) break; // fehler beim lesen
-        //    QDataStream bas ( &ba, QIODevice::Unbuffered | QIODevice::ReadOnly );
-        // bas.setByteOrder(QDataStream::LittleEndian);
 
         float *buf = (float*) ba.data();
 
