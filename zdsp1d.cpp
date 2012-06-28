@@ -347,7 +347,7 @@ bool cZDSP1Client::InitiateActValues(QString& s) {
             {
                 float *buf = (float*) ba.data();
                 for (int i = 0; i < m_fDspMemData.size(); i++)
-                    m_fDspMemData[j] = *buf++;
+                    m_fDspMemData[i] = *buf++;
                 return true;
             }
         }
