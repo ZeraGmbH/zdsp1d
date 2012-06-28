@@ -379,7 +379,7 @@ bool cZDSP1Client::InitiateActValues(QString& s) {
         //    QDataStream bas ( &ba, QIODevice::Unbuffered | QIODevice::ReadOnly );
         // bas.setByteOrder(QDataStream::LittleEndian);
 
-        float *buf = ba.data();
+        float *buf = (float*) ba.data();
 
         for (int j = of; j < of+len; j++)
         {
