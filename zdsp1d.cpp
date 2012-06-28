@@ -345,7 +345,7 @@ bool cZDSP1Client::InitiateActValues(QString& s) {
 	if (myServer->DspDevSeek(fd, msec.StartAdr/*m_nStartAdr*/) >= 0) {
 		if (myServer->DspDevRead(fd, ba.data(), m_nlen<<2) >= 0) {
                                 QDataStream bas ( &ba, QIODevice::Unbuffered | QIODevice::ReadOnly );
-				bas.setByteOrder(QDataStream::LittleEndian);
+                // bas.setByteOrder(QDataStream::LittleEndian);
                                 for (int i = 0; i < m_fDspMemData.size(); i++)
 				    bas >> m_fDspMemData[i] ;
 				return true;
@@ -382,7 +382,7 @@ bool cZDSP1Client::InitiateActValues(QString& s) {
 
 	    if (myServer->DspDevRead(fd, ba.data(), len*4 ) < 0) break; // fehler beim lesen
             QDataStream bas ( &ba, QIODevice::Unbuffered | QIODevice::ReadOnly );
-	    bas.setByteOrder(QDataStream::LittleEndian);
+        // bas.setByteOrder(QDataStream::LittleEndian);
 
         for (int j = of; j < of+len; j++)
         {
