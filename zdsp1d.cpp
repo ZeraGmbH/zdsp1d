@@ -337,8 +337,6 @@ tDspMemArray& cZDSP1Client::GetDspMemData() {
 bool cZDSP1Client::InitiateActValues(QString& s) {
     int fd = myServer->DevFileDescriptor;;
     bool ok = false;
-    float dspdata;
-    float* pdspdata;
 
     if (s.isEmpty()) { // sonderfall liste leer -> alle messwerte lesen
 	QByteArray ba(m_nlen<<2);
@@ -355,9 +353,6 @@ bool cZDSP1Client::InitiateActValues(QString& s) {
     }
     else {
 	for (int i=0;;i++) {
-        dspdata = 0.0;
-        pdspdata = &dspdata;
-
         char workspace[1000];
         char* wsptr = workspace;
 
@@ -381,13 +376,14 @@ bool cZDSP1Client::InitiateActValues(QString& s) {
         myServer->DspDevRead(fd, wsptr, len*4 );
 
 	    if (myServer->DspDevRead(fd, ba.data(), len*4 ) < 0) break; // fehler beim lesen
-            QDataStream bas ( &ba, QIODevice::Unbuffered | QIODevice::ReadOnly );
+        //    QDataStream bas ( &ba, QIODevice::Unbuffered | QIODevice::ReadOnly );
         // bas.setByteOrder(QDataStream::LittleEndian);
+
+        float *buf = ba.data();
 
         for (int j = of; j < of+len; j++)
         {
-            bas >> dspdata;
-            m_fDspMemData[j] = dspdata;
+            m_fDspMemData[j] = *buf++;
         }
 	}
     }
