@@ -341,7 +341,7 @@ bool cZDSP1Client::InitiateActValues(QString& s) {
     if (s.isEmpty())
     { // sonderfall liste leer -> alle messwerte lesen
         QByteArray ba(m_nlen<<2);
-        QDataStream bas( ba, IO_Raw | IO_ReadOnly);
+        QDataStream bas( &ba, IO_Raw | IO_ReadOnly);
         bas.setByteOrder(QDataStream::LittleEndian);
         bas.setFloatingPointPrecision(QDataStream::SinglePrecision);
         if (myServer->DspDevSeek(fd, msec.StartAdr/*m_nStartAdr*/) >= 0)
@@ -374,7 +374,7 @@ bool cZDSP1Client::InitiateActValues(QString& s) {
 	    int of = (*it).offs(); // dito
 	    QByteArray ba(len*4); // der benötigte speicher
 
-        QDataStream bas( ba, IO_Raw | IO_ReadOnly);
+        QDataStream bas( &ba, IO_Raw | IO_ReadOnly);
         bas.setByteOrder(QDataStream::LittleEndian);
         bas.setFloatingPointPrecision(QDataStream::SinglePrecision);
 
