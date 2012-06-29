@@ -564,13 +564,12 @@ bool cZDSP1Client::DspVarWrite(QString& s) {
 	    
 	int n,alloc;
 	n = alloc = 0; // keine elemente 
-	QByteArray ba;
-        QDataStream bas ( &ba, QIODevice::Unbuffered | QIODevice::ReadWrite );
-	bas.setByteOrder(QDataStream::LittleEndian);
-	    
-    float* baptr = (float*) ba.data();
 
-	bool ok2 = true;
+    QByteArray ba;
+    QDataStream bas ( &ba, QIODevice::Unbuffered | QIODevice::ReadWrite );
+	bas.setByteOrder(QDataStream::LittleEndian);
+    bas.setFloatingPointPrecision(QDataStream::SinglePrecision);
+    bool ok2 = true;
 	for (int j=1;;j++) {
 	    QString p = vs.section(",",j,j);
 	    if (p.isEmpty()) break;
@@ -585,12 +584,10 @@ bool cZDSP1Client::DspVarWrite(QString& s) {
 		if (ok2) bas << vul;
 		else {
 		    float vf = p.toFloat(&ok2); // test auf float
-            if (ok2) *baptr = vf; // bas << vf; funktioniert nicht in qt4 !? vermutlich fehler in qdatastream
+            if (ok2) bas << vf;
 		}
 	    }
-        if (ok2) baptr++; // wir haben geschrieben also +4
-        else break;
-        //if (!ok2) break;
+        if (!ok2) break;
 	}
 	    
 	if (!ok2) break;
