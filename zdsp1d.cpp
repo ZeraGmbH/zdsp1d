@@ -341,13 +341,15 @@ bool cZDSP1Client::InitiateActValues(QString& s) {
     if (s.isEmpty())
     { // sonderfall liste leer -> alle messwerte lesen
         QByteArray ba(m_nlen<<2);
+        QDataStream bas( ba, IO_Raw | IO_ReadOnly);
+        bas.setByteOrder(QDataStream::LittleEndian);
+        bas.setFloatingPointPrecision(QDataStream::SinglePrecision);
         if (myServer->DspDevSeek(fd, msec.StartAdr/*m_nStartAdr*/) >= 0)
         {
             if (myServer->DspDevRead(fd, ba.data(), m_nlen<<2) >= 0)
             {
-                float *buf = (float*) ba.data();
                 for (int i = 0; i < m_fDspMemData.size(); i++)
-                    m_fDspMemData[i] = *buf++;
+                    bas >> m_fDspMemData[i];
                 return true;
             }
         }
@@ -372,14 +374,16 @@ bool cZDSP1Client::InitiateActValues(QString& s) {
 	    int of = (*it).offs(); // dito
 	    QByteArray ba(len*4); // der benötigte speicher
 
+        QDataStream bas( ba, IO_Raw | IO_ReadOnly);
+        bas.setByteOrder(QDataStream::LittleEndian);
+        bas.setFloatingPointPrecision(QDataStream::SinglePrecision);
+
         if (myServer->DspDevSeek(fd,msec.StartAdr/* m_nStartAdr*/ + of) < 0) break; // file positionieren
 	    if (myServer->DspDevRead(fd, ba.data(), len*4 ) < 0) break; // fehler beim lesen
 
-        float *buf = (float*) ba.data();
-
         for (int j = of; j < of+len; j++)
         {
-            m_fDspMemData[j] = *buf++;
+            bas >> m_fDspMemData[j];
         }
 	}
     }
