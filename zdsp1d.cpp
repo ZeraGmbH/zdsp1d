@@ -730,7 +730,7 @@ const char* cZDSP1Server::mTestDsp(char* s)
                 bool err;
                 ulong faultadr;
                 int bw, br, br2;
-                float tval,
+                float tval;
 
                 QByteArray ba; // wir werden 10000 floats in das array schreiben
                 QByteArray ba2; // zurückgelesene daten
