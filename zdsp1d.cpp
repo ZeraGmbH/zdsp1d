@@ -724,8 +724,10 @@ const char* cZDSP1Server::mTestDsp(char* s)
                 ulong faultadr;
                 int bw, br, br2;
 
-                QByteArray ba(n*4); // wir werden 10000 floats in das array schreiben
-                QByteArray ba2(n*4); // zurückgelesene daten
+                QByteArray ba; // wir werden 10000 floats in das array schreiben
+                QByteArray ba2; // zurückgelesene daten
+                ba.resize(n*4);
+                ba2.resize(n*4);
 
                 QDataStream bas ( &ba, QIODevice::Unbuffered | QIODevice::ReadWrite );
                 bas.setByteOrder(QDataStream::LittleEndian);
