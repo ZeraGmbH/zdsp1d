@@ -788,6 +788,8 @@ const char* cZDSP1Server::mTestDsp(char* s)
                             br2 = ba2[j];
                             err = true;
                         }
+                        if (err)
+                            break;
                     }
 
                     if (err)
