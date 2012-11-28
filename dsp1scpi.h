@@ -26,6 +26,7 @@ enum SCPICmdType  {	nixCmd, // 0 is nix
 			TriggerIntListHKSK,
 			TriggerIntListALL,
 			ResetMaxima,
+            TestDsp,
 			ResetDsp,
 			BootDsp,
 			SetDspBootPath,

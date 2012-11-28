@@ -335,7 +335,7 @@ tDspMemArray& cZDSP1Client::GetDspMemData() {
 
 
 bool cZDSP1Client::InitiateActValues(QString& s) {
-    int fd = myServer->DevFileDescriptor;;
+    int fd = myServer->DevFileDescriptor;
     bool ok = false;
 
     if (s.isEmpty())
@@ -441,7 +441,7 @@ bool cZDSP1Client::DspVar(QString& s,int& ir) { // einen int (32bit) wert lesen
    bool ret = false;
    QByteArray *ba = new QByteArray();
    QString ss = QString("%1,1").arg(s);
-   if ( DspVarRead(ss,ba) >0)  { // 1 wort ab name (s) lesen
+   if ( DspVarRead(ss,ba) != 0)  { // 1 wort ab name (s) lesen
        ir = *((int*) (ba->data()));
        ret = true;
    }
@@ -454,7 +454,7 @@ bool cZDSP1Client::DspVar(QString& s,float& fr) { // eine float wert lesen
     bool ret = false;
     QByteArray *ba = new QByteArray();
     QString ss = QString("%1,1").arg(s);
-    if ( DspVarRead(ss,ba) > 0) {  // 1 wort ab name(s) lesen
+    if ( DspVarRead(ss,ba) != 0) {  // 1 wort ab name(s) lesen
 	fr = *((float*) (ba->data()));
 	ret = true;
     }
@@ -676,6 +676,129 @@ int cZDSP1Server::DspDevRead(int fd,char* buf,int len) {
     }
     return r;
 }
+
+
+const char* cZDSP1Server::mTestDsp(char* s)
+{
+    int nr, tmode;
+    bool ok, tstart;
+
+    tstart=false;
+
+    QString par = pCmdInterpreter->m_pParser->GetKeyword(&s); // holt den parameter aus dem kommando
+    tmode=par.toInt(&ok);
+    if ((ok) && ( (tmode>=0) && (tmode<2) ))
+    {
+        par = pCmdInterpreter->m_pParser->GetKeyword(&s);
+        nr=par.toInt(&ok);
+        if ((ok) && ( (nr>=0) && (nr<1000) ))
+            tstart=true;
+    }
+
+    if (tstart == true)
+    {
+        int i;
+        int errcount = 0;
+        switch (tmode)
+        {
+            case 0:
+                for (i=0; i<nr; i++)
+                {
+                    mResetDsp(s);
+                    if (Test4DspRunning() == true)
+                        errcount++;
+                    else
+                    {
+                        mBootDsp(s);
+                        if (Test4DspRunning() == false)
+                            errcount++;
+                    }
+                    Answer = QString("Test booting dsp %1 times, errors %2").arg(nr).arg(errcount);
+                }
+                break;
+
+            case 1:
+                const int n = 10000;
+                int i,j;
+                bool err;
+                ulong faultadr;
+                int bw, br, br2;
+
+                QByteArray ba(n*4); // wir werden 10000 floats in das array schreiben
+                QByteArray ba2(n*4); // zurückgelesene daten
+
+                QDataStream bas ( &ba, QIODevice::Unbuffered | QIODevice::ReadWrite );
+                bas.setByteOrder(QDataStream::LittleEndian);
+                bas.setFloatingPointPrecision(QDataStream::SinglePrecision);
+                for (i=0; i<n;i++)
+                {
+                    bas << 1.0e9 * random() / RAND_MAX;
+                }
+
+                cZDSP1Client* cl = GetClient(ActSock);
+                QString sadr  = "UWSPACE";
+                ulong adr = cl->DspVarResolver.adr(sadr) ;
+                for (i=0; i< nr; i++)
+                {
+                    if (DspDevSeek(DevFileDescriptor, adr) < 0)
+                    {
+                        Answer = QString("Test write/read dsp data, dev seek fault");
+                        break; // file positionieren
+                    }
+
+                    if (DspDevWrite(DevFileDescriptor, ba.data(), n*4 ) < 0)
+                    {
+                        Answer = QString("Test write/read dsp data, dev write fault");
+                        break; // fehler beim schreiben
+                    }
+
+                    if (DspDevSeek(DevFileDescriptor, adr) < 0)
+                    {
+                        Answer = QString("Test write/read dsp data, dev seek fault");
+                        break; // file positionieren
+                    }
+
+                    if (DspDevRead(DevFileDescriptor, ba2.data(), n+4) < 0)
+                    {
+                        Answer = QString("Test write/read dsp data, dev read fault");
+                        break; // fehler beim schreiben
+                    }
+
+                    err = false;
+                    for (j=0; j<n*4; j++)
+                    {
+                        if (ba[j] != ba2[j])
+                        {
+                            bw = ba[j]; // das geschriebene byte
+                            br = ba2[j]; // das gelesene byte
+                            faultadr = adr + j;
+                            DspDevRead(DevFileDescriptor, ba2.data(), n+4);
+                            br2 = ba2[j];
+                            err = true;
+                        }
+                    }
+
+                    if (err)
+                    {
+                        Answer = QString("Test write/read dsp data, data fault adress %1, write %2, read1 %3, read2 %4").arg(faultadr,16).arg(bw,16).arg(br,16).arg(br2,16);
+                        break; // file positionieren
+                    }
+
+                }
+
+                if (i==nr)
+                    Answer = QString("Test write/read dsp data, %1 times %bytes transferred, no errors").arg(nr).arg(n*4);
+
+                break;
+
+        }
+
+    }
+
+    else Answer = ERRVALString; // fehler wert
+    return Answer.latin1();
+}
+
 
 
 const char* cZDSP1Server::mResetDsp(char*) {
@@ -1661,6 +1784,7 @@ void cZDSP1Server::DelClient(int s) { // entfernt einen client
 
 const char* cZDSP1Server::SCPICmd( SCPICmdType cmd, char* s) {
     switch ((int)cmd)	{
+    case    TestDsp:        return mTestDsp(s);
     case 	ResetDsp:		return mResetDsp(s);
     case	BootDsp: 		return mBootDsp(s);		
     case 	SetDspBootPath: 		return mSetDspBootPath(s);
@@ -1711,7 +1835,7 @@ const char* cZDSP1Server::SCPIQuery( SCPICmdType cmd) {
     case 		GetCmdIntList: 		return mGetCmdIntList();
     case 		GetCmdList: 		return mGetCmdList();
     case		GetSamplingSystem:	return mGetSamplingSystem();	
-    case                 GetCommEncryption:	return mGetCommEncryption();		
+    case        GetCommEncryption:	return mGetCommEncryption();
     case		GetEN61850DestAdr:	return mGetEN61850DestAdr(); 
     case		GetEN61850SourceAdr:	return mGetEN61850SourceAdr(); 
     case		GetEN61850EthTypeAppId:  return mGetEN61850EthTypeAppId();

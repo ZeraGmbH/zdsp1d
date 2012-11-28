@@ -121,6 +121,7 @@ private:
     // die routinen für das system modell
     const char* mCommand2Dsp(QString&); // indirekt für system modell    
     
+    const char* mTestDsp(char*);
     const char* mResetDsp(char*);
     const char* mBootDsp(char*);
     const char* mSetDspBootPath(char*);
