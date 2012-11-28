@@ -697,7 +697,7 @@ const char* cZDSP1Server::mTestDsp(char* s)
 
     if (tstart == true)
     {
-        int i;
+        int i,j;
         int errcount = 0;
         switch (tmode)
         {
@@ -705,11 +705,18 @@ const char* cZDSP1Server::mTestDsp(char* s)
                 for (i=0; i<nr; i++)
                 {
                     mResetDsp(s);
-                    if (Test4DspRunning() == true)
+                    for (j=0; j< 100; j++)
+                    {
+                        usleep(1000);
+                        if (Test4DspRunning() == false)
+                            break;
+                    }
+                    if (j==100)
                         errcount++;
                     else
                     {
                         mBootDsp(s);
+                        usleep(1000);
                         if (Test4DspRunning() == false)
                             errcount++;
                     }
