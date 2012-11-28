@@ -767,7 +767,7 @@ const char* cZDSP1Server::mTestDsp(char* s)
                         break; // file positionieren
                     }
 
-                    if (DspDevRead(DevFileDescriptor, ba2.data(), n+4) < 0)
+                    if (DspDevRead(DevFileDescriptor, ba2.data(), n*4) < 0)
                     {
                         Answer = QString("Test write/read dsp data, dev read fault");
                         break; // fehler beim schreiben
@@ -781,7 +781,7 @@ const char* cZDSP1Server::mTestDsp(char* s)
                             bw = ba[j]; // das geschriebene byte
                             br = ba2[j]; // das gelesene byte
                             faultadr = adr + j;
-                            DspDevRead(DevFileDescriptor, ba2.data(), n+4);
+                            DspDevRead(DevFileDescriptor, ba2.data(), n*4);
                             br2 = ba2[j];
                             err = true;
                         }
