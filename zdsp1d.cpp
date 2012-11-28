@@ -796,7 +796,7 @@ const char* cZDSP1Server::mTestDsp(char* s)
                 }
 
                 if (i==nr)
-                    Answer = QString("Test write/read dsp data, %1 times %bytes transferred, no errors").arg(nr).arg(n*4);
+                    Answer = QString("Test write/read dsp data, %1 times %2 bytes transferred, no errors").arg(nr).arg(n*4);
 
                 break;
 
