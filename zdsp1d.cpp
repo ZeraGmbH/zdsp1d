@@ -730,21 +730,25 @@ const char* cZDSP1Server::mTestDsp(char* s)
                 bool err;
                 ulong faultadr;
                 int bw, br, br2;
-                float tval;
+//                float tval;
+                char byte;
 
                 QByteArray ba; // wir werden 10000 floats in das array schreiben
                 QByteArray ba2; // zurückgelesene daten
                 ba.resize(n*4);
                 ba2.resize(n*4);
 
-                QDataStream bas ( &ba, QIODevice::Unbuffered | QIODevice::ReadWrite );
-                bas.setByteOrder(QDataStream::LittleEndian);
-                bas.setFloatingPointPrecision(QDataStream::SinglePrecision);
-                tval = 1.0e32;
-                for (i=0; i<n;i++)
+//                QDataStream bas ( &ba, QIODevice::Unbuffered | QIODevice::ReadWrite );
+//                bas.setByteOrder(QDataStream::LittleEndian);
+//                bas.setFloatingPointPrecision(QDataStream::SinglePrecision);
+//                tval = 1.0e32;
+                byte = 0;
+                for (i=0; i<n*4;i++)
                 {
-                    tval *=-1.0;
-                    bas << (tval * (random() / RAND_MAX));
+//                    tval *=-1.0;
+//                    bas << (tval * (random() / RAND_MAX));
+                    ba[i] = byte;
+                    byte = (byte +1) % 256;
                 }
 
                 cZDSP1Client* cl = GetClient(ActSock);
