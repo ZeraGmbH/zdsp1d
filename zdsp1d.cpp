@@ -744,7 +744,7 @@ const char* cZDSP1Server::mTestDsp(char* s)
                 for (i=0; i<n;i++)
                 {
                     tval *=-1.0;
-                    bas << tval * random() / RAND_MAX;
+                    bas << (tval * (random() / RAND_MAX));
                 }
 
                 cZDSP1Client* cl = GetClient(ActSock);
