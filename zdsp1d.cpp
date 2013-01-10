@@ -1642,7 +1642,10 @@ const char* cZDSP1Server::mMeasure(char* s) {
 
 int cZDSP1Server::readMagicId()
 {
-    return ioctl(DevFileDescriptor,IO_READ,MagicId);
+    int r;
+    r = ioctl(DevFileDescriptor,IO_READ,MagicId);
+    if (DEBUG1) syslog(LOG_INFO,"zdsp1d readMagicId : 0x%x\n", r);
+    return r;
 }
 
 
