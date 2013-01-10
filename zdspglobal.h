@@ -38,6 +38,6 @@
 #define InpBufSize 4096
 
 // wenn DEBUG -> kein fork() 
-//#define DEBUG 1
+#define DEBUG 1
 
 #endif
