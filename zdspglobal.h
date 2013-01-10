@@ -28,7 +28,7 @@
 //  {"GETSTIME",64,CMD1i16,0},
 //  {"TESTTIMESKIPLT",65,CMD2i16,0}
 //  eingeführt. ..... läuft aber erst mit dsp ab version 3.07
-
+//  ADSP21362 unterstützung eingebaut, automatische umschaltung über magicId
 
 //#define CheckSumOffset 56
 //#define LeiterkartenName "wm3000i"

@@ -185,6 +185,7 @@ private:
     
     bool DspIntHandler();
     bool LoadDSProgram();
+    int readMagicId();
     bool Test4HWPresent(); 
     bool Test4DspRunning();
     cZDSP1Client* GetClient(int);

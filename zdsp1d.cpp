@@ -48,6 +48,9 @@ extern sMemSection dm32UserWorkSpace;
 extern sMemSection dm32CmdList;
 extern sMemSection symbConsts1;
 
+extern sDspVar CmdListVar;
+extern sDspVar UserWorkSpaceVar;
+
 extern cNode* InitCmdTree();
 
 
@@ -617,10 +620,36 @@ struct sigaction mySigAction;
 
 cZDSP1Server::cZDSP1Server()
     :cZHServer() {
+    int r;
     cParse* parser=new(cParse); // das ist der parser
     pCmdInterpreter=new cCmdInterpreter(this,InitCmdTree(),parser); // das ist der kommando interpreter
     m_sDspDeviceVersion = m_sDspSerialNumber = "Unknown"; // kennen wir erst mal nicht
-    m_sDspBootPath = "/home/zera/wm3000.ldr"; // default dsp program name
+    r = readMagicId();
+    if ( r == MAGIC_ID21262 )
+    {
+        m_sDspBootPath = "/opt/zera/bin/zdsp21262.ldr"; // default dsp program name
+        // adressen im dsp stehen für adsp21262 default richtig
+    }
+    else
+    {
+        m_sDspBootPath = "/opt/zera/bin/zdsp21362.ldr"; // default dsp program name
+        // für adsp21362 schreiben wir die adressen um
+        dm32DspWorkspace.StartAdr = dm32DspWorkSpaceBase21362;
+        dm32DialogWorkSpace.StartAdr = dm32DialogWorkSpaceBase21362;
+        dm32UserWorkSpace.StartAdr = dm32UserWorkSpaceBase21362;
+        dm32CmdList.StartAdr = dm32CmdListBase21362;
+
+        sDspVar* pDspVar = &CmdListVar;
+
+        pDspVar->size = CmdListLen21362; pDspVar++;
+        pDspVar->size = IntCmdListLen21362; pDspVar++;
+        pDspVar->size = CmdListLen21362; pDspVar++;
+        pDspVar->size = IntCmdListLen21362;
+
+        pDspVar = &UserWorkSpaceVar;
+        pDspVar->size = uwSpaceSize21362;
+    }
+
     DebugLevel = 0; // MaxDebugLevel; // default alle debug informationen
     m_sDspDeviceNode = DSPDeviceNode; // default device node
     DSPServer = this;
@@ -1534,6 +1563,7 @@ bool cZDSP1Server::LoadDSProgram() { // die programmlisten aller aktiven clients
 }
 
 
+
 const char* cZDSP1Server::mUnloadCmdList(char *) {
     cZDSP1Client* cl = GetClient(ActSock);
     cl->SetActive(false);
@@ -1610,10 +1640,16 @@ const char* cZDSP1Server::mMeasure(char* s) {
 }
 
 
+int cZDSP1Server::readMagicId()
+{
+    return ioctl(DevFileDescriptor,IO_READ,MagicId);
+}
+
+
 bool cZDSP1Server::Test4HWPresent() {
     int r;
-    r = ioctl(DevFileDescriptor,IO_READ,MagicId);
-    return (r==MAGIC_ID); 
+    r = readMagicId();
+    return ( (r == MAGIC_ID21262) || (r == MAGIC_ID21362));
 }
 
 

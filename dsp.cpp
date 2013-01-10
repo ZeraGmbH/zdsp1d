@@ -197,7 +197,7 @@ static sDspCmd DspCmd[66] = {	{"INVALID", 0, CMD ,0},
                 {"CMPCLK",62,CMD3i16,0},
                 {"CLKMODE",63,CMD1i16,0},
                 {"GETSTIME",64,CMD1i16,0},
-                {"TESTTIMESKIPLT",65,CMD2i16,0}};
+                {"TESTTIMESKIPNEX",65,CMD2i16,0}};
 
 
 sDspCmd* findDspCmd(QString& s) {
@@ -227,7 +227,7 @@ sDspVar DspWorkspaceVar[15] = 	{ {"FREQENCY",1,eFloat,0},			// 1 wert gemessene 
 
 
 sMemSection dm32DspWorkspace = {
-	StartAdr		: 0x82800,
+    StartAdr		: dm32DspWorkSpaceBase21262,
 	n 		: 15,
 	DspVar		: DspWorkspaceVar };
 	
@@ -254,28 +254,28 @@ sDspVar DialogWorkSpaceVar[18] = 	{ 	  {"DSPCMDPAR",10,eInt,0},		// 10 werte cmd
 
 
 sMemSection dm32DialogWorkSpace = {
-	StartAdr		: 0x83800,
+    StartAdr		: dm32DialogWorkSpaceBase21262,
 	n		: 18,
 	DspVar		: DialogWorkSpaceVar };
 
 
-sDspVar UserWorkSpaceVar[1] = { {"UWSPACE",14336,eFloat,0} };
+sDspVar UserWorkSpaceVar[1] = { {"UWSPACE",uwSpaceSize21262,eFloat,0} };
 
 
 sMemSection dm32UserWorkSpace = {
-	StartAdr		: 0x84800,
+    StartAdr		: dm32UserWorkSpaceBase21262,
 	n 		: 1,
 	DspVar		: UserWorkSpaceVar };
 
 
-sDspVar CmdListVar[4] = 	{	{"INTCMDLIST",128,eInt,0},                // interrupt kommando
-				{"CMDLIST",896,eInt,0},		// cycl. kommando liste
-				{"ALTINTCMDLIST",128,eInt,0}, 	// alternative kommando listen
-				{"ALTCMDLIST",896,eInt,0}};		
+sDspVar CmdListVar[4] = 	{	{"INTCMDLIST",IntCmdListLen21262,eInt,0},                // interrupt kommando
+                {"CMDLIST",CmdListLen21262,eInt,0},		// cycl. kommando liste
+                {"ALTINTCMDLIST",IntCmdListLen21262,eInt,0}, 	// alternative kommando listen
+                {"ALTCMDLIST",CmdListLen21262,eInt,0}};
 
 
 sMemSection dm32CmdList = {
-	StartAdr		: 0x84000,
+    StartAdr		: dm32CmdListBase21262,
 	n 		: 4,
 	DspVar		: CmdListVar };
 
