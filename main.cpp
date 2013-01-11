@@ -69,6 +69,7 @@ int main( int argc, char *argv[] )
 	r=zdsp1d->Execute(); // wenn DEBUG -> kein fork -> server läuft im vordergrund 
 #endif // DEBUG	
     }
+    delete zdsp1d;
     closelog();
     return (r);
 }
