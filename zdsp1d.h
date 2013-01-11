@@ -185,6 +185,7 @@ private:
     
     bool DspIntHandler();
     bool LoadDSProgram();
+    void setDspType();
     int readMagicId();
     bool Test4HWPresent(); 
     bool Test4DspRunning();

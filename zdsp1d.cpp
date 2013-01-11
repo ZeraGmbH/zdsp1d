@@ -620,38 +620,13 @@ struct sigaction mySigAction;
 
 cZDSP1Server::cZDSP1Server()
     :cZHServer() {
-    int r;
     cParse* parser=new(cParse); // das ist der parser
     pCmdInterpreter=new cCmdInterpreter(this,InitCmdTree(),parser); // das ist der kommando interpreter
     m_sDspDeviceVersion = m_sDspSerialNumber = "Unknown"; // kennen wir erst mal nicht
-    r = readMagicId();
-    if ( r == MAGIC_ID21262 )
-    {
-        m_sDspBootPath = "/opt/zera/bin/zdsp21262.ldr"; // default dsp program name
-        // adressen im dsp stehen für adsp21262 default richtig
-    }
-    else
-    {
-        m_sDspBootPath = "/opt/zera/bin/zdsp21362.ldr"; // default dsp program name
-        // für adsp21362 schreiben wir die adressen um
-        dm32DspWorkspace.StartAdr = dm32DspWorkSpaceBase21362;
-        dm32DialogWorkSpace.StartAdr = dm32DialogWorkSpaceBase21362;
-        dm32UserWorkSpace.StartAdr = dm32UserWorkSpaceBase21362;
-        dm32CmdList.StartAdr = dm32CmdListBase21362;
-
-        sDspVar* pDspVar = &CmdListVar;
-
-        pDspVar->size = CmdListLen21362; pDspVar++;
-        pDspVar->size = IntCmdListLen21362; pDspVar++;
-        pDspVar->size = CmdListLen21362; pDspVar++;
-        pDspVar->size = IntCmdListLen21362;
-
-        pDspVar = &UserWorkSpaceVar;
-        pDspVar->size = uwSpaceSize21362;
-    }
 
     DebugLevel = 0; // MaxDebugLevel; // default alle debug informationen
     m_sDspDeviceNode = DSPDeviceNode; // default device node
+    m_sDspBootPath = "";
     DSPServer = this;
 
     mySigAction.sa_handler = &SigHandler; // signal handler einrichten
@@ -1640,6 +1615,40 @@ const char* cZDSP1Server::mMeasure(char* s) {
 }
 
 
+void cZDSP1Server::setDspType()
+{
+    int r;
+    r = readMagicId();
+    if ( r == MAGIC_ID21262 )
+    {
+        if (m_sDspBootPath == "") // wenn der benutzer denselben schon beim programmaufruf mitgesetzt hat, lassen wir das!
+            m_sDspBootPath = "/opt/zera/bin/zdsp21262.ldr"; // default dsp program name
+        // adressen im dsp stehen für adsp21262 default richtig
+    }
+    else
+    {
+        if (m_sDspBootPath == "") // dito
+            m_sDspBootPath = "/opt/zera/bin/zdsp21362.ldr"; // default dsp program name
+        // für adsp21362 schreiben wir die adressen um
+        dm32DspWorkspace.StartAdr = dm32DspWorkSpaceBase21362;
+        dm32DialogWorkSpace.StartAdr = dm32DialogWorkSpaceBase21362;
+        dm32UserWorkSpace.StartAdr = dm32UserWorkSpaceBase21362;
+        dm32CmdList.StartAdr = dm32CmdListBase21362;
+
+        sDspVar* pDspVar = &CmdListVar;
+
+        pDspVar->size = CmdListLen21362; pDspVar++;
+        pDspVar->size = IntCmdListLen21362; pDspVar++;
+        pDspVar->size = CmdListLen21362; pDspVar++;
+        pDspVar->size = IntCmdListLen21362;
+
+        pDspVar = &UserWorkSpaceVar;
+        pDspVar->size = uwSpaceSize21362;
+    }
+
+}
+
+
 int cZDSP1Server::readMagicId()
 {
     int r;
@@ -1689,6 +1698,7 @@ cZDSP1Client* cZDSP1Server::GetClient(int s) {
 
 int cZDSP1Server::Execute() { // server ausführen
     int sock;
+    setDspType();
     if ( (sock = socket( PF_INET, SOCK_STREAM, 0)) == -1) { //   socket holen
 	if DEBUG1 syslog(LOG_ERR,"socket() failed\n"); 
 	return(1);
