@@ -1484,20 +1484,21 @@ bool cZDSP1Server::LoadDSProgram() { // die programmlisten aller aktiven clients
     cmd = client->GenDspCmd(s, &ok);
     mds1 << cmd;
      
-    while ( (client = it.current()) != 0) {
-	++it;
-	if (client->isActive()) {
-	    client->SetStartAdr(umo);
-	    s =  QString( "USERMEMOFFSET(%1)" ).arg(umo);
-	    cmd = client->GenDspCmd(s, &ok);
-	    mds1 << cmd;
-	    mds2 << cmd;
-	    umo += (client->GetDspMemData()).size(); // relokalisieren der daten im dsp
-	    tDspCmdList& cmdl = client->GetDspCmdList();
+    while ( (client = it.current()) != 0)
+    {
+        ++it;
+        if (client->isActive()) {
+            client->SetStartAdr(umo);
+            s =  QString( "USERMEMOFFSET(%1)" ).arg(umo);
+            cmd = client->GenDspCmd(s, &ok);
+            mds1 << cmd;
+            mds2 << cmd;
+            umo += (client->GetDspMemData()).size(); // relokalisieren der daten im dsp
+            tDspCmdList& cmdl = client->GetDspCmdList();
             for (int i = 0; i < cmdl.size(); i++ ) mds1 << cmdl[i]; // cycl. liste
-	    tDspCmdList& cmdl2 = client->GetDspIntCmdList();
+            tDspCmdList& cmdl2 = client->GetDspIntCmdList();
             for ( int i = 0; i < cmdl2.size(); i++ ) mds2 << cmdl2[i]; // interrupt liste
-	}
+        }
     }
     s =  QString( "INVALID()");
     client = it.toFirst();
@@ -1637,10 +1638,10 @@ void cZDSP1Server::setDspType()
 
         sDspVar* pDspVar = &CmdListVar;
 
-        pDspVar->size = CmdListLen21362; pDspVar++;
         pDspVar->size = IntCmdListLen21362; pDspVar++;
         pDspVar->size = CmdListLen21362; pDspVar++;
         pDspVar->size = IntCmdListLen21362;
+        pDspVar->size = CmdListLen21362; pDspVar++;
 
         pDspVar = &UserWorkSpaceVar;
         pDspVar->size = uwSpaceSize21362;
