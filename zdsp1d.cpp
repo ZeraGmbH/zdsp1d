@@ -1640,8 +1640,8 @@ void cZDSP1Server::setDspType()
 
         pDspVar->size = IntCmdListLen21362; pDspVar++;
         pDspVar->size = CmdListLen21362; pDspVar++;
-        pDspVar->size = IntCmdListLen21362;
-        pDspVar->size = CmdListLen21362; pDspVar++;
+        pDspVar->size = IntCmdListLen21362; pDspVar++;
+        pDspVar->size = CmdListLen21362;
 
         pDspVar = &UserWorkSpaceVar;
         pDspVar->size = uwSpaceSize21362;
