@@ -132,7 +132,7 @@
 
 #include "dsp.h"
 
-static sDspCmd DspCmd[66] = {	{"INVALID", 0, CMD ,0},
+static sDspCmd DspCmd[67] = {	{"INVALID", 0, CMD ,0},
 				{"USERMEMOFFSET", 1, CMD1i32, 0 },
 				{"DSPMEMOFFSET", 2, CMD1i32, 0 },
 				{"COPYDATA", 3, CMD3i16, 0 },	
@@ -197,7 +197,8 @@ static sDspCmd DspCmd[66] = {	{"INVALID", 0, CMD ,0},
                 {"CMPCLK",62,CMD3i16,0},
                 {"CLKMODE",63,CMD1i16,0},
                 {"GETSTIME",64,CMD1i16,0},
-                {"TESTTIMESKIPNEX",65,CMD2i16,0}};
+                {"TESTTIMESKIPNEX",65,CMD2i16,0},
+                {"SUBVCC",66,CMD3i16,0}};
 
 
 sDspCmd* findDspCmd(QString& s) {
