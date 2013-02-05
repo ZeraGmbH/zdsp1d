@@ -1435,28 +1435,40 @@ QDataStream& operator<<(QDataStream& ds,cDspCmd c) {
 }
 
 
-bool cZDSP1Server::DspIntHandler() { // behandelt den dsp interrupt
+bool cZDSP1Server::DspIntHandler()
+{ // behandelt den dsp interrupt
     int IRQCode;
     QString s;
     cZDSP1Client *client,*client2;
-    client = clientlist.first(); // wir nutzen den 1. client zum lesen
-    client->DspVar(s = "CTRLCMDPAR",IRQCode); // wir lesen die hksk
-    int process = IRQCode >> 16;
-    if (!(client2 = GetClient(process))) { // wir suchen den client dazu
-	if DEBUG1 syslog(LOG_ERR,"dsp interrupt mismatch, no such client (%d)\n",process);     
-	client->DspVarWrite(s = QString("CTRLACK,%1;").arg(CmdDone)); // acknowledge falls fehler
-	return true; // und interrupt als bearbeitet markieren
-    }
-    else 
+    bool clientAvail;
+    int process = 0;
+
+    clientAvail = ((client = clientlist.first()) !=0); // wir nutzen immer den 1. client zum lesen
+    if (clientAvail) // wir haben noch einen über den wir lesen können
     {
-	if ( client2->OutpAvail() )
-	    return false; // der client hat noch output welcher gesendet werden muss
-	
-	client->DspVarWrite(s = QString("CTRLACK,%1;").arg(CmdDone)); // sonst acknowledge
-	IRQCode &= 0xFFFF;
-	s = QString("DSPINT:%1").arg(IRQCode);
-	client2->SetOutput((char*)s.latin1()); // die async. meldung 
-	return true; // interrupt ist bearbeitet
+        client->DspVar(s = "CTRLCMDPAR",IRQCode); // wir lesen die hksk
+        process = IRQCode >> 16;
+        clientAvail = ( (client2 = GetClient(process)) !=0); // ist der client noch da für den der interrupt bestimmt war?
+
+    }
+
+    if (!clientAvail)
+    { // wir suchen den client dazu
+        if DEBUG1 syslog(LOG_ERR,"dsp interrupt mismatch, no such client (%d)\n",process);
+        client->DspVarWrite(s = QString("CTRLACK,%1;").arg(CmdDone)); // acknowledge falls fehler
+        return true; // und interrupt als bearbeitet markieren
+    }
+
+    else
+    {
+        if ( client2->OutpAvail() )
+            return false; // der client hat noch output welcher gesendet werden muss
+
+        client->DspVarWrite(s = QString("CTRLACK,%1;").arg(CmdDone)); // sonst acknowledge
+        IRQCode &= 0xFFFF;
+        s = QString("DSPINT:%1").arg(IRQCode);
+        client2->SetOutput((char*)s.latin1()); // die async. meldung
+        return true; // interrupt ist bearbeitet
     }
 }
 
