@@ -612,13 +612,13 @@ cZDSP1Server* DSPServer;
 int cZDSP1Server::gotSIGIO;
 
 void SigHandler(int)  {
-    DSPServer->gotSIGIO += 1;
+    DSPServer->gotSIGIO = 1;
     if ((DSPServer->DebugLevel) & 2) syslog(LOG_INFO,"dsp interrupt received\n");  
 }
 
 
 struct sigaction mySigAction;
-sigset_t mySigset;
+sigset_t mySigmask, origSigmask;
 
 
 cZDSP1Server::cZDSP1Server()
@@ -632,8 +632,9 @@ cZDSP1Server::cZDSP1Server()
     m_sDspBootPath = "";
     DSPServer = this;
 
-    sigemptyset(&mySigset);
-    sigaddset(&mySigset, SIGIO); // wir wollen sigio blocken wenn wir (p)select aufrufen
+    sigemptyset(&mySigmask);
+    sigaddset(&mySigmask, SIGIO); // wir wollen sigio blocken wenn wir (p)select aufrufen
+    sigprocmask(SIG_BLOCK, &mySigmask, &origSigmask);
 
     mySigAction.sa_handler = &SigHandler; // signal handler einrichten
     sigemptyset(&mySigAction.sa_mask);
@@ -1759,7 +1760,7 @@ int cZDSP1Server::Execute() // server ausführen
     {
         if ( DspIntHandler() )
         {// interrupt behandeln
-            gotSIGIO--; // wenn behandelt -> flagge rücksetzen
+            gotSIGIO = 0; // wenn behandelt -> flagge rücksetzen
 	    }
 
 	}
@@ -1779,7 +1780,7 @@ int cZDSP1Server::Execute() // server ausführen
 //    TimeOut.tv_sec = 0;
 //    TimeOut.tv_usec = 500; // wir müssen den wert immer neu setzen weil er von select manipuliert wird
 
-    rm = pselect(fdmax+1,&rfds,&wfds,NULL,NULL,&mySigset); // blockierender aufruf
+    rm = pselect(fdmax+1,&rfds,&wfds,NULL,NULL,&origSigmask); // blockierender aufruf
 	
     if (rm >= 0)  // wir wollten und können was senden bzw. wir können was lesen oder es war ein interrupt
     {
