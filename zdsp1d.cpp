@@ -1715,14 +1715,14 @@ int cZDSP1Server::Execute() // server ausführen
     setDspType();
     if ( (sock = socket( PF_INET, SOCK_STREAM, 0)) == -1)
     { //   socket holen
-	if DEBUG1 syslog(LOG_ERR,"socket() failed\n"); 
-	return(1);
+        if DEBUG1 syslog(LOG_ERR,"socket() failed\n");
+        return(1);
     }
     struct servent* se;
     if ( (se=getservbyname( sServerName.latin1(),"tcp")) == NULL )  // holt port nr aus /etc/services
     {
-	if DEBUG1 syslog(LOG_ERR,"internet network services not found\n");
-	return(1);
+        if DEBUG1 syslog(LOG_ERR,"internet network services not found\n");
+        return(1);
     }
     
     struct timeval TimeOut; // 50usec timeout für select aufruf 
@@ -1731,13 +1731,15 @@ int cZDSP1Server::Execute() // server ausführen
     addr.sin_addr.s_addr = INADDR_ANY; // alle adressen des host
     addr.sin_port = se->s_port; // ! s_port ist network byte order !
     addr.sin_family=AF_INET;
-    if ( bind( sock, (struct sockaddr*) &addr, sizeof(addr)) == -1) { // ip-adresse und port an socket binden
-	if DEBUG1 syslog(LOG_ERR,"bind() failed\n");
-	return(1);
+    if ( bind( sock, (struct sockaddr*) &addr, sizeof(addr)) == -1)
+    { // ip-adresse und port an socket binden
+        if DEBUG1 syslog(LOG_ERR,"bind() failed\n");
+        return(1);
     }
-    if ( listen(sock,3) == -1) { // einrichten einer warteschlange für einlaufende verbindungsaufbauwünsche
-	if DEBUG1 syslog(LOG_ERR,"listen() faild\n");
-	return(1);
+    if ( listen(sock,3) == -1)
+    { // einrichten einer warteschlange für einlaufende verbindungsaufbauwünsche
+        if DEBUG1 syslog(LOG_ERR,"listen() faild\n");
+        return(1);
     }
     char InputBuffer[InpBufSize];
     int nBytes;
@@ -1747,11 +1749,12 @@ int cZDSP1Server::Execute() // server ausführen
 	FD_ZERO (&rfds);  // deskriptor menge löschen
 	FD_ZERO (&wfds);  
 	
-	if (gotSIGIO) { // kann max. 2 werden  
+    if (gotSIGIO)
+    { // kann max. 2 werden
 	    if ( DspIntHandler() ) {// interrupt behandeln
 		gotSIGIO--; // wenn behandelt -> flagge runterzählen 
 	    }
-	    
+
 	}
 	
     fdmax=sock; // start socket
