@@ -1709,23 +1709,24 @@ cZDSP1Client* cZDSP1Server::GetClient(int s) {
  }
 
 
-int cZDSP1Server::Execute() { // server ausführen
+int cZDSP1Server::Execute() // server ausführen
+{
     int sock;
     setDspType();
-    if ( (sock = socket( PF_INET, SOCK_STREAM, 0)) == -1) { //   socket holen
+    if ( (sock = socket( PF_INET, SOCK_STREAM, 0)) == -1)
+    { //   socket holen
 	if DEBUG1 syslog(LOG_ERR,"socket() failed\n"); 
 	return(1);
     }
     struct servent* se;
-    if ( (se=getservbyname( sServerName.latin1(),"tcp")) == NULL ) {  // holt port nr aus /etc/services
+    if ( (se=getservbyname( sServerName.latin1(),"tcp")) == NULL )  // holt port nr aus /etc/services
+    {
 	if DEBUG1 syslog(LOG_ERR,"internet network services not found\n");
 	return(1);
     }
     
     struct timeval TimeOut; // 50usec timeout für select aufruf 
-    TimeOut.tv_sec = 0;
-    TimeOut.tv_usec = 50;
-    
+
     struct sockaddr_in addr;
     addr.sin_addr.s_addr = INADDR_ANY; // alle adressen des host
     addr.sin_port = se->s_port; // ! s_port ist network byte order !
@@ -1753,83 +1754,95 @@ int cZDSP1Server::Execute() { // server ausführen
 	    
 	}
 	
-	fdmax=sock; // start socket
-	FD_SET(sock,&rfds); 
-	if ( ! clientlist.isEmpty()) for ( cZDSP1Client* client=clientlist.first(); client; client=clientlist.next() ) {
-	    fd=client->sock;
-	    FD_SET(fd,&rfds); 
-	    if ( client->OutpAvail() ) 
-		FD_SET(fd,&wfds);  
-	    if (fd>fdmax) fdmax=fd;
-	}
+    fdmax=sock; // start socket
+    FD_SET(sock,&rfds);
+    if ( ! clientlist.isEmpty())
+        for ( cZDSP1Client* client=clientlist.first(); client; client=clientlist.next() )
+        {
+            fd=client->sock;
+            FD_SET(fd,&rfds);
+            if ( client->OutpAvail() )
+                FD_SET(fd,&wfds);
+            if (fd>fdmax) fdmax=fd;
+        }
 	    
+    TimeOut.tv_sec = 0;
+    TimeOut.tv_usec = 500; // wir müssen den wert immer neu setzen weil er von select manipuliert wird
 	rm = select(fdmax+1,&rfds,&wfds,NULL,&TimeOut); // blockierender aufruf 
 	
-	if (rm >= 0) { // wir wollten und können was senden bzw. wir können was lesen oder es war ein interrupt
-		  
-	    // erst den output bearbeiten für den fall dass wir bereits einen interrupt bearbeitet haben
-	    if ( ! clientlist.isEmpty()) 
-		for ( cZDSP1Client* client=clientlist.first(); client; client=clientlist.next() ) {
-		fd=client->sock;
-		if (FD_ISSET(fd,&wfds) ) { // soll und kann was an den client gesendet werden ?
-		    QString out = client->GetOutput();
-		    out+="\n";
-		    // char* out=client->GetOutput();
-		    send(fd,out.latin1(),out.length(),0);
+    if (rm >= 0)  // wir wollten und können was senden bzw. wir können was lesen oder es war ein interrupt
+    {
+        // erst den output bearbeiten für den fall dass wir bereits einen interrupt bearbeitet haben
+        if ( ! clientlist.isEmpty())
+            for ( cZDSP1Client* client=clientlist.first(); client; client=clientlist.next() )
+            {
+                fd=client->sock;
+                if (FD_ISSET(fd,&wfds) )
+                { // soll und kann was an den client gesendet werden ?
+                    QString out = client->GetOutput();
+                    out+="\n";
+                    // char* out=client->GetOutput();
+                    send(fd,out.latin1(),out.length(),0);
                     client->SetOutput(""); // kein output mehr da .
-		} 
-	    }
-		  
-	    if ( FD_ISSET(sock,&rfds) ) { // hier ggf.  neuen client hinzunehmen
-		int addrlen=sizeof(addr);
-		if ( (s=accept(sock,(struct sockaddr*) &addr, (socklen_t*) &addrlen) ) == -1 ) {
-		    if DEBUG1 syslog(LOG_ERR,"accept() failed\n");
-		}
-		else {
-		    AddClient(s,(struct sockaddr_in*) &addr);
-		}
-	    }
+                }
+            }
+
+        if ( FD_ISSET(sock,&rfds) )
+        { // hier ggf.  neuen client hinzunehmen
+            int addrlen=sizeof(addr);
+            if ( (s=accept(sock,(struct sockaddr*) &addr, (socklen_t*) &addrlen) ) == -1 )
+            {
+                if DEBUG1 syslog(LOG_ERR,"accept() failed\n");
+            }
+            else
+            {
+                AddClient(s,(struct sockaddr_in*) &addr);
+            }
+        }
 		
-	    if ( ! clientlist.isEmpty()) for ( cZDSP1Client* client=clientlist.first(); client; client=clientlist.next() ) {
-		fd=client->sock;
-		if (FD_ISSET(fd,&rfds) ) { // sind daten für den client da, oder hat er sich abgemeldet ?
-		    if ( (nBytes=recv(fd,InputBuffer,InpBufSize,0)) > 0  ) { // daten sind da
-			bool InpRdy=false;
-			switch (InputBuffer[nBytes-1]) { // letztes zeichen
-			      case 0x0d: // cr
-				  InputBuffer[--nBytes]=0; // c string ende daraus machen 
-				  InpRdy=true;
-				  break;
-			      case 0x0a: // linefeed
-				  InputBuffer[--nBytes]=0; 
-				  if (nBytes) 
-				      if (InputBuffer[nBytes-1] == 0x0d) InputBuffer[--nBytes]=0;
-				  InpRdy=true;
-				  break;
-		                    case 0x04: // eof
-				  InputBuffer[nBytes-1]=0; // c string ende daraus machen 
-				  InpRdy=true;
-				  break;
-			      case 0:
-				  InpRdy=true; // daten komplett und 0 terminiert
-				  break;
-			      default:
-				  InputBuffer[nBytes]=0; // teil string komplettieren
-			      }
-		    
-			client->AddInput(&InputBuffer[0]);
-			if (InpRdy) {
-			    ActSock=fd; 
-			    client->SetOutput(pCmdInterpreter->CmdExecute(client->GetInput())); // führt kommando aus und setzt output
-			    client->ClearInput();
-			}
-		    }
-		    else 
-		    {
-			DelClient(fd); // client hat sich abgemeldet ( hab den iterator zwar, aber DelClient ist virtuell !!! ) 
-			close(fd);
-		    }
-		}
+        if ( ! clientlist.isEmpty())
+            for ( cZDSP1Client* client=clientlist.first(); client; client=clientlist.next() )
+            {
+                fd=client->sock;
+                if (FD_ISSET(fd,&rfds) ) { // sind daten für den client da, oder hat er sich abgemeldet ?
+                    if ( (nBytes=recv(fd,InputBuffer,InpBufSize,0)) > 0  )
+                    { // daten sind da
+                        bool InpRdy=false;
+                        switch (InputBuffer[nBytes-1]) { // letztes zeichen
+                        case 0x0d: // cr
+                            InputBuffer[--nBytes]=0; // c string ende daraus machen
+                            InpRdy=true;
+                            break;
+                        case 0x0a: // linefeed
+                            InputBuffer[--nBytes]=0;
+                            if (nBytes)
+                                if (InputBuffer[nBytes-1] == 0x0d) InputBuffer[--nBytes]=0;
+                            InpRdy=true;
+                            break;
+                        case 0x04: // eof
+                            InputBuffer[nBytes-1]=0; // c string ende daraus machen
+                            InpRdy=true;
+                            break;
+                        case 0:
+                            InpRdy=true; // daten komplett und 0 terminiert
+                            break;
+                        default:
+                            InputBuffer[nBytes]=0; // teil string komplettieren
+                        }
+
+                        client->AddInput(&InputBuffer[0]);
+                        if (InpRdy) {
+                            ActSock=fd;
+                            client->SetOutput(pCmdInterpreter->CmdExecute(client->GetInput())); // führt kommando aus und setzt output
+                            client->ClearInput();
+                        }
+                    }
+                    else
+                    {
+                        DelClient(fd); // client hat sich abgemeldet ( hab den iterator zwar, aber DelClient ist virtuell !!! )
+                        close(fd);
+                    }
+            }
 	    }
 	
 	}
