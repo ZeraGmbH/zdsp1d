@@ -612,7 +612,7 @@ cZDSP1Server* DSPServer;
 int cZDSP1Server::gotSIGIO;
 
 void SigHandler(int)  {
-    DSPServer->gotSIGIO = 1;
+    DSPServer->gotSIGIO += 1;
     if ((DSPServer->DebugLevel) & 2) syslog(LOG_INFO,"dsp interrupt received\n");  
 }
 
@@ -633,7 +633,7 @@ cZDSP1Server::cZDSP1Server()
     DSPServer = this;
 
     sigemptyset(&mySigset);
-    sigaddset(&mySigset, SIGIO);
+    sigaddset(&mySigset, SIGIO); // wir wollen sigio blocken wenn wir (p)select aufrufen
 
     mySigAction.sa_handler = &SigHandler; // signal handler einrichten
     sigemptyset(&mySigAction.sa_mask);
@@ -1759,7 +1759,7 @@ int cZDSP1Server::Execute() // server ausführen
     {
         if ( DspIntHandler() )
         {// interrupt behandeln
-            gotSIGIO = 0; // wenn behandelt -> flagge rücksetzen
+            gotSIGIO--; // wenn behandelt -> flagge rücksetzen
 	    }
 
 	}
