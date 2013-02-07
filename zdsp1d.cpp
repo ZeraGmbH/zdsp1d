@@ -3,6 +3,7 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/socket.h>
+#include <sys/select.h>
 #include <sys/ioctl.h>
 #include <netdb.h>
 #include <netinet/in.h>
@@ -611,11 +612,13 @@ cZDSP1Server* DSPServer;
 int cZDSP1Server::gotSIGIO;
 
 void SigHandler(int)  {
-    DSPServer->gotSIGIO += 1;
+    DSPServer->gotSIGIO = 1;
     if ((DSPServer->DebugLevel) & 2) syslog(LOG_INFO,"dsp interrupt received\n");  
 }
 
+
 struct sigaction mySigAction;
+sigset_t mySigset;
 
 
 cZDSP1Server::cZDSP1Server()
@@ -628,6 +631,9 @@ cZDSP1Server::cZDSP1Server()
     m_sDspDeviceNode = DSPDeviceNode; // default device node
     m_sDspBootPath = "";
     DSPServer = this;
+
+    sigemptyset(&mySigset);
+    sigaddset(&mySigset, SIGIO);
 
     mySigAction.sa_handler = &SigHandler; // signal handler einrichten
     sigemptyset(&mySigAction.sa_mask);
@@ -1725,7 +1731,7 @@ int cZDSP1Server::Execute() // server ausführen
         return(1);
     }
     
-    struct timeval TimeOut; // 50usec timeout für select aufruf 
+    // struct timeval TimeOut; // 50usec timeout für select aufruf
 
     struct sockaddr_in addr;
     addr.sin_addr.s_addr = INADDR_ANY; // alle adressen des host
@@ -1750,9 +1756,10 @@ int cZDSP1Server::Execute() // server ausführen
 	FD_ZERO (&wfds);  
 	
     if (gotSIGIO)
-    { // kann max. 2 werden
-	    if ( DspIntHandler() ) {// interrupt behandeln
-		gotSIGIO--; // wenn behandelt -> flagge runterzählen 
+    {
+        if ( DspIntHandler() )
+        {// interrupt behandeln
+            gotSIGIO = 0; // wenn behandelt -> flagge rücksetzen
 	    }
 
 	}
@@ -1769,9 +1776,10 @@ int cZDSP1Server::Execute() // server ausführen
             if (fd>fdmax) fdmax=fd;
         }
 	    
-    TimeOut.tv_sec = 0;
-    TimeOut.tv_usec = 500; // wir müssen den wert immer neu setzen weil er von select manipuliert wird
-	rm = select(fdmax+1,&rfds,&wfds,NULL,&TimeOut); // blockierender aufruf 
+//    TimeOut.tv_sec = 0;
+//    TimeOut.tv_usec = 500; // wir müssen den wert immer neu setzen weil er von select manipuliert wird
+
+    rm = pselect(fdmax+1,&rfds,&wfds,NULL,NULL,&mySigset); // blockierender aufruf
 	
     if (rm >= 0)  // wir wollten und können was senden bzw. wir können was lesen oder es war ein interrupt
     {
