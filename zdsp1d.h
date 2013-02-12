@@ -36,6 +36,7 @@ class cZDSP1Client: public cZHClient {
 public:
     cZDSP1Client(){};
     cZDSP1Client(int,struct sockaddr_in*,cZDSP1Server*);
+    cZDSP1Client(cZDSP1Server* server);
     ~cZDSP1Client(){}; //  allokierten speicher ggf. freigeben
     
     
@@ -66,6 +67,7 @@ public:
     cDspVarResolver DspVarResolver; // zum auflösen der variablen aus kommandos
     
 private:
+    void init(cZDSP1Server* server);
     cZDSP1Server* myServer; 
     bool m_bActive;
     cZDSP1Client* GetClient(int);

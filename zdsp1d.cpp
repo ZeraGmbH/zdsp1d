@@ -63,7 +63,20 @@ static char dspnrunning[12]= "not running";
 
 
 cZDSP1Client::cZDSP1Client(int s,struct sockaddr_in* adr,cZDSP1Server* server)
-    :cZHClient(s,adr) {
+    :cZHClient(s,adr)
+{
+    init(server);
+}
+
+
+cZDSP1Client::cZDSP1Client(cZDSP1Server* server)
+{
+    init(server);
+}
+
+
+void cZDSP1Client::init(cZDSP1Server *server)
+{
     m_sCmdListDef = m_sIntCmdListDef = "Empty"; // alle listen default leer
     cDspCmd DspCmd;
     m_DspCmdList.append(DspCmd);
@@ -79,7 +92,6 @@ cZDSP1Client::cZDSP1Client(int s,struct sockaddr_in* adr,cZDSP1Server* server)
     Encryption = 0; // es werden alle var. abfragen im klartext gesendet
     m_bActive = false;
 }
-
 
 QString& cZDSP1Client::SetRavList(QString& s) {
     int i = 0;
@@ -1466,7 +1478,7 @@ bool cZDSP1Server::DspIntHandler()
             client->DspVarWrite(s = QString("CTRLACK,%1;").arg(CmdDone)); // acknowledge falls fehler
         else
         {
-            cZDSP1Client *dummyClient = new cZDSP1Client(); // dummyClient einrichten
+            cZDSP1Client *dummyClient = new cZDSP1Client(this); // dummyClient einrichten
             dummyClient->DspVarWrite(s = QString("CTRLACK,%1;").arg(CmdDone)); // und rücksetzen
         }
         return true; // und interrupt als bearbeitet markieren
