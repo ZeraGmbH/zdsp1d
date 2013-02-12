@@ -1462,7 +1462,13 @@ bool cZDSP1Server::DspIntHandler()
     if (!clientAvail)
     { // wir suchen den client dazu
         if DEBUG1 syslog(LOG_ERR,"dsp interrupt mismatch, no such client (%d)\n",process);
-        client->DspVarWrite(s = QString("CTRLACK,%1;").arg(CmdDone)); // acknowledge falls fehler
+        if (client != 0) // wir haben noch einen client zum rücksetzen der semaphore, wenn nicht -> ???? das darf aber nicht ->
+            client->DspVarWrite(s = QString("CTRLACK,%1;").arg(CmdDone)); // acknowledge falls fehler
+        else
+        {
+            cZDSP1Client *dummyClient = new cZDSP1Client(); // dummyClient einrichten
+            dummyClient->DspVarWrite(s = QString("CTRLACK,%1;").arg(CmdDone)); // und rücksetzen
+        }
         return true; // und interrupt als bearbeitet markieren
     }
 
@@ -1751,108 +1757,116 @@ int cZDSP1Server::Execute() // server ausführen
     fd_set rfds,wfds; // menge von deskriptoren für read bzw. write
     int fd,fdmax,s,rm;
     for (;;) {
-	FD_ZERO (&rfds);  // deskriptor menge löschen
-	FD_ZERO (&wfds);  
-	
-    if (gotSIGIO)
-    {
-        if ( DspIntHandler() )
-        {// interrupt behandeln
-            gotSIGIO = 0; // wenn behandelt -> flagge rücksetzen
-	    }
+        FD_ZERO (&rfds);  // deskriptor menge löschen
+        FD_ZERO (&wfds);
 
-	}
-	
-    fdmax=sock; // start socket
-    FD_SET(sock,&rfds);
-    if ( ! clientlist.isEmpty())
-        for ( cZDSP1Client* client=clientlist.first(); client; client=clientlist.next() )
+        if (gotSIGIO)
         {
-            fd=client->sock;
-            FD_SET(fd,&rfds);
-            if ( client->OutpAvail() )
-                FD_SET(fd,&wfds);
-            if (fd>fdmax) fdmax=fd;
+            if ( DspIntHandler() )
+            {// interrupt behandeln
+                gotSIGIO = 0; // wenn behandelt -> flagge rücksetzen
+            }
+
         }
-	    
-    rm = pselect(fdmax+1,&rfds,&wfds,NULL,NULL,&origSigmask); // blockierender aufruf
-	
-    if (rm >= 0)  // wir wollten und können was senden bzw. wir können was lesen oder es war ein interrupt
-    {
-        // erst den output bearbeiten für den fall dass wir bereits einen interrupt bearbeitet haben
+
+        fdmax=sock; // start socket
+        FD_SET(sock,&rfds);
         if ( ! clientlist.isEmpty())
             for ( cZDSP1Client* client=clientlist.first(); client; client=clientlist.next() )
             {
                 fd=client->sock;
-                if (FD_ISSET(fd,&wfds) )
-                { // soll und kann was an den client gesendet werden ?
-                    QString out = client->GetOutput();
-                    out+="\n";
-                    // char* out=client->GetOutput();
-                    send(fd,out.latin1(),out.length(),0);
-                    client->SetOutput(""); // kein output mehr da .
+                FD_SET(fd,&rfds);
+                if ( client->OutpAvail() )
+                    FD_SET(fd,&wfds);
+                if (fd>fdmax) fdmax=fd;
+            }
+
+        rm = pselect(fdmax+1,&rfds,&wfds,NULL,NULL,&origSigmask); // blockierender aufruf
+
+        if (rm >= 0)  // wir wollten und können was senden bzw. wir können was lesen oder es war ein interrupt
+        {
+
+            if ( ! clientlist.isEmpty())
+            { // erstmal input, bzw. client abmeldungen bearbeiten
+                for ( cZDSP1Client* client=clientlist.first(); client; client=clientlist.next() )
+                {
+                    fd=client->sock;
+                    if (FD_ISSET(fd,&rfds) )
+                    { // sind daten für den client da, oder hat er sich abgemeldet ?
+                        if ( (nBytes=recv(fd,InputBuffer,InpBufSize,0)) > 0  )
+                        { // daten sind da
+                            bool InpRdy=false;
+                            switch (InputBuffer[nBytes-1]) { // letztes zeichen
+                            case 0x0d: // cr
+                                InputBuffer[--nBytes]=0; // c string ende daraus machen
+                                InpRdy=true;
+                                break;
+                            case 0x0a: // linefeed
+                                InputBuffer[--nBytes]=0;
+                                if (nBytes)
+                                    if (InputBuffer[nBytes-1] == 0x0d) InputBuffer[--nBytes]=0;
+                                InpRdy=true;
+                                break;
+                            case 0x04: // eof
+                                InputBuffer[nBytes-1]=0; // c string ende daraus machen
+                                InpRdy=true;
+                                break;
+                            case 0:
+                                InpRdy=true; // daten komplett und 0 terminiert
+                                break;
+                            default:
+                                InputBuffer[nBytes]=0; // teil string komplettieren
+                            }
+
+                            client->AddInput(&InputBuffer[0]);
+                            if (InpRdy) {
+                                ActSock=fd;
+                                client->SetOutput(pCmdInterpreter->CmdExecute(client->GetInput())); // führt kommando aus und setzt output
+                                client->ClearInput();
+                            }
+                        }
+                        else
+                        {
+                            DelClient(fd); // client hat sich abgemeldet
+                            close(fd);
+                        }
+                    }
                 }
             }
 
-        if ( FD_ISSET(sock,&rfds) )
-        { // hier ggf.  neuen client hinzunehmen
-            int addrlen=sizeof(addr);
-            if ( (s=accept(sock,(struct sockaddr*) &addr, (socklen_t*) &addrlen) ) == -1 )
-            {
-                if DEBUG1 syslog(LOG_ERR,"accept() failed\n");
-            }
-            else
-            {
-                AddClient(s,(struct sockaddr_in*) &addr);
-            }
-        }
-		
-        if ( ! clientlist.isEmpty())
-            for ( cZDSP1Client* client=clientlist.first(); client; client=clientlist.next() )
-            {
-                fd=client->sock;
-                if (FD_ISSET(fd,&rfds) ) { // sind daten für den client da, oder hat er sich abgemeldet ?
-                    if ( (nBytes=recv(fd,InputBuffer,InpBufSize,0)) > 0  )
-                    { // daten sind da
-                        bool InpRdy=false;
-                        switch (InputBuffer[nBytes-1]) { // letztes zeichen
-                        case 0x0d: // cr
-                            InputBuffer[--nBytes]=0; // c string ende daraus machen
-                            InpRdy=true;
-                            break;
-                        case 0x0a: // linefeed
-                            InputBuffer[--nBytes]=0;
-                            if (nBytes)
-                                if (InputBuffer[nBytes-1] == 0x0d) InputBuffer[--nBytes]=0;
-                            InpRdy=true;
-                            break;
-                        case 0x04: // eof
-                            InputBuffer[nBytes-1]=0; // c string ende daraus machen
-                            InpRdy=true;
-                            break;
-                        case 0:
-                            InpRdy=true; // daten komplett und 0 terminiert
-                            break;
-                        default:
-                            InputBuffer[nBytes]=0; // teil string komplettieren
-                        }
 
-                        client->AddInput(&InputBuffer[0]);
-                        if (InpRdy) {
-                            ActSock=fd;
-                            client->SetOutput(pCmdInterpreter->CmdExecute(client->GetInput())); // führt kommando aus und setzt output
-                            client->ClearInput();
-                        }
+            if ( ! clientlist.isEmpty())
+            { // jetzt den output bearbeiten
+                for ( cZDSP1Client* client=clientlist.first(); client; client=clientlist.next() )
+                {
+                    fd=client->sock;
+                    if (FD_ISSET(fd,&wfds) )
+                    { // soll und kann was an den client gesendet werden ?
+                        QString out = client->GetOutput();
+                        out+="\n";
+                        // char* out=client->GetOutput();
+                        send(fd,out.latin1(),out.length(),0);
+                        client->SetOutput(""); // kein output mehr da .
                     }
-                    else
-                    {
-                        DelClient(fd); // client hat sich abgemeldet ( hab den iterator zwar, aber DelClient ist virtuell !!! )
-                        close(fd);
-                    }
+                }
             }
-	    }
-	
-	}
+
+            if ( FD_ISSET(sock,&rfds) )
+            { // hier ggf.  neuen client hinzunehmen
+                int addrlen=sizeof(addr);
+                if ( (s=accept(sock,(struct sockaddr*) &addr, (socklen_t*) &addrlen) ) == -1 )
+                {
+                    if DEBUG1 syslog(LOG_ERR,"accept() failed\n");
+                }
+                else
+                {
+                    AddClient(s,(struct sockaddr_in*) &addr);
+                }
+            }
+
+
+
+        }
     }
     close(sock);
 }
