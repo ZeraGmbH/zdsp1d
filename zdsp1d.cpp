@@ -1732,8 +1732,6 @@ int cZDSP1Server::Execute() // server ausführen
         return(1);
     }
     
-    // struct timeval TimeOut; // 50usec timeout für select aufruf
-
     struct sockaddr_in addr;
     addr.sin_addr.s_addr = INADDR_ANY; // alle adressen des host
     addr.sin_port = se->s_port; // ! s_port ist network byte order !
@@ -1777,9 +1775,6 @@ int cZDSP1Server::Execute() // server ausführen
             if (fd>fdmax) fdmax=fd;
         }
 	    
-//    TimeOut.tv_sec = 0;
-//    TimeOut.tv_usec = 500; // wir müssen den wert immer neu setzen weil er von select manipuliert wird
-
     rm = pselect(fdmax+1,&rfds,&wfds,NULL,NULL,&origSigmask); // blockierender aufruf
 	
     if (rm >= 0)  // wir wollten und können was senden bzw. wir können was lesen oder es war ein interrupt
