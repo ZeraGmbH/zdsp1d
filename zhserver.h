@@ -35,10 +35,9 @@ private:
 class cZHClient {
 public:
     cZHClient(){};
-    cZHClient(int,struct sockaddr_in*);
+    cZHClient(int socket);
     ~cZHClient(); //  allokierten speicher ggf. freigeben
     int sock; // socket für den die verbindung besteht
-    struct sockaddr_in addr; // address informationen
     void SetOutput(const char*); // setzt den output, d.h. legt auch daten dafür an
     char* GetOutput(); // gibt den output zurück
     bool OutpAvail(); // true wenn mind. 1 zeichen im ausgabepuffer
@@ -59,7 +58,7 @@ public:
     virtual int Execute(); // server ausführen
     QString& GetSoftwareVersion();
     virtual int SetServerNr(const char*); // setzen der device nr -> neuen server namen
-    virtual void AddClient(int, sockaddr_in*); // fügt einen client hinzu
+    virtual void AddClient(int socket); // fügt einen client hinzu
     virtual void DelClient(int); // entfernt einen client
 protected:
     QString sServerName;

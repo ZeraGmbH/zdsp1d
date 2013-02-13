@@ -29,12 +29,16 @@
 //  {"TESTTIMESKIPLT",65,CMD2i16,0}
 //  eingeführt. ..... läuft aber erst mit dsp ab version 3.07
 //  ADSP21362 unterstützung eingebaut, automatische umschaltung über magicId
+//v1.08 ergänzt :
+// neue befehle für dsp
+// {"SUBVCC",66,CMD3i16,0}}
+//  eingeführt. ..... läuft aber erst mit dsp ab version 3.08
 
-//#define CheckSumOffset 56
-//#define LeiterkartenName "wm3000i"
+
+
 #define DSPDeviceNode "/dev/zFPGA1dsp1"
 #define ServerBasisName "zdsp1d"
-#define ServerVersion "V1.07"
+#define ServerVersion "V1.08"
 #define InpBufSize 4096
 
 // wenn DEBUG -> kein fork() 

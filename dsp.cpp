@@ -201,10 +201,12 @@ static sDspCmd DspCmd[67] = {	{"INVALID", 0, CMD ,0},
                 {"SUBVCC",66,CMD3i16,0}};
 
 
-sDspCmd* findDspCmd(QString& s) {
+sDspCmd* findDspCmd(QString& s)
+{
     int len = sizeof(DspCmd)/sizeof(sDspCmd);
     for (int i=0; i < len; i++)
-	if (s == DspCmd[i].Name) return &DspCmd[i]; // zeiger wenn wir das kommando kennen
+        if (s == DspCmd[i].Name) return &DspCmd[i]; // zeiger wenn wir das kommando kennen
+
     return NULL; // sonst 0
 }
 
@@ -300,115 +302,158 @@ sMemSection symbConsts1 = {
 cDspClientVar::cDspClientVar() 
     :m_nSize(0) {}
 
-bool cDspClientVar::Init(QString& s) {
+
+bool cDspClientVar::Init(QString& s)
+{
     bool ret = false;
     int n,fs;
-    if ( (n = s.count(',')) > 0 ) {
-	m_sName = s.section(',',0,0).stripWhiteSpace();
-	fs = s.section(',',1,1).stripWhiteSpace().toInt(&ret);
-	if (ret)  m_nSize = fs;
+    if ( (n = s.count(',')) > 0 )
+    {
+        m_sName = s.section(',',0,0).stripWhiteSpace();
+        fs = s.section(',',1,1).stripWhiteSpace().toInt(&ret); // der erste parameter ist die feldgrösse
+        if (ret)
+            m_nSize = fs;
+
+        if (n > 1) // wir haben noch einen parameter, dann ist das der typ
+        {
+            fs = s.section(',',2,2).stripWhiteSpace().toInt(&ret);
+            if (ret)
+            {
+                if ( (ret = ( (fs == eInt) || (fs == eFloat) )))
+                    m_nType = fs;
+            }
+        }
+        else
+            m_nType = eFloat; // default ist es ein float
     }
     return ret;
 }
 
 
-QString& cDspClientVar::name() {
+QString& cDspClientVar::name()
+{
     return m_sName;
 }
 
 
-int cDspClientVar::size() {
+int cDspClientVar::size()
+{
     return m_nSize;
 }
 
 
-ulong cDspClientVar::offs() {
+int cDspClientVar::type()
+{
+    return m_nType;
+}
+
+
+ulong cDspClientVar::offs()
+{
     return m_nOffsAdr;
 }
 
 
-void cDspClientVar::SetOffs(long o) {
+void cDspClientVar::SetOffs(long o)
+{
     m_nOffsAdr = o;
 }
 
 
-cDspVarResolver::cDspVarResolver() {
+cDspVarResolver::cDspVarResolver()
+{
     VarParser.SetDelimiter("(,+,-,)"); // setze die trennzeichen für den parser
     VarParser.SetWhiteSpace(" (,)");
 }
 
 
-void cDspVarResolver::addSection(sMemSection* sec) {
+void cDspVarResolver::addSection(sMemSection* sec)
+{
     MemSectionList.append(sec);
 }
 
 
-long cDspVarResolver::offs(QString& s,  sMemSection** pSec) {
+long cDspVarResolver::offs(QString& s,  sMemSection** pSec, int *type)
+{
     SearchedVar = 0;
     long ret = -1; // erstmal fehler
     *pSec = NULL; // dito
     bool ok;
     sMemSection *msec; // sonst variablenliste durchforsten
     QString ts = s.upper();
-    char* cts=(char*) ts.latin1(); 
+    char* cts=(char*) ts.latin1();
     QString sSearch=VarParser.GetKeyword(&cts);
-    for ( msec = MemSectionList.first(); msec; msec = MemSectionList.next() ) { //
-	long offs = 0;
-	for (int i = 0; i< msec->n;i++) {
-	    if (sSearch==msec->DspVar[i].Name)  { // der name ist schon drin
-		SearchedVar = &(msec->DspVar[i]);
-		ts = ts.stripWhiteSpace();
-		ts = ts.remove(msec->DspVar[i].Name); // name raus
-		if (ts.length() > 0) { // wenn noch was da, dann muss das ein +/- offset sein
-		    ret = ts.toLong(&ok,10); // prüfen auf dez. konstante
-		    if (ok) {
-			ret += offs;
-			break;
-		    }
-		    ret = ts.toLong(&ok,16); // mal hex versuchen
-		    if (ok) {
-			ret += offs;
-			break;
-		    }
-		    ret = -1; // sonst ist das ein fehler
-		    break; 
-		}
-		ret = offs; // startadresse der variablen
-		break;
-	    }
-	    offs += msec->DspVar[i].size;
-	}
-	if (ret > -1) {
-	    *pSec = msec; // merken der sektion in der die variable stand
-	    break;
-	}
+    for ( msec = MemSectionList.first(); msec; msec = MemSectionList.next() )
+    { //
+        long offs = 0;
+        for (int i = 0; i< msec->n;i++)
+        {
+            if (sSearch==msec->DspVar[i].Name)
+            { // der name ist schon drin
+                SearchedVar = &(msec->DspVar[i]);
+                if (type != NULL) // wenn der variablen type gebraucht wird
+                    *type = SearchedVar->type;
+                ts = ts.stripWhiteSpace();
+                ts = ts.remove(msec->DspVar[i].Name); // name raus
+                if (ts.length() > 0)
+                { // wenn noch was da, dann muss das ein +/- offset sein
+                    ret = ts.toLong(&ok,10); // prüfen auf dez. konstante
+                    if (ok)
+                    {
+                        ret += offs;
+                        break;
+                    }
+                    ret = ts.toLong(&ok,16); // mal hex versuchen
+                    if (ok) {
+                        ret += offs;
+                        break;
+                    }
+                    ret = -1; // sonst ist das ein fehler
+                    break;
+                }
+                ret = offs; // startadresse der variablen
+                break;
+            }
+            offs += msec->DspVar[i].size;
+        }
+        if (ret > -1)
+        {
+            *pSec = msec; // merken der sektion in der die variable stand
+            break;
+        }
     }
-    if (ret > -1) return ret; // offset adresse 
+    if (ret > -1) return ret; // offset adresse
+    if (type != NULL) // wenn der variablen type gebraucht wird
+        *type = eUnknown; // wir kennen den type nicht wenn die adresse absolut übertragen wurde
     ret = s.toLong(&ok,10); // prüfen auf dez. konstante
     if (ok) return ret;
     ret = s.toLong(&ok,16); // mal hex versuchen
     if (ok) return ret;
     return -1;
 }
-    
 
-long cDspVarResolver::offs(QString& s) {
-    return offs(s, &sec);
+
+long cDspVarResolver::offs(QString& s)
+{
+    return offs(s, &sec, NULL);
 }
 
 
-long cDspVarResolver::adr(QString& s) {
-    long ret = offs(s, &sec); // -1 wenn nicht gefunden
-    if (sec) {
-	ret += sec->StartAdr; 
-    	SearchedVar->adr = ret;
-    }	
+long cDspVarResolver::adr(QString& s, int *type)
+{
+    long ret = offs(s, &sec, type); // -1 wenn nicht gefunden
+    if (sec)
+    {
+        ret += sec->StartAdr;
+        SearchedVar->adr = ret;
+    }
     return ret;
 }
 
 
 sDspVar* cDspVarResolver::vadr(QString& s) {
-   adr (s); // adresse wird bestimmt und gespeichert
+   adr (s, NULL); // adresse wird bestimmt und gespeichert
+
    return SearchedVar; // zeiger auf die gesuchte variable wir übergeben
 }
 

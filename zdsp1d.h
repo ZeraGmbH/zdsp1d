@@ -35,8 +35,7 @@ class cZDSP1Server; // forward
 class cZDSP1Client: public cZHClient {
 public:
     cZDSP1Client(){};
-    cZDSP1Client(int,struct sockaddr_in*,cZDSP1Server*);
-    cZDSP1Client(cZDSP1Server* server);
+    cZDSP1Client(int socket,cZDSP1Server *server);
     ~cZDSP1Client(){}; //  allokierten speicher ggf. freigeben
     
     
@@ -94,8 +93,8 @@ public:
     cZDSP1Server();
     virtual ~cZDSP1Server();
     virtual int Execute(); // server ausführen überladen v. cZHServer
-    virtual void AddClient(int, sockaddr_in*); // fügt einen client hinzu
-    virtual void DelClient(int); // entfernt einen client
+    virtual void AddClient(int socket); // fügt einen client hinzu
+    virtual void DelClient(int socket); // entfernt einen client
         
     virtual const char* SCPICmd( SCPICmdType, char*);
     virtual const char* SCPIQuery( SCPICmdType);

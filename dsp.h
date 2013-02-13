@@ -48,7 +48,7 @@ struct sDspCmd { // wird zum ausdekodieren der dsp kommandos benötigt
 };
     
 sDspCmd* findDspCmd(QString&);
-enum dType { eInt, eFloat};
+enum dType { eInt, eFloat, eUnknown};
 
 struct sDspVar { // dient ebenfalls der dekodierung 
     const char* Name; // name der variablen
@@ -69,13 +69,13 @@ class cDspVarResolver { // der löst die Variablen anhand der memsections und na
 public:
     cDspVarResolver();
     void addSection(sMemSection*); // sections werden im konstruktor erstmal fest eingebunden
-    long offs(QString&); // gibt die offs. adresse einer variablen zurück, -1 wenn es die variable nicht gibt
-    long adr(QString&); // gibt die abs. adresse einer variablen zurück, -1 ...
-    sDspVar* vadr(QString&); // wie adr(..) gibt aber zeiger auf sDspVar 
+    long offs(QString&); // gibt die offs. adresse einer variablen zurück, -1 wenn es die variable nicht gibt, zum generiren der dsp kommandos
+    long adr(QString&, int*); // gibt die abs. adresse einer variablen im dsp zurück, -1 wenn es die variable nicht gibt, zum schreiben in den dsp
+    sDspVar* vadr(QString&); //  gibt einen zeiger auf sDspVar zurück, zum lesen von daten aus dem dsp
 private:
     cParse VarParser;
     sDspVar *SearchedVar; // zeiger auf die gesuchte variable;
-    long offs(QString&, sMemSection**);
+    long offs(QString&, sMemSection**, int *);
     sMemSection *sec;
     Q3PtrList<sMemSection> MemSectionList;
 };
@@ -88,11 +88,13 @@ public:
     QString& name();
     void SetOffs(long);
     int size();
+    int type();
     ulong offs();
 private:    
     QString m_sName; // eine dsp variable hat einen namen
     int m_nOffsAdr; // hat eine rel. start adresse
-    int m_nSize; // und eine anzahl von elementen (float)
+    int m_nSize; // und eine anzahl von elementen
+    int m_nType; // der typ der variablen (efloat oder eint)
 };
 
 
