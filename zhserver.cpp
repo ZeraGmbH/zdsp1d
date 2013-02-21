@@ -141,7 +141,7 @@ void cZHClient::AddAsyncMessage(const char * message)
 char *cZHClient::GetAsyncMessage()
 {
     m_sRM = m_sAsyncMessage.section(';',1,1);
-    m_sAsyncMessage.replace(0,m_sRM.length(),"");
+    m_sAsyncMessage.replace(0,m_sRM.length()+1,"");
     return (char*)m_sRM.latin1();
 }
 

@@ -1640,7 +1640,7 @@ void cZDSP1Server::DspIntHandler()
     }
 
     if (!clientAvail)
-    { // wir suchen den client dazu
+    {
         if DEBUG1 syslog(LOG_ERR,"dsp interrupt mismatch, no such client (%d)\n",process);
         if (client != 0) // wir haben noch einen client zum rücksetzen der semaphore, wenn nicht -> ???? das darf aber nicht ->
             client->DspVarWrite(s = QString("CTRLACK,%1;").arg(CmdDone)); // acknowledge falls fehler
@@ -2062,11 +2062,12 @@ int cZDSP1Server::Execute() // server ausführen
                             client->SetOutput(""); // kein output mehr da
                         }
                         else
-                        {
-                            QString out = client->GetAsyncMessage();
-                            out+="\n";
-                            send(fd,out.latin1(),out.length(),0);
-                        }
+                            if (client->AsyncMessageAvail())
+                            {
+                                QString out = client->GetAsyncMessage();
+                                out+="\n";
+                                send(fd,out.latin1(),out.length(),0);
+                            }
                     }
                 }
             }
