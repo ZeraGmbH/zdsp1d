@@ -41,12 +41,20 @@ public:
     void SetOutput(const char*); // setzt den output, d.h. legt auch daten dafür an
     char* GetOutput(); // gibt den output zurück
     bool OutpAvail(); // true wenn mind. 1 zeichen im ausgabepuffer
+    bool AsyncMessageAvail(); // dito
     void ClearInput(); // löscht den input buffer
     void AddInput(char*); // addiert einen teil string zum buffer
     char* GetInput(); // gibt zeiger auf input
+    void AddAsyncMessage(const char*);
+    char* GetAsyncMessage();
+
 protected:
-    QString sOutput;    
     QString sInput;
+    QString sOutput;
+
+private:
+    QString m_sAsyncMessage;
+    QString m_sRM;
 };
 
 

@@ -184,7 +184,7 @@ private:
     const char* mDspMemoryRead(char*);
     const char* mDspMemoryWrite(char*);
     
-    bool DspIntHandler();
+    void DspIntHandler();
     bool LoadDSProgram();
     void setDspType();
     int readMagicId();

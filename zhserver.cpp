@@ -78,6 +78,9 @@ void cNodeZHServer::SetNodeNameList(QStringList* sl)
 cZHClient::cZHClient(int socket)
 {
     sock=socket;
+    m_sAsyncMessage = "";
+    sInput = "";
+    sOutput = "";
 }
 
 
@@ -104,6 +107,12 @@ bool cZHClient::OutpAvail()
 }
 
 
+bool cZHClient::AsyncMessageAvail()
+{
+    return (m_sAsyncMessage.length() > 0);
+}
+
+
 void cZHClient::ClearInput()
 { // löscht den input buffer
     sInput="";
@@ -119,6 +128,21 @@ void cZHClient::AddInput(char* s)
 char* cZHClient::GetInput()
 { // gibt zeiger auf input
     return((char*)sInput.latin1());
+}
+
+
+void cZHClient::AddAsyncMessage(const char * message)
+{
+    m_sAsyncMessage += ";";
+    m_sAsyncMessage += message;
+}
+
+
+char *cZHClient::GetAsyncMessage()
+{
+    m_sRM = m_sAsyncMessage.section(';',1,1);
+    m_sAsyncMessage.replace(0,m_sRM.length(),"");
+    return (char*)m_sRM.latin1();
 }
 
 

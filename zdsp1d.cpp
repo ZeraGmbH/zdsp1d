@@ -594,6 +594,7 @@ QString& cZDSP1Client::DspVarListRead(QString& s)
                 for (int j = 0; j < n-1; j++,ul++) ts << (*ul) << "," ;
                 ts << *ul << ";" ;
                 break;}
+            case eUnknown:
             case eFloat :{
                 float *f = (float*) ba->data();
                 for (int j = 0; j < n-1; j++,f++) ts << (*f) << "," ;
@@ -1621,7 +1622,7 @@ QDataStream& operator<<(QDataStream& ds,cDspCmd c)
 }
 
 
-bool cZDSP1Server::DspIntHandler()
+void cZDSP1Server::DspIntHandler()
 { // behandelt den dsp interrupt
     int IRQCode;
     QString s;
@@ -1648,20 +1649,17 @@ bool cZDSP1Server::DspIntHandler()
             cZDSP1Client *dummyClient = new cZDSP1Client(0,this); // dummyClient einrichten
             dummyClient->DspVarWrite(s = QString("CTRLACK,%1;").arg(CmdDone)); // und rücksetzen
         }
-        return true; // und interrupt als bearbeitet markieren
     }
 
     else
     {
-        if ( client2->OutpAvail() )
-            return false; // der client hat noch output welcher gesendet werden muss
-
         client->DspVarWrite(s = QString("CTRLACK,%1;").arg(CmdDone)); // sonst acknowledge
         IRQCode &= 0xFFFF;
         s = QString("DSPINT:%1").arg(IRQCode);
-        client2->SetOutput((char*)s.latin1()); // die async. meldung
-        return true; // interrupt ist bearbeitet
+        client2->AddAsyncMessage((char*)s.latin1()); // die async. meldung
     }
+
+    return ;
 }
 
 
@@ -1979,11 +1977,8 @@ int cZDSP1Server::Execute() // server ausführen
 
         if (gotSIGIO)
         {
-            if ( DspIntHandler() )
-            {// interrupt behandeln
-                gotSIGIO = 0; // wenn behandelt -> flagge rücksetzen
-            }
-
+            DspIntHandler(); // interrupt behandeln
+            gotSIGIO = 0; // wenn behandelt -> flagge rücksetzen
         }
 
         fdmax=sock; // start socket
@@ -1993,7 +1988,7 @@ int cZDSP1Server::Execute() // server ausführen
             {
                 fd=client->sock;
                 FD_SET(fd,&rfds);
-                if ( client->OutpAvail() )
+                if ( client->OutpAvail() || client->AsyncMessageAvail() ) // wir haben eine antwort oder eine asynch. meldung
                     FD_SET(fd,&wfds);
                 if (fd>fdmax) fdmax=fd;
             }
@@ -2059,11 +2054,19 @@ int cZDSP1Server::Execute() // server ausführen
                     fd=client->sock;
                     if (FD_ISSET(fd,&wfds) )
                     { // soll und kann was an den client gesendet werden ?
-                        QString out = client->GetOutput();
-                        out+="\n";
-                        // char* out=client->GetOutput();
-                        send(fd,out.latin1(),out.length(),0);
-                        client->SetOutput(""); // kein output mehr da .
+                        if (client->OutpAvail())
+                        {
+                            QString out = client->GetOutput();
+                            out+="\n";
+                            send(fd,out.latin1(),out.length(),0);
+                            client->SetOutput(""); // kein output mehr da
+                        }
+                        else
+                        {
+                            QString out = client->GetAsyncMessage();
+                            out+="\n";
+                            send(fd,out.latin1(),out.length(),0);
+                        }
                     }
                 }
             }
