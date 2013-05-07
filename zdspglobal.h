@@ -33,22 +33,30 @@
 // neue befehle für dsp
 // {"SUBVCC",66,CMD3i16,0}}
 //  eingeführt. ..... läuft aber erst mit dsp ab version 3.08
-//v1.09
-// im en61850 decoder war eine änderung notwendig...diese wurde im dsp ab v3.16 realisiert
-// mittlerweile hatte sich das memory mapping in dialogworkspace geändert und musste daher
-// angepasst werden. es wurde ein dsp cmd DSPINTPOST eingeführt welches ans ende aller
-// kommandoliste angehängt werden muss, weil wir aus gründen von interrupt latenzen im
-// dsp auf queued interrupts umgestellt hatten. darüber hinaus musste der interrupt handler
-// geändert werden.
-//v1.10
-// es wurden mehrere Kommandos für den dsp ergänzt. die liste war für den com5003 bereits gewachsen
-// und für die wm3000 musste ein kommando ergänzt werden damit der dc aus den messperioden herausgerechnet
-// werden kann. dies ist erforderlich für die amplitudenjustage weil zera referenzgeräte immer noch ohne
-// dc arbeiten.
+//v1.09:
+//  diese version wurde aus oe(Qt4.8) zurück nach Qt3 geholt. sie beinhaltet
+//  unter anderem neue befehle und daten typen für den dsp, wenn daten in
+//  den dsp geschrieben werden. sie unterstützt das neue dsp programm ab
+//  version 3.09, welches einen neuen, performanteren ethernet dekoder
+//  beinhaltet. ganz wesentlich ist aber dass der neue dsp server deutlich
+//  weniger system performance benötigt, weil das interrupt handling stark
+//  geändert wurde.
+//  im en61850 decoder war eine änderung notwendig...diese wurde im dsp ab v3.16 realisiert
+//  mittlerweile hatte sich das memory mapping in dialogworkspace geändert und musste daher
+//  angepasst werden. es wurde ein dsp cmd DSPINTPOST eingeführt welches ans ende aller
+//  kommandoliste angehängt werden muss, weil wir aus gründen von interrupt latenzen im
+//  dsp auf queued interrupts umgestellt hatten. darüber hinaus musste der interrupt handler
+//  geändert werden.
+//  v1.10
+//  es wurden mehrere Kommandos für den dsp ergänzt. die liste war für den com5003 bereits gewachsen
+//  und für die wm3000 musste ein kommando ergänzt werden damit der dc aus den messperioden herausgerechnet
+//  werden kann. dies ist erforderlich für die amplitudenjustage weil zera referenzgeräte immer noch ohne
+//  dc arbeiten.
 
-#define DSPDeviceNode "/dev/zFPGA1dsp1"
+#define DSPDeviceNode "/dev/adsp21262-1/0"
 #define ServerBasisName "zdsp1d"
-#define ServerVersion "V1.10"
+#define ServerVersion "V1.09"
+
 #define InpBufSize 4096
 
 // wenn DEBUG -> kein fork() 

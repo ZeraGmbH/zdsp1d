@@ -8,11 +8,9 @@
 #include <qstring.h>
 #include <qstringlist.h>
 #include <qmap.h>
-#include <q3valuelist.h>
-//Added by qt3to4:
-#include <Q3PtrList>
-//#include <Q3MemArray>
-#include <QVector>
+#include <qvaluelist.h>
+#include <qptrlist.h>
+#include <qmemarray.h>
 
 #include "dsp1scpi.h"
 #include "zhserver.h"
@@ -26,9 +24,9 @@
 #define DEBUG2 (DebugLevel & 2) // alle devnode aktivitäten loggen
 #define DEBUG3 (DebugLevel & 4) // alle client an-,abmeldungen
 
-typedef Q3ValueList<cDspCmd> tDspCmdList;
-typedef Q3ValueList<cDspClientVar> tDspVarList;
-typedef QVector<float> tDspMemArray;
+typedef QValueList<cDspCmd> tDspCmdList;
+typedef QValueList<cDspClientVar> tDspVarList;
+typedef QMemArray<float> tDspMemArray;
 
 class cZDSP1Server; // forward
 
@@ -84,7 +82,7 @@ private:
     tDspVarList m_DspVarList; // liste mit variablen beschreibungen
     tDspCmdList m_DspCmdList; // liste mit dsp kommandos (periodisch)
     tDspCmdList  m_DspIntCmdList; // liste mit dsp kommandos (interrupt)
-    QVector<sDspVar> varArray; // array von sDspVar
+    QMemArray<sDspVar> varArray; // array von sDspVar
     sMemSection msec; // eine memory section für den DspVarResolver 
 };
 
@@ -116,7 +114,7 @@ public:
     
 private:
     uchar ActivatedCmdList;
-    Q3PtrList<cZDSP1Client> clientlist; // liste der clients
+    QPtrList<cZDSP1Client> clientlist; // liste der clients
     
     // die routinen für das system modell
     const char* mCommand2Dsp(QString&); // indirekt für system modell    

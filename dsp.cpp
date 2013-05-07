@@ -318,7 +318,7 @@ bool cDspClientVar::Init(QString& s)
 {
     bool ret = false;
     int n,fs;
-    if ( (n = s.count(',')) > 0 )
+    if ( (n = s.contains(',')) > 0 )
     {
         m_sName = s.section(',',0,0).stripWhiteSpace();
         fs = s.section(',',1,1).stripWhiteSpace().toInt(&ret); // der erste parameter ist die feldgrösse

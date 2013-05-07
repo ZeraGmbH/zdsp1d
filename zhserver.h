@@ -10,7 +10,7 @@
 #define ZHSERVER_H
 
 #include <netinet/in.h>
-#include <q3ptrlist.h>
+#include <qptrlist.h>
 #include <qstringlist.h>
 #include <qstring.h>
 
@@ -74,7 +74,7 @@ protected:
     static QString sSoftwareVersion; // version des hw-servers (programm name + version )
     cCmdInterpreter* pCmdInterpreter; // der benutzte kommando interpreter
 private:
-    Q3PtrList<cZHClient> clientlist; // liste der clients
+    QPtrList<cZHClient> clientlist; // liste der clients
 };    
     
 #endif // ifndef ZHSERVER_H

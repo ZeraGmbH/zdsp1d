@@ -5,7 +5,7 @@
 #define DSP_H
 
 #include <qstring.h>
-#include <q3ptrlist.h>
+#include <qptrlist.h>
 #include <qdatastream.h>
 
 #include "parse.h"
@@ -77,7 +77,7 @@ private:
     sDspVar *SearchedVar; // zeiger auf die gesuchte variable;
     long offs(QString&, sMemSection**, int *);
     sMemSection *sec;
-    Q3PtrList<sMemSection> MemSectionList;
+    QPtrList<sMemSection> MemSectionList;
 };
 
 
