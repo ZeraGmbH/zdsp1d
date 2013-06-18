@@ -713,11 +713,15 @@ bool cZDSP1Client::DspVarWrite(QString& s)
 /* globaler zeiger auf  "den"  server und eine signal behandlungsroutine */
 cZDSP1Server* DSPServer;
 int cZDSP1Server::gotSIGIO;
+int pipeFD[2]; 
+char pipeBuf[2] = "I";
 
 void SigHandler(int)
 {
     DSPServer->gotSIGIO = 1;
-    if ((DSPServer->DebugLevel) & 2) syslog(LOG_INFO,"dsp interrupt received\n");  
+    if ((DSPServer->DebugLevel) & 2) 
+	syslog(LOG_INFO,"dsp interrupt received\n");  
+    write(pipeFD[1], pipeBuf, 1);
 }
 
 
@@ -2003,7 +2007,16 @@ int cZDSP1Server::Execute() // server ausführen
         if DEBUG1 syslog(LOG_ERR,"internet network services not found\n");
         return(1);
     }
-    
+    if ( pipe(pipeFD) == -1 )
+    {
+        if DEBUG1 syslog(LOG_ERR,"no pipe could be openend\n");
+        return(1);
+    }
+    else
+    {
+	fcntl( pipeFD[1], F_SETFL, O_NONBLOCK); 
+	fcntl( pipeFD[0], F_SETFL, O_NONBLOCK);
+    }
     struct sockaddr_in addr;
     addr.sin_addr.s_addr = INADDR_ANY; // alle adressen des host
     addr.sin_port = se->s_port; // ! s_port ist network byte order !
@@ -2034,6 +2047,9 @@ int cZDSP1Server::Execute() // server ausführen
 
         fdmax=sock; // start socket
         FD_SET(sock,&rfds);
+        FD_SET(pipeFD[0],&rfds);
+        if (pipeFD[0] > fdmax)
+	    fdmax = pipeFD[0];
         if ( ! clientlist.isEmpty())
             for ( cZDSP1Client* client=clientlist.first(); client; client=clientlist.next() )
             {
@@ -2136,11 +2152,16 @@ int cZDSP1Server::Execute() // server ausführen
                 }
             }
 
-
-
+            if ( FD_ISSET(pipeFD[0],&rfds) )
+            { // we read the byte from pipe to avoid overflow	
+		char buf[2];
+		read(pipeFD[0], buf, 1);
+            }
         }
     }
     close(sock);
+    close(pipeFD[1]);
+    close(pipeFD[0]);
 }
 
 
