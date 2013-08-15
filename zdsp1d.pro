@@ -12,7 +12,10 @@ HEADERS	+= zdspglobal.h \
 	zhserver.h \
 	dsp.h \
 	zeraglobal.h \
-	dsp1scpi.h
+	dsp1scpi.h \
+    xmlsettings.h \
+    ethsettings.h \
+    debugsettings.h
 
 SOURCES	+= main.cpp \
 	parse.cpp \
@@ -21,7 +24,9 @@ SOURCES	+= main.cpp \
 	zdsp1d.cpp \
 	zhserver.cpp \
 	dsp.cpp \
-	scpi.cpp
+	scpi.cpp \
+    debugsettings.cpp \
+    ethsettings.cpp
 
 unix {
   UI_DIR = .ui

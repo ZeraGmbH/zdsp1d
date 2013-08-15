@@ -40,6 +40,7 @@
 #define ServerBasisName "zdsp1d"
 #define ServerVersion "V1.08"
 #define InpBufSize 4096
+#define defaultXSDFile "/etc/zera/com5003d/com5003d.xsd"
 
 // wenn DEBUG -> kein fork() 
 //#define DEBUG 1
