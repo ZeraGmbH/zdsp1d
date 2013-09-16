@@ -32,7 +32,7 @@ public:
 //    cNode (int,cNode*,cNode*,void(cCmdInterpreter*,char*),void(cCmdInterpreter*)); // konstruktor, nNodedef, pNextNode, pNewLevelNode, m_pCmd, m_pQuery
     cNode (int,cNode*,cNode*,SCPICmdType,SCPICmdType); // konstruktor, nNodedef, pNextNode, pNewLevelNode, Cmd, Query
     virtual ~cNode(){};
-    virtual cNode* TestNode(cCmdInterpreter*,char**)=0; // zeiger, zeiger, zeiger auf zeiger auf inputzeile, testet den knoten
+    virtual cNode* TestNode(cCmdInterpreter*,QChar**)=0; // zeiger, zeiger, zeiger auf zeiger auf inputzeile, testet den knoten
     int m_nNodeStat; // ergebnis des parse durchlaufes
 //    void (*m_pCmd) (cCmdInterpreter*,char*); // kommando bearbeiten, output -> kommando interpreter, zeiger auf den parser und input string
     SCPICmdType m_nCmd;
@@ -50,7 +50,7 @@ public:
     cNodeSCPI (const char*,int,cNode*,cNode*,SCPICmdType,SCPICmdType); 
     virtual  ~cNodeSCPI(){};
     // konstruktor, sNodeName, nNodedef, pNextNode, pNewLevelNode, Cmd, Query
-    virtual cNode* TestNode(cCmdInterpreter*,char**); // zeiger, zeiger auf zeiger auf inputzeile, testet den knoten
+    virtual cNode* TestNode(cCmdInterpreter*,QChar**); // zeiger, zeiger auf zeiger auf inputzeile, testet den knoten
 private:
     cSCPIString sNodeName; // name des knoten
 };

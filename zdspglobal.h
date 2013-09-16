@@ -42,7 +42,24 @@
 #define InpBufSize 4096
 #define defaultXSDFile "/etc/zera/com5003d/com5003d.xsd"
 
-// wenn DEBUG -> kein fork() 
-//#define DEBUG 1
+#define MaxDebugLevel 7
+#define DEBUG1 (m_nDebugLevel & 1) // alle fehlermeldungen loggen
+#define DEBUG2 (m_nDebugLevel & 2) // alle i2c aktivitäten loggen
+#define DEBUG3 (m_nDebugLevel & 4) // alle client an-,abmeldungen
+
+enum ServerErrors
+{
+    noError,
+    forkError,
+    parameterError,
+    xsdfileError,
+    xmlfileError,
+    dspDeviceError,
+    pipeError,
+    rmConnectionError
+};
+
+// wenn ZDSP1DDEBUG -> kein fork()
+//#define ZDSP1DDEBUG 1
 
 #endif

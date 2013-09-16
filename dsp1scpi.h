@@ -32,9 +32,6 @@ enum SCPICmdType  {	nixCmd, // 0 is nix
 			SetDspBootPath,
 			GetDspBootPath,
 			GetPCBSerialNumber,
-			GetDspDeviceNode,
-			eSetDebugLevel,
-			GetDebugLevel,
 			GetDeviceVersion,
 			GetServerVersion,  
 			SetSamplingSystem,
@@ -71,7 +68,7 @@ enum SCPICmdType  {	nixCmd, // 0 is nix
 class cbIFace { // call back interface 
 public:    
     virtual ~cbIFace(){}; // rein virtuell
-    virtual const char* SCPICmd( SCPICmdType, char*) = 0; 
+    virtual const char* SCPICmd( SCPICmdType, QChar*) = 0;
     virtual const char* SCPIQuery( SCPICmdType) = 0;
 };
 

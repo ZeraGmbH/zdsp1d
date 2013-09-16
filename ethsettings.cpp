@@ -11,8 +11,6 @@ cETHSettings::cETHSettings(Zera::XMLConfig::cReader *xmlread)
     m_ConfigXMLMap["zdsp1dconfig:connectivity:ethernet:ipadress:resourcemanager"] = setRMIPAdress;
     m_ConfigXMLMap["zdsp1dconfig:connectivity:ethernet:port:server"] = setServerPort;
     m_ConfigXMLMap["zdsp1dconfig:connectivity:ethernet:port:resourcemanager"] = setRMPort;
-    m_nServerPort = defaultServerPort;
-    m_nRMPort = defaultRMPort;
 }
 
 

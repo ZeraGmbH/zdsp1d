@@ -12,10 +12,8 @@ cNodeSCPI* System;
                    cNodeSCPI* SystemVersion;
 		           cNodeSCPI* SystemVersionServer;
 		           cNodeSCPI* SystemVersionDevice;	   
-	     cNodeSCPI* SystemDebug;	   
                    cNodeSCPI* SystemCommunication;
-		          cNodeSCPI* SystemCommunicationDeviceNode;
-		          cNodeSCPI* SystemCommunicationEncryption;	  
+                            cNodeSCPI* SystemCommunicationEncryption;
 	     cNodeSCPI* SystemDsp;
                             cNodeSCPI* SystemDspTest;
 	                        cNodeSCPI* SystemDspReset;
@@ -132,12 +130,10 @@ cNode* InitCmdTree()
     SystemDspTest=new cNodeSCPI("TEST",isCommand,SystemDspReset,NULL,TestDsp,nixCmd);
     SystemDsp=new cNodeSCPI("DSP",isNode,SystemSerNr,SystemDspTest,nixCmd,nixCmd);
     SystemCommunicationEncryption=new cNodeSCPI("ENCRYPTION",isQuery | isCommand,NULL,NULL,SetCommEncryption,GetCommEncryption);
-    SystemCommunicationDeviceNode=new cNodeSCPI("DEVNODE",isQuery,SystemCommunicationEncryption,NULL,nixCmd,GetDspDeviceNode);
-    SystemCommunication=new cNodeSCPI("COMMUNICATION",isNode,SystemDsp,SystemCommunicationDeviceNode,nixCmd,nixCmd);
-    SystemDebug=new cNodeSCPI("DEBUG",isQuery | isCommand,SystemCommunication,NULL,eSetDebugLevel,GetDebugLevel);
+    SystemCommunication=new cNodeSCPI("COMMUNICATION",isNode,SystemDsp,SystemCommunicationEncryption,nixCmd,nixCmd);
     SystemVersionDevice=new cNodeSCPI("DEVICE",isQuery,NULL,NULL,nixCmd,GetDeviceVersion);
     SystemVersionServer=new cNodeSCPI("SERVER",isQuery,SystemVersionDevice,NULL,nixCmd,GetServerVersion);  
-    SystemVersion=new cNodeSCPI("VERSION",isNode,SystemDebug,SystemVersionServer,nixCmd,nixCmd);	         
+    SystemVersion=new cNodeSCPI("VERSION",isNode,SystemCommunication,SystemVersionServer,nixCmd,nixCmd);
     System=new cNodeSCPI("SYSTEM",isNode,Status,SystemVersion,nixCmd,nixCmd);
     return (System);  
 }

@@ -59,16 +59,16 @@ cNodeSCPI::cNodeSCPI (const char* s,int ns,cNode* n1,cNode* n2,SCPICmdType cmd,S
 }
 
 
-cNode* cNodeSCPI::TestNode(cCmdInterpreter* ci,char** inp)
+cNode* cNodeSCPI::TestNode(cCmdInterpreter* ci, QChar **inp)
 {
-    char* tinp=*inp; // zeiger kopieren
+    QChar* tinp=*inp; // zeiger kopieren
     QString stmp=ci->m_pParser->GetKeyword(&tinp); // lässt das nächste schlüsselwort vom parser lesen ( der ist static)
     m_nNodeStat=isUnknown; // erst mal unbekannt
     if (sNodeName != stmp) return (pNextNode); // zum prüfen des nächsten knoten ( solange != NULL gehts weiter )
     m_nNodeStat |= isKnown;
     *inp=tinp; // hinter dem schlüsselwort gehts weiter
     
-    char c=ci->m_pParser->GetChar(inp);
+    char c = ci->m_pParser->GetChar(inp).toAscii();
     switch (c)
     {
     case ':' 	: // es ist ein knoten

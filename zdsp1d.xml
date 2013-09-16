@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<zdsp1dconfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+	<connectivity>
+		<debuglevel>0</debuglevel>
+		<ethernet>
+			<ipadress>
+				<resourcemanager>192.168.6.124</resourcemanager>
+			</ipadress>	
+			<port>
+				<server>6310</server>
+				<resourcemanager>6312</resourcemanager>
+			</port>
+		</ethernet>
+		<dsp>
+			<device> 
+				<node>/dev/zFPGA1dsp1</node>
+			</device>
+		</dsp>		
+	</connectivity>
+	
+</zdsp1dconfig> 

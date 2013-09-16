@@ -382,7 +382,7 @@ long cDspVarResolver::offs(QString& s,  sMemSection** pSec, int *type)
     bool ok;
     sMemSection *msec; // sonst variablenliste durchforsten
     QString ts = s.upper();
-    char* cts=(char*) ts.latin1();
+    QChar* cts = ts.data();
     QString sSearch=VarParser.GetKeyword(&cts);
     for ( msec = MemSectionList.first(); msec; msec = MemSectionList.next() )
     { //

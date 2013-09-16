@@ -8,14 +8,22 @@
 #include "cmdinterpret.h"
 
 
-
-char* cCmdInterpreter::CmdExecute(char* s)
+cCmdInterpreter::cCmdInterpreter(cbIFace* cb, cNode* r, cParse* p)
+    :m_pcbIFace(cb), m_pParser(p), m_pRootCmd(r)
 {
-    SetAnswer(ACKString);
-    if (*s)
+}
+
+
+QString &cCmdInterpreter::CmdExecute(QString &sinput)
+{
+    Answer = ACKString;
+
+    QChar* input = sinput.data();
+
+    if (!input->isNull())
     { // leeres kommando ist nichts falsches -> also richtig
-        char* CmdString=s; // der input string
-        cNode* actNode=m_pRootCmd; // startknoten setzen
+        QChar* CmdString = input; // der input string
+        cNode* actNode = m_pRootCmd; // startknoten setzen
         cNode* prevNode;
         do
         {
@@ -23,18 +31,11 @@ char* cCmdInterpreter::CmdExecute(char* s)
         } while ( (actNode = actNode->TestNode(this,&CmdString)) );
         switch ( prevNode->m_nNodeStat )
         {
-        case (isKnown | isCommand) : SetAnswer( m_pcbIFace->SCPICmd(prevNode->m_nCmd,CmdString));break;
-        case (isKnown | isQuery) : SetAnswer( m_pcbIFace->SCPIQuery(prevNode->m_nQuery));break;
-        default: SetAnswer(NACKString);
+        case (isKnown | isCommand) : Answer = m_pcbIFace->SCPICmd(prevNode->m_nCmd,CmdString);break;
+        case (isKnown | isQuery) : Answer =  m_pcbIFace->SCPIQuery(prevNode->m_nQuery);break;
+        default: Answer = NACKString;
         };
     }
     return (Answer);
 }
 
-
-void cCmdInterpreter::SetAnswer(const char* s)
-{
-    if (Answer) free(Answer);
-    Answer=(char*) malloc(strlen(s)+1);
-    strcpy(Answer,s);
-}

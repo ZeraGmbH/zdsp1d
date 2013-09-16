@@ -2,17 +2,17 @@
 
 #include "parse.h"
 
-const QString cParse::GetKeyword(char** s)
+const QString cParse::GetKeyword(QChar **s)
 {
     QString ls = "";
-    char tc=GetChar(s);
-    if (tc)
+    QChar tc=GetChar(s);
+    if (!tc.isNull())
     { // whitespace weg und schon mal 1 zeichen
         for (;;) {
             ls+=tc;
             tc=**s; // hole nächstes zeichen
             if ( delimiter.contains(tc,false) ) break; // wenn zeichen delimiter -> fertig
-            if (!tc) break; // string zu ende -> fertig
+            if (tc.isNull()) break; // string zu ende -> fertig
             (*s)++; // sonst nächstes zeichen
         }
     };
@@ -20,16 +20,16 @@ const QString cParse::GetKeyword(char** s)
     return(ls); // schlüsselwort ohne delimiter
 }
 
-char cParse::GetChar(char** s)
+QChar cParse::GetChar(QChar** s)
 {
-    char tc=0;
-    if (**s)
+    QChar tc=0;
+    if (!(**s).isNull())
     { // abfrage für den fall, dass string schon zu ende
         do {
             tc = **s;
             (*s)++;
         }
-        while ( (tc) && (whitespace.contains(tc,false)) ); // ignoriere whitespace character
+        while ( (!tc.isNull()) && (whitespace.contains(tc,false)) ); // ignoriere whitespace character
     }
 
     return(tc); // return = 0 oder zeichen != whitespace

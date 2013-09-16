@@ -5,6 +5,7 @@
 #ifndef ZDSP1D_H
 #define ZDSP1D_H
 
+#include <QObject>
 #include <qstring.h>
 #include <qstringlist.h>
 #include <qmap.h>
@@ -18,24 +19,26 @@
 #include "zhserver.h"
 #include "dsp.h"
 
-// diese werte sind fix
-#define MaxClients 10 
-
-#define MaxDebugLevel 7
-#define DEBUG1 (DebugLevel & 1) // alle fehlermeldungen loggen
-#define DEBUG2 (DebugLevel & 2) // alle devnode aktivitäten loggen
-#define DEBUG3 (DebugLevel & 4) // alle client an-,abmeldungen
 
 typedef Q3ValueList<cDspCmd> tDspCmdList;
 typedef Q3ValueList<cDspClientVar> tDspVarList;
 typedef QVector<float> tDspMemArray;
 
+class QFile;
+class QByteArray;
+class QStateMachine;
+class QState;
 class cZDSP1Server; // forward
+class cDebugSettings;
+class cETHSettings;
+class cDSPSettings;
+class cRMConnection;
 
-class cZDSP1Client: public cZHClient {
+class cZDSP1Client
+{
 public:
     cZDSP1Client(){};
-    cZDSP1Client(int socket,cZDSP1Server *server);
+    cZDSP1Client(int socket, Zera::Net::cClient* netclient, cZDSP1Server *server);
     ~cZDSP1Client(){}; //  allokierten speicher ggf. freigeben
     
     
@@ -64,17 +67,19 @@ public:
     tDspCmdList& GetDspIntCmdList(); // an den dsp übertragen kann
     tDspMemArray& GetDspMemData(); 
     cDspVarResolver DspVarResolver; // zum auflösen der variablen aus kommandos
-    
+    int sock; // socket für den die verbindung besteht
+    Zera::Net::cClient* m_pNetClient; // our network client
+
 private:
-    void init(cZDSP1Server* server);
+    void init(int socket, Zera::Net::cClient *netclient, cZDSP1Server* server);
     cZDSP1Server* myServer; 
     bool m_bActive;
-    cZDSP1Client* GetClient(int);
     bool GenCmdList(QString&, tDspCmdList&,QString&);
     bool syntaxCheck(QString&);
           
     int Encryption;
     char* qSEncryption(char*,int );
+    QString sOutput;
     QString m_sCmdListDef; // kommando liste defintion
     QString m_sIntCmdListDef; // interrupt kommando  liste defintion
         
@@ -86,17 +91,18 @@ private:
     tDspCmdList  m_DspIntCmdList; // liste mit dsp kommandos (interrupt)
     QVector<sDspVar> varArray; // array von sDspVar
     sMemSection msec; // eine memory section für den DspVarResolver 
+
 };
 
-class cZDSP1Server: public cZHServer, public cbIFace {
+class cZDSP1Server: public QObject, public cZHServer, public cbIFace {
+    Q_OBJECT
 public:
     cZDSP1Server();
     virtual ~cZDSP1Server();
-    virtual int Execute(); // server ausführen überladen v. cZHServer
-    virtual void AddClient(int socket); // fügt einen client hinzu
-    virtual void DelClient(int socket); // entfernt einen client
-        
-    virtual const char* SCPICmd( SCPICmdType, char*);
+    virtual void AddClient(Zera::Net::cClient *m_pNetClient); // fügt einen client hinzu
+    virtual void DelClient(Zera::Net::cClient *m_pNetClient); // entfernt einen client
+
+    virtual const char* SCPICmd( SCPICmdType, QChar*);
     virtual const char* SCPIQuery( SCPICmdType);
     
     static int gotSIGIO; // für signal handling
@@ -111,51 +117,60 @@ public:
     int DspDevSeek(int,ulong);
     int DspDevOpen();
     
-    void DspIntService(int);
     int DevFileDescriptor; // kerneltreiber wird nur 1x geöffnet und dann gehalten
-    int DebugLevel;
+    int m_nDebugLevel;
     
+    cDebugSettings* m_pDebugSettings;
+    cETHSettings* m_pETHSettings;
+    cDSPSettings* m_pDspSettings;
+
+signals:
+    void serverSetup();
+    void sendAnswer(QByteArray);
+    void abortInit();
+
 private:
+    Zera::Net::cServer* myServer; // the real server that does the communication job
+    quint8 m_nerror;
     uchar ActivatedCmdList;
     Q3PtrList<cZDSP1Client> clientlist; // liste der clients
     
     // die routinen für das system modell
     const char* mCommand2Dsp(QString&); // indirekt für system modell    
     
-    const char* mTestDsp(char*);
-    const char* mResetDsp(char*);
-    const char* mBootDsp(char*);
-    const char* mSetDspBootPath(char*);
+    const char* mTestDsp(QChar *);
+    const char* mResetDsp(QChar*);
+    const char* mBootDsp(QChar*);
+    const char* mSetDspBootPath(QChar*);
     const char* mGetDspBootPath();
     const char* mGetPCBSerialNumber();
-    const char* mGetDspDeviceNode();   
-    const char* mSetDspDebugLevel(char*);
+    const char* mSetDspDebugLevel(QChar*);
     const char* mGetDebugLevel();
     const char* mGetDeviceVersion();
     const char* mGetServerVersion();  
-    const char* mSetSamplingSystem(char*);
+    const char* mSetSamplingSystem(QChar*);
     const char* mGetSamplingSystem();
-    const char* mSetCommEncryption(char*);
+    const char* mSetCommEncryption(QChar*);
     const char* mGetCommEncryption();
-    const char* mSetEN61850DestAdr(char*);
+    const char* mSetEN61850DestAdr(QChar*);
     const char* mGetEN61850DestAdr();
-    const char* mSetEN61850SourceAdr(char*);
+    const char* mSetEN61850SourceAdr(QChar*);
     const char* mGetEN61850SourceAdr();
-    const char* mSetEN61850EthTypeAppId(char*);
+    const char* mSetEN61850EthTypeAppId(QChar*);
     const char* mGetEN61850EthTypeAppId();
-    const char* mSetEN61850PriorityTagged(char*);
+    const char* mSetEN61850PriorityTagged(QChar*);
     const char* mGetEN61850PriorityTagged();
-    const char* mSetEN61850EthSync(char*);
+    const char* mSetEN61850EthSync(QChar*);
     const char* mGetEN61850EthSync();
-    const char* mSetDspCommandStat(char*);
+    const char* mSetDspCommandStat(QChar*);
     const char* mGetDspCommandStat();
-    const char* mSetEN61850DataCount(char*);
+    const char* mSetEN61850DataCount(QChar*);
     const char* mGetEN61850DataCount();
-    const char* mSetEN61850SyncLostCount(char*);
+    const char* mSetEN61850SyncLostCount(QChar*);
     const char* mGetEN61850SyncLostCount();
-    const char* mTriggerIntListHKSK(char*);
-    const char* mTriggerIntListALL(char*);
-    const char* mResetMaxima(char*);
+    const char* mTriggerIntListHKSK(QChar*);
+    const char* mTriggerIntListALL(QChar*);
+    const char* mResetMaxima(QChar*);
         
     // die routinen für das status modell
     
@@ -167,24 +182,23 @@ private:
   
     // die routinen für das measure modell
     
-    const char* mFetch(char*);
-    const char* mInitiate(char*);
-    const char* mUnloadCmdList(char*);
-    const char* mLoadCmdList(char*);
-    const char* mSetRavList(char*);
+    const char* mFetch(QChar *);
+    const char* mInitiate(QChar*);
+    const char* mUnloadCmdList(QChar*);
+    const char* mLoadCmdList(QChar*);
+    const char* mSetRavList(QChar*);
     const char* mGetRavList();
-    const char* mSetCmdIntList(char*);
+    const char* mSetCmdIntList(QChar*);
     const char* mGetCmdIntList();
-    const char* mSetCmdList(char*);
+    const char* mSetCmdList(QChar*);
     const char* mGetCmdList();
-    const char* mMeasure(char*);	     
+    const char* mMeasure(QChar*);
     
     // die routinen für das memory modell
     
-    const char* mDspMemoryRead(char*);
-    const char* mDspMemoryWrite(char*);
+    const char* mDspMemoryRead(QChar *);
+    const char* mDspMemoryWrite(QChar *);
     
-    void DspIntHandler();
     bool LoadDSProgram();
     void setDspType();
     int readMagicId();
@@ -196,8 +210,26 @@ private:
     QString m_sDspSerialNumber; // seriennummer der hardware
     QString m_sDspDeviceNode; // für den zugriff zur hardware
     QString m_sDspBootPath;
+    Zera::XMLConfig::cReader* myXMLConfigReader;
 
     QString Answer;
+
+    QStateMachine* m_pInitializationMachine;
+    QState* stateconnect2RM;
+    QState* stateSendRMIdentandRegister;
+    cRMConnection* m_pRMConnection;
+    QFile *m_pInterruptPipe;
+
+private slots:
+    virtual void establishNewConnection(Zera::Net::cClient* newClient);
+    virtual void deleteConnection();
+    virtual void executeCommand(const QByteArray cmd);
+    void DspIntHandler();
+    void doConfiguration();
+    void doSetupServer();
+    void doCloseServer();
+    void doConnect2RM();
+    void doIdentAndRegister();
 };
 
 #endif

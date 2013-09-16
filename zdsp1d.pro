@@ -1,6 +1,18 @@
 TEMPLATE	= app
 LANGUAGE	= C++
 
+include(zdsp1d.user.pri)
+
+QMAKE_CXXFLAGS += -O0
+
+LIBS +=  -lzeranet
+LIBS +=  -lzeranetclient
+LIBS +=  -lzeraxmlconfig
+LIBS +=  -lprotobuf
+LIBS +=  -lzera-resourcemanager-protobuf
+
+
+
 CONFIG	+= qt warn_on release
 CONFIG	+= debug_and_release
 
@@ -15,7 +27,9 @@ HEADERS	+= zdspglobal.h \
 	dsp1scpi.h \
     xmlsettings.h \
     ethsettings.h \
-    debugsettings.h
+    debugsettings.h \
+    dspsettings.h \
+    rmconnection.h
 
 SOURCES	+= main.cpp \
 	parse.cpp \
@@ -26,7 +40,9 @@ SOURCES	+= main.cpp \
 	dsp.cpp \
 	scpi.cpp \
     debugsettings.cpp \
-    ethsettings.cpp
+    ethsettings.cpp \
+    dspsettings.cpp \
+    rmconnection.cpp
 
 unix {
   UI_DIR = .ui
@@ -35,8 +51,13 @@ unix {
 }
 
 #The following line was inserted by qt3to4
-QT +=  qt3support 
+QT +=  qt3support xml network
 
 target.path = /usr/bin
 INSTALLS += target
 
+configxml.path = /etc/zera/zdsp1d
+configxml.files = zdsp1d.xsd \
+                  zdsp1d.xml
+
+OTHER_FILES +=

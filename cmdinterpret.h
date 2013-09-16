@@ -12,15 +12,12 @@ class cbIFace;
 
 class cCmdInterpreter { // interpretiert einen inputstring und führt kommando aus (scpi)
 public:
-    cCmdInterpreter(cbIFace* cb, cNode* r, cParse* p) {
-	m_pcbIFace = cb; m_pRootCmd = r; m_pParser = p; Answer = 0; };
-    ~cCmdInterpreter() {if (Answer) free(Answer);};  // gibt speicher ggf. frei
-    cParse* m_pParser;
-    char* CmdExecute(char*);
-    void SetAnswer(const char*);
+    cCmdInterpreter(cbIFace* cb, cNode* r, cParse* p);
+    QString& CmdExecute(QString& sinput);
     cbIFace* m_pcbIFace; // pointer auf call back interface
+    cParse* m_pParser;
 private:
-    char* Answer; // der vom kommando generierte output steht hier 
+    QString Answer; // der vom kommando generierte output steht hier
     cNode* m_pRootCmd; // der startknoten aller kommandos
 };
 
