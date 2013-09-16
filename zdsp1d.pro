@@ -60,4 +60,6 @@ configxml.path = /etc/zera/zdsp1d
 configxml.files = zdsp1d.xsd \
                   zdsp1d.xml
 
+INSTALLS += configxml
+
 OTHER_FILES +=
