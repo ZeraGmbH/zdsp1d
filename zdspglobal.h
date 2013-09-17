@@ -60,6 +60,6 @@ enum ServerErrors
 };
 
 // wenn ZDSP1DDEBUG -> kein fork()
-//#define ZDSP1DDEBUG 1
+#define ZDSP1DDEBUG 1
 
 #endif
