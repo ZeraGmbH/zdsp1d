@@ -40,7 +40,7 @@
 #define ServerBasisName "zdsp1d"
 #define ServerVersion "V1.08"
 #define InpBufSize 4096
-#define defaultXSDFile "/etc/zera/com5003d/com5003d.xsd"
+#define defaultXSDFile "/etc/zera/zdsp1dd/zdsp1d.xsd"
 
 #define MaxDebugLevel 7
 #define DEBUG1 (m_nDebugLevel & 1) // alle fehlermeldungen loggen
