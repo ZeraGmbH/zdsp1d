@@ -837,7 +837,9 @@ void cZDSP1Server::doConfiguration()
 void cZDSP1Server::doSetupServer()
 {
     cParse* parser=new(cParse); // das ist der parser
+    parser->SetWhiteSpace(" ;");
     pCmdInterpreter=new cCmdInterpreter(this,InitCmdTree(),parser); // das ist der kommando interpreter
+
     m_sDspDeviceVersion = m_sDspSerialNumber = "Unknown"; // kennen wir erst mal nicht
 
     m_sDspBootPath = "";

@@ -11,9 +11,9 @@ const QString cParse::GetKeyword(QChar **s)
         for (;;) {
             ls+=tc;
             tc=**s; // hole nächstes zeichen
+            if ( delimiter.contains(tc,false) ) break; // wenn zeichen delimiter -> fertig
             if (tc.isNull()) break; // string zu ende -> fertig
             (*s)++; // sonst nächstes zeichen
-            if ( delimiter.contains(tc,false) ) break; // wenn zeichen delimiter -> fertig
         }
     };
 
