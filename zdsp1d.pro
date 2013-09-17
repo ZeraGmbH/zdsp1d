@@ -11,10 +11,7 @@ LIBS +=  -lzeraxmlconfig
 LIBS +=  -lprotobuf
 LIBS +=  -lzera-resourcemanager-protobuf
 
-
-
-CONFIG	+= qt warn_on release
-CONFIG	+= debug_and_release
+CONFIG	+= qt debug
 
 HEADERS	+= zdspglobal.h \
 	parse.h \
