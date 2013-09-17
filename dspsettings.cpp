@@ -7,7 +7,7 @@
 cDSPSettings::cDSPSettings(Zera::XMLConfig::cReader *xmlread)
 {
     m_pXMLReader = xmlread;
-    m_ConfigXMLMap["com5003dconfig:connectivity:dsp:device:node"] = DSPSettings::setDSPDevNode;
+    m_ConfigXMLMap["zdsp1dconfig:connectivity:dsp:device:node"] = DSPSettings::setDSPDevNode;
 }
 
 
