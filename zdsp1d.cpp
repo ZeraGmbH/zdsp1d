@@ -344,6 +344,7 @@ bool cZDSP1Client::GenCmdList(QString& s, tDspCmdList& cl, QString& errs)
     for (int i = 0;;i++)
     {
         QString cs = s.section(';',i,i);
+        qDebug() << cs;
         if ( (cs.isEmpty()) || (cs==("Empty")) )break; // liste ist durch
         cl.append(GenDspCmd(cs, &ok));
         if (!ok)
