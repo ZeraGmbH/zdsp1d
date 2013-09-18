@@ -851,13 +851,14 @@ void cZDSP1Server::doSetupServer()
     sigprocmask(SIG_BLOCK, &mySigmask, &origSigmask);
     */
 
+    ActivatedCmdList = 0; // der derzeit aktuelle kommando listen satz (0,1)
+
     mySigAction.sa_handler = &SigHandler; // signal handler einrichten
     sigemptyset(&mySigAction.sa_mask);
     mySigAction. sa_flags = SA_RESTART;
     mySigAction.sa_restorer = NULL;
     sigaction(SIGIO, &mySigAction, NULL); // handler für sigio definieren
     gotSIGIO = 0;
-    ActivatedCmdList = 0; // der derzeit aktuelle kommando listen satz (0,1)
     SetFASync();
 
     if (pipe(pipeFD) == -1)
