@@ -105,6 +105,7 @@ public:
     virtual const char* SCPICmd( SCPICmdType, QChar*);
     virtual const char* SCPIQuery( SCPICmdType);
     
+    static int m_nFPGAfd;
     static int gotSIGIO; // für signal handling
     void SetFASync(); // async. benachrichtung einschalten
     

@@ -726,12 +726,15 @@ bool cZDSP1Client::DspVarWrite(QString& s)
 /* globaler zeiger auf  "den"  server und eine signal behandlungsroutine */
 cZDSP1Server* DSPServer;
 int cZDSP1Server::gotSIGIO;
+int cZDSP1Server::m_nFPGAfd;
 int pipeFD[2];
 char pipeBUf[2]="I";
 
 
 void SigHandler(int)
 {
+    quint32 sigStart = 0;
+    write(DSPServer->m_nFPGAfd,(char*) &sigStart,4);
     DSPServer->gotSIGIO = 1;
     if (DSPServer->m_nDebugLevel & 2) syslog(LOG_INFO,"dsp interrupt received\n");
     write(pipeFD[1], pipeBUf, 1); // we signal the interrupt
@@ -838,6 +841,9 @@ void cZDSP1Server::doConfiguration()
 
 void cZDSP1Server::doSetupServer()
 {
+    m_nFPGAfd = open("/dev/zFPGA1reg",O_RDWR);
+    lseek(m_nFPGAfd,0x0,0);
+
     cParse* parser=new(cParse); // das ist der parser
     pCmdInterpreter=new cCmdInterpreter(this,InitCmdTree(),parser); // das ist der kommando interpreter
 
@@ -1780,6 +1786,10 @@ QDataStream& operator<<(QDataStream& ds,cDspCmd c)
 
 void cZDSP1Server::DspIntHandler(int)
 { // behandelt den dsp interrupt
+
+    quint32 sigStart = 1;
+    write(m_nFPGAfd,(char*) &sigStart,4);
+
     int IRQCode;
     QString s;
     cZDSP1Client *client,*client2;
@@ -1793,7 +1803,11 @@ void cZDSP1Server::DspIntHandler(int)
     clientAvail = ((client = clientlist.first()) !=0); // wir nutzen immer den 1. client zum lesen
     if (clientAvail) // wir haben noch einen über den wir lesen können
     {
+        sigStart = 2;
+        write(m_nFPGAfd,(char*) &sigStart,4);
         client->DspVar(s = "CTRLCMDPAR",IRQCode); // wir lesen die hksk
+        sigStart = 3;
+        write(m_nFPGAfd,(char*) &sigStart,4);
         process = IRQCode >> 16;
         clientAvail = ( (client2 = GetClient(process)) !=0); // ist der client noch da für den der interrupt bestimmt war?
 
@@ -1803,7 +1817,13 @@ void cZDSP1Server::DspIntHandler(int)
     {
         if DEBUG1 syslog(LOG_ERR,"dsp interrupt mismatch, no such client (%d)\n",process);
         if (client != 0) // wir haben noch einen client zum rücksetzen der semaphore, wenn nicht -> ???? das darf aber nicht ->
+        {
+            sigStart = 4;
+            write(m_nFPGAfd,(char*) &sigStart,4);
             client->DspVarWrite(s = QString("CTRLACK,%1;").arg(CmdDone)); // acknowledge falls fehler
+            sigStart = 5;
+            write(m_nFPGAfd,(char*) &sigStart,4);
+        }
         else
         {
             cZDSP1Client *dummyClient = new cZDSP1Client(0, 0, this); // dummyClient einrichten
