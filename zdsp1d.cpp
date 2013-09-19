@@ -25,6 +25,7 @@
 #include <qstringlist.h>
 #include <qmap.h>
 #include <qdatastream.h>
+#include <QFile>
 #include <QSocketNotifier>
 #include <qbuffer.h>
 //Added by qt3to4:
@@ -1785,7 +1786,8 @@ void cZDSP1Server::DspIntHandler(int)
     bool clientAvail;
 
     DSPServer->gotSIGIO = 0;
-    m_pInterruptPipe->readAll();
+    char buf[2];
+    read(pipeFD[0], buf, 1);
     int process = 0;
 
     clientAvail = ((client = clientlist.first()) !=0); // wir nutzen immer den 1. client zum lesen
