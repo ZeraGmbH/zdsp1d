@@ -25,7 +25,7 @@
 #include <qstringlist.h>
 #include <qmap.h>
 #include <qdatastream.h>
-#include <qfile.h>                                                                                   
+#include <QSocketNotifier>
 #include <qbuffer.h>
 //Added by qt3to4:
 #include <Q3TextStream>
@@ -726,14 +726,14 @@ bool cZDSP1Client::DspVarWrite(QString& s)
 cZDSP1Server* DSPServer;
 int cZDSP1Server::gotSIGIO;
 int pipeFD[2];
-char pipeBUf[2]="\n";
+char pipeBUf[2]="I";
 
 
 void SigHandler(int)
 {
     DSPServer->gotSIGIO = 1;
     if (DSPServer->m_nDebugLevel & 2) syslog(LOG_INFO,"dsp interrupt received\n");
-    write(pipeFD[1], pipeBUf, 2); // we signal the interrupt
+    write(pipeFD[1], pipeBUf, 1); // we signal the interrupt
 }
 
 
@@ -859,9 +859,8 @@ void cZDSP1Server::doSetupServer()
         fcntl( pipeFD[1], F_SETFL, O_NONBLOCK);
         fcntl( pipeFD[0], F_SETFL, O_NONBLOCK);
 
-        m_pInterruptPipe = new QFile(this);
-        m_pInterruptPipe->open(pipeFD[0], QIODevice::ReadOnly);
-        connect(m_pInterruptPipe, SIGNAL(readyRead()), this, SLOT(DspIntHandler()));
+        m_pPipeInterrupt = new QSocketNotifier(pipeFD[0], QSocketNotifier::Read, this);
+        connect(m_pPipeInterrupt, SIGNAL(activated(int)), this, SLOT(DspIntHandler(int)));
 
         m_nDebugLevel = m_pDebugSettings->getDebugLevel();
 
@@ -1778,7 +1777,7 @@ QDataStream& operator<<(QDataStream& ds,cDspCmd c)
 }
 
 
-void cZDSP1Server::DspIntHandler()
+void cZDSP1Server::DspIntHandler(int)
 { // behandelt den dsp interrupt
     int IRQCode;
     QString s;

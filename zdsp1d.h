@@ -24,7 +24,7 @@ typedef Q3ValueList<cDspCmd> tDspCmdList;
 typedef Q3ValueList<cDspClientVar> tDspVarList;
 typedef QVector<float> tDspMemArray;
 
-class QFile;
+class QSocketNotifier;
 class QByteArray;
 class QStateMachine;
 class QState;
@@ -218,13 +218,13 @@ private:
     QState* stateconnect2RM;
     QState* stateSendRMIdentandRegister;
     cRMConnection* m_pRMConnection;
-    QFile *m_pInterruptPipe;
+    QSocketNotifier *m_pPipeInterrupt;
 
 private slots:
     virtual void establishNewConnection(Zera::Net::cClient* newClient);
     virtual void deleteConnection();
     virtual void executeCommand(const QByteArray cmd);
-    void DspIntHandler();
+    void DspIntHandler(int);
     void doConfiguration();
     void doSetupServer();
     void doCloseServer();
