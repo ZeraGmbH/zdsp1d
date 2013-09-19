@@ -1818,11 +1818,9 @@ void cZDSP1Server::DspIntHandler(int)
         if DEBUG1 syslog(LOG_ERR,"dsp interrupt mismatch, no such client (%d)\n",process);
         if (client != 0) // wir haben noch einen client zum rücksetzen der semaphore, wenn nicht -> ???? das darf aber nicht ->
         {
-            sigStart = 4;
-            write(m_nFPGAfd,(char*) &sigStart,4);
+
             client->DspVarWrite(s = QString("CTRLACK,%1;").arg(CmdDone)); // acknowledge falls fehler
-            sigStart = 5;
-            write(m_nFPGAfd,(char*) &sigStart,4);
+
         }
         else
         {
@@ -1833,7 +1831,12 @@ void cZDSP1Server::DspIntHandler(int)
 
     else
     {
+        sigStart = 4;
+        write(m_nFPGAfd,(char*) &sigStart,4);
         client->DspVarWrite(s = QString("CTRLACK,%1;").arg(CmdDone)); // sonst acknowledge
+        sigStart = 5;
+        write(m_nFPGAfd,(char*) &sigStart,4);
+
         IRQCode &= 0xFFFF;
         s = QString("DSPINT:%1").arg(IRQCode);
 
