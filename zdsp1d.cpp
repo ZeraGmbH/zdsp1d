@@ -845,21 +845,7 @@ void cZDSP1Server::doSetupServer()
     m_sDspBootPath = "";
     DSPServer = this;
 
-    /* brauchen wir nicht mehr !?
-    sigemptyset(&mySigmask);
-    sigaddset(&mySigmask, SIGIO); // wir wollen sigio blocken wenn wir (p)select aufrufen
-    sigprocmask(SIG_BLOCK, &mySigmask, &origSigmask);
-    */
-
     ActivatedCmdList = 0; // der derzeit aktuelle kommando listen satz (0,1)
-
-    mySigAction.sa_handler = &SigHandler; // signal handler einrichten
-    sigemptyset(&mySigAction.sa_mask);
-    mySigAction. sa_flags = SA_RESTART;
-    mySigAction.sa_restorer = NULL;
-    sigaction(SIGIO, &mySigAction, NULL); // handler für sigio definieren
-    gotSIGIO = 0;
-    SetFASync();
 
     if (pipe(pipeFD) == -1)
     {
@@ -892,6 +878,14 @@ void cZDSP1Server::doSetupServer()
 
         else
         {
+            mySigAction.sa_handler = &SigHandler; // signal handler einrichten
+            sigemptyset(&mySigAction.sa_mask);
+            mySigAction. sa_flags = SA_RESTART;
+            mySigAction.sa_restorer = NULL;
+            sigaction(SIGIO, &mySigAction, NULL); // handler für sigio definieren
+            gotSIGIO = 0;
+            SetFASync();
+
             setDspType(); // now we can interrogate the mounted dsp device type
             // our resource mananager connection must be opened after configuration is done
             m_pRMConnection = new cRMConnection(m_pETHSettings->getRMIPadr(), m_pETHSettings->getPort(resourcemanager), m_pDebugSettings->getDebugLevel());
