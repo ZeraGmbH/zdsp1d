@@ -726,14 +726,14 @@ bool cZDSP1Client::DspVarWrite(QString& s)
 cZDSP1Server* DSPServer;
 int cZDSP1Server::gotSIGIO;
 int pipeFD[2];
-char pipeBUf[2]="I";
+char pipeBUf[2]="\n";
 
 
 void SigHandler(int)
 {
     DSPServer->gotSIGIO = 1;
     if (DSPServer->m_nDebugLevel & 2) syslog(LOG_INFO,"dsp interrupt received\n");
-    write(pipeFD[1], pipeBUf, 1); // we signal the interrupt
+    write(pipeFD[1], pipeBUf, 2); // we signal the interrupt
 }
 
 
