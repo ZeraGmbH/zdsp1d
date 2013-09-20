@@ -1838,12 +1838,14 @@ void cZDSP1Server::DspIntHandler(int)
         write(m_nFPGAfd,(char*) &sigStart,4);
 
         IRQCode &= 0xFFFF;
+        /*
         s = QString("DSPINT:%1").arg(IRQCode);
 
         QByteArray block;
         block = s.toUtf8();
 
         client2->m_pNetClient->writeClient(block); // we send async message to our netclient
+        */
     }
 
     return ;
