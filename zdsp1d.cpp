@@ -505,6 +505,7 @@ bool cZDSP1Client::DspVar(QString& s,int& ir)
 
     //debug info
     quint32 sigStart = 1;
+    lseek(myServer->m_nFPGAfd,0x0,0);
     write(myServer->m_nFPGAfd, (char*)sigStart,4);
 
     bool ret = false;
@@ -519,6 +520,7 @@ bool cZDSP1Client::DspVar(QString& s,int& ir)
 
     //debug info
     sigStart = 5;
+    lseek(myServer->m_nFPGAfd,0x0,0);
     write(myServer->m_nFPGAfd, (char*)sigStart,4);
 
     return ret;
@@ -545,6 +547,7 @@ sDspVar* cZDSP1Client::DspVarRead(QString& s,QByteArray* ba)
     bool ok;
     //debug info
     quint32 sigStart = 6;
+    lseek(myServer->m_nFPGAfd,0x0,0);
     write(myServer->m_nFPGAfd, (char*)sigStart,4);
 
     QString name = s.section(",",0,0);
@@ -558,6 +561,7 @@ sDspVar* cZDSP1Client::DspVarRead(QString& s,QByteArray* ba)
 
     //debug info
     sigStart = 7;
+    lseek(myServer->m_nFPGAfd,0x0,0);
     write(myServer->m_nFPGAfd, (char*)sigStart,4);
 
     int fd = myServer->DevFileDescriptor;
@@ -565,6 +569,7 @@ sDspVar* cZDSP1Client::DspVarRead(QString& s,QByteArray* ba)
     {
         //debug info
         quint32 sigStart = 8;
+        lseek(myServer->m_nFPGAfd,0x0,0);
         write(myServer->m_nFPGAfd, (char*)sigStart,4);
 
         return DspVar; // dev.  seek und dev. read ok
@@ -1788,6 +1793,7 @@ void cZDSP1Server::DspIntHandler()
 { // behandelt den dsp interrupt
 
     quint32 sigStart = 1;
+    //lseek(m_nFPGAfd,0x0,0);
     //write(m_nFPGAfd,(char*) &sigStart,4);
 
     int IRQCode;
@@ -1801,9 +1807,11 @@ void cZDSP1Server::DspIntHandler()
     if (clientAvail) // wir haben noch einen über den wir lesen können
     {
         sigStart = 2;
+        lseek(m_nFPGAfd,0x0,0);
         write(m_nFPGAfd,(char*) &sigStart,4);
         client->DspVar(s = "CTRLCMDPAR",IRQCode); // wir lesen die hksk
         sigStart = 3;
+        lseek(m_nFPGAfd,0x0,0);
         write(m_nFPGAfd,(char*) &sigStart,4);
         process = IRQCode >> 16;
         clientAvail = ( (client2 = GetClient(process)) !=0); // ist der client noch da für den der interrupt bestimmt war?
@@ -1829,9 +1837,11 @@ void cZDSP1Server::DspIntHandler()
     else
     {
         sigStart = 4;
+        lseek(m_nFPGAfd,0x0,0);
         write(m_nFPGAfd,(char*) &sigStart,4);
         client->DspVarWrite(s = QString("CTRLACK,%1;").arg(CmdDone)); // sonst acknowledge
         sigStart = 5;
+        lseek(m_nFPGAfd,0x0,0);
         write(m_nFPGAfd,(char*) &sigStart,4);
 
         IRQCode &= 0xFFFF;
