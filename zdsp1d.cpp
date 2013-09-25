@@ -26,7 +26,6 @@
 #include <qmap.h>
 #include <qdatastream.h>
 #include <QFile>
-#include <QSocketNotifier>
 #include <qbuffer.h>
 //Added by qt3to4:
 #include <Q3TextStream>
@@ -503,6 +502,11 @@ QString& cZDSP1Client::FetchActValues(QString& s)
 
 bool cZDSP1Client::DspVar(QString& s,int& ir)
 { // einen int (32bit) wert lesen
+
+    //debug info
+    quint32 sigStart = 1;
+    write(myServer->m_nFPGAfd, (char*)sigStart,4);
+
     bool ret = false;
     QByteArray *ba = new QByteArray();
     QString ss = QString("%1,1").arg(s);
@@ -512,6 +516,11 @@ bool cZDSP1Client::DspVar(QString& s,int& ir)
         ret = true;
     }
     delete ba;
+
+    //debug info
+    sigStart = 5;
+    write(myServer->m_nFPGAfd, (char*)sigStart,4);
+
     return ret;
 }
 
@@ -534,6 +543,10 @@ bool cZDSP1Client::DspVar(QString& s,float& fr)
 sDspVar* cZDSP1Client::DspVarRead(QString& s,QByteArray* ba)
 {
     bool ok;
+    //debug info
+    quint32 sigStart = 6;
+    write(myServer->m_nFPGAfd, (char*)sigStart,4);
+
     QString name = s.section(",",0,0);
     sDspVar *DspVar;
     if ( (DspVar = DspVarResolver.vadr(name)) == 0) return 0; // fehler, den namen gibt es nicht
@@ -542,11 +555,20 @@ sDspVar* cZDSP1Client::DspVarRead(QString& s,QByteArray* ba)
     if (!ok || (n<1) ) return 0; // fehler in der anzahl der elemente
     
     ba->resize(4*n);
-    
+
+    //debug info
+    sigStart = 7;
+    write(myServer->m_nFPGAfd, (char*)sigStart,4);
+
     int fd = myServer->DevFileDescriptor;
-    
     if ( (myServer->DspDevSeek(fd, DspVar->adr) >= 0) && (myServer->DspDevRead(fd, ba->data(), n*4 ) >= 0) )
+    {
+        //debug info
+        quint32 sigStart = 8;
+        write(myServer->m_nFPGAfd, (char*)sigStart,4);
+
         return DspVar; // dev.  seek und dev. read ok
+    }
 
     return 0; // sonst fehler		
 }
@@ -726,16 +748,12 @@ bool cZDSP1Client::DspVarWrite(QString& s)
 /* globaler zeiger auf  "den"  server und eine signal behandlungsroutine */
 cZDSP1Server* DSPServer;
 int cZDSP1Server::m_nFPGAfd;
-int pipeFD[2];
-char pipeBUf[2]="I";
-
 
 void SigHandler(int)
 {
     quint32 sigStart = 0;
     write(DSPServer->m_nFPGAfd,(char*) &sigStart,4);
     if (DSPServer->m_nDebugLevel & 2) syslog(LOG_INFO,"dsp interrupt received\n");
-//    write(pipeFD[1], pipeBUf, 1); // we signal the interrupt
     DSPServer->DspIntHandler();
 }
 
@@ -853,53 +871,38 @@ void cZDSP1Server::doSetupServer()
 
     ActivatedCmdList = 0; // der derzeit aktuelle kommando listen satz (0,1)
 
-    if (pipe(pipeFD) == -1)
+    m_nDebugLevel = m_pDebugSettings->getDebugLevel();
+
+    myServer = Zera::Net::cServer::getInstance(); // our working (talking) horse
+    connect(myServer,SIGNAL(newClientAvailable(Zera::Net::cClient*)),this,SLOT(establishNewConnection(Zera::Net::cClient*)));
+    myServer->startServer(m_pETHSettings->getPort(server)); // and can start the server now
+
+    m_sDspDeviceNode = m_pDspSettings->getDeviceNode(); // we try to open the dsp device
+    if (DspDevOpen() < 0)
     {
-        if (DEBUG1) syslog(LOG_ERR,"no pipe could be opened\n");
-        m_nerror = pipeError; // and finish if not possible
+        m_nerror = dspDeviceError; // and finish if not possible
         emit abortInit();
     }
 
     else
     {
-        fcntl( pipeFD[1], F_SETFL, O_NONBLOCK);
-        fcntl( pipeFD[0], F_SETFL, O_NONBLOCK);
+        mySigAction.sa_handler = &SigHandler; // signal handler einrichten
+        sigemptyset(&mySigAction.sa_mask);
+        mySigAction. sa_flags = SA_RESTART;
+        mySigAction.sa_restorer = NULL;
+        sigaction(SIGIO, &mySigAction, NULL); // handler für sigio definieren
+        SetFASync();
 
-//        m_pPipeInterrupt = new QSocketNotifier(pipeFD[0], QSocketNotifier::Read, this);
-//        connect(m_pPipeInterrupt, SIGNAL(activated(int)), this, SLOT(DspIntHandler(int)));
+        setDspType(); // now we can interrogate the mounted dsp device type
+        // our resource mananager connection must be opened after configuration is done
+        m_pRMConnection = new cRMConnection(m_pETHSettings->getRMIPadr(), m_pETHSettings->getPort(resourcemanager), m_pDebugSettings->getDebugLevel());
+        connect(m_pRMConnection, SIGNAL(connectionRMError()), this, SIGNAL(abortInit()));
+        // so we must complete our state machine here
+        stateconnect2RM->addTransition(m_pRMConnection, SIGNAL(connected()), stateSendRMIdentandRegister);
 
-        m_nDebugLevel = m_pDebugSettings->getDebugLevel();
-
-        myServer = Zera::Net::cServer::getInstance(); // our working (talking) horse
-        connect(myServer,SIGNAL(newClientAvailable(Zera::Net::cClient*)),this,SLOT(establishNewConnection(Zera::Net::cClient*)));
-        myServer->startServer(m_pETHSettings->getPort(server)); // and can start the server now
-
-        m_sDspDeviceNode = m_pDspSettings->getDeviceNode(); // we try to open the dsp device
-        if (DspDevOpen() < 0)
-        {
-            m_nerror = dspDeviceError; // and finish if not possible
-            emit abortInit();
-        }
-
-        else
-        {
-            mySigAction.sa_handler = &SigHandler; // signal handler einrichten
-            sigemptyset(&mySigAction.sa_mask);
-            mySigAction. sa_flags = SA_RESTART;
-            mySigAction.sa_restorer = NULL;
-            sigaction(SIGIO, &mySigAction, NULL); // handler für sigio definieren
-            SetFASync();
-
-            setDspType(); // now we can interrogate the mounted dsp device type
-            // our resource mananager connection must be opened after configuration is done
-            m_pRMConnection = new cRMConnection(m_pETHSettings->getRMIPadr(), m_pETHSettings->getPort(resourcemanager), m_pDebugSettings->getDebugLevel());
-            connect(m_pRMConnection, SIGNAL(connectionRMError()), this, SIGNAL(abortInit()));
-            // so we must complete our state machine here
-            stateconnect2RM->addTransition(m_pRMConnection, SIGNAL(connected()), stateSendRMIdentandRegister);
-
-            emit serverSetup(); // so we enter state machine's next state
-        }
+        emit serverSetup(); // so we enter state machine's next state
     }
+
 }
 
 
@@ -1786,15 +1789,13 @@ void cZDSP1Server::DspIntHandler()
 { // behandelt den dsp interrupt
 
     quint32 sigStart = 1;
-    write(m_nFPGAfd,(char*) &sigStart,4);
+    //write(m_nFPGAfd,(char*) &sigStart,4);
 
     int IRQCode;
     QString s;
     cZDSP1Client *client,*client2;
     bool clientAvail;
 
-    char buf[2];
-    read(pipeFD[0], buf, 1);
     int process = 0;
 
     clientAvail = ((client = clientlist.first()) !=0); // wir nutzen immer den 1. client zum lesen
@@ -1829,10 +1830,10 @@ void cZDSP1Server::DspIntHandler()
     else
     {
         sigStart = 4;
-        write(m_nFPGAfd,(char*) &sigStart,4);
+        //write(m_nFPGAfd,(char*) &sigStart,4);
         client->DspVarWrite(s = QString("CTRLACK,%1;").arg(CmdDone)); // sonst acknowledge
         sigStart = 5;
-        write(m_nFPGAfd,(char*) &sigStart,4);
+        //write(m_nFPGAfd,(char*) &sigStart,4);
 
         IRQCode &= 0xFFFF;
         /*
