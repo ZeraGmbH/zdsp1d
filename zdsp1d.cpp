@@ -1829,10 +1829,10 @@ void cZDSP1Server::DspIntHandler()
     else
     {
         sigStart = 4;
-        //write(m_nFPGAfd,(char*) &sigStart,4);
+        write(m_nFPGAfd,(char*) &sigStart,4);
         client->DspVarWrite(s = QString("CTRLACK,%1;").arg(CmdDone)); // sonst acknowledge
         sigStart = 5;
-        //write(m_nFPGAfd,(char*) &sigStart,4);
+        write(m_nFPGAfd,(char*) &sigStart,4);
 
         IRQCode &= 0xFFFF;
         /*
