@@ -106,7 +106,6 @@ public:
     virtual const char* SCPIQuery( SCPICmdType);
     
     static int m_nFPGAfd;
-    static int gotSIGIO; // für signal handling
     void SetFASync(); // async. benachrichtung einschalten
     
     int SetBootPath(const char*);
@@ -118,6 +117,8 @@ public:
     int DspDevSeek(int,ulong);
     int DspDevOpen();
     
+    void DspIntHandler();
+
     int DevFileDescriptor; // kerneltreiber wird nur 1x geöffnet und dann gehalten
     int m_nDebugLevel;
     
@@ -225,7 +226,7 @@ private slots:
     virtual void establishNewConnection(Zera::Net::cClient* newClient);
     virtual void deleteConnection();
     virtual void executeCommand(const QByteArray cmd);
-    void DspIntHandler(int);
+
     void doConfiguration();
     void doSetupServer();
     void doCloseServer();

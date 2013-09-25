@@ -725,7 +725,6 @@ bool cZDSP1Client::DspVarWrite(QString& s)
 
 /* globaler zeiger auf  "den"  server und eine signal behandlungsroutine */
 cZDSP1Server* DSPServer;
-int cZDSP1Server::gotSIGIO;
 int cZDSP1Server::m_nFPGAfd;
 int pipeFD[2];
 char pipeBUf[2]="I";
@@ -735,9 +734,9 @@ void SigHandler(int)
 {
     quint32 sigStart = 0;
     write(DSPServer->m_nFPGAfd,(char*) &sigStart,4);
-    DSPServer->gotSIGIO = 1;
     if (DSPServer->m_nDebugLevel & 2) syslog(LOG_INFO,"dsp interrupt received\n");
-    write(pipeFD[1], pipeBUf, 1); // we signal the interrupt
+//    write(pipeFD[1], pipeBUf, 1); // we signal the interrupt
+    DSPServer->DspIntHandler();
 }
 
 
@@ -866,8 +865,8 @@ void cZDSP1Server::doSetupServer()
         fcntl( pipeFD[1], F_SETFL, O_NONBLOCK);
         fcntl( pipeFD[0], F_SETFL, O_NONBLOCK);
 
-        m_pPipeInterrupt = new QSocketNotifier(pipeFD[0], QSocketNotifier::Read, this);
-        connect(m_pPipeInterrupt, SIGNAL(activated(int)), this, SLOT(DspIntHandler(int)));
+//        m_pPipeInterrupt = new QSocketNotifier(pipeFD[0], QSocketNotifier::Read, this);
+//        connect(m_pPipeInterrupt, SIGNAL(activated(int)), this, SLOT(DspIntHandler(int)));
 
         m_nDebugLevel = m_pDebugSettings->getDebugLevel();
 
@@ -889,7 +888,6 @@ void cZDSP1Server::doSetupServer()
             mySigAction. sa_flags = SA_RESTART;
             mySigAction.sa_restorer = NULL;
             sigaction(SIGIO, &mySigAction, NULL); // handler für sigio definieren
-            gotSIGIO = 0;
             SetFASync();
 
             setDspType(); // now we can interrogate the mounted dsp device type
@@ -1784,7 +1782,7 @@ QDataStream& operator<<(QDataStream& ds,cDspCmd c)
 }
 
 
-void cZDSP1Server::DspIntHandler(int)
+void cZDSP1Server::DspIntHandler()
 { // behandelt den dsp interrupt
 
     quint32 sigStart = 1;
@@ -1795,7 +1793,6 @@ void cZDSP1Server::DspIntHandler(int)
     cZDSP1Client *client,*client2;
     bool clientAvail;
 
-    DSPServer->gotSIGIO = 0;
     char buf[2];
     read(pipeFD[0], buf, 1);
     int process = 0;
