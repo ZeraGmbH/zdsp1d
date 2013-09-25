@@ -747,7 +747,6 @@ bool cZDSP1Client::DspVarWrite(QString& s)
 
 /* globaler zeiger auf  "den"  server und eine signal behandlungsroutine */
 cZDSP1Server* DSPServer;
-int cZDSP1Server::m_nFPGAfd;
 
 void SigHandler(int)
 {
