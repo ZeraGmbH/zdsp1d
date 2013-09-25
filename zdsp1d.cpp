@@ -1809,7 +1809,12 @@ void cZDSP1Server::DspIntHandler()
         sigStart = 2;
         lseek(m_nFPGAfd,0x0,0);
         write(m_nFPGAfd,(char*) &sigStart,4);
-        client->DspVar(s = "CTRLCMDPAR",IRQCode); // wir lesen die hksk
+
+        QByteArray* ba = new(QByteArray);
+        client->DspVarRead(s = "MAXIMUMSAMPLE,32",ba);
+
+        // client->DspVar(s = "CTRLCMDPAR",IRQCode); // wir lesen die hksk
+
         sigStart = 3;
         lseek(m_nFPGAfd,0x0,0);
         write(m_nFPGAfd,(char*) &sigStart,4);
