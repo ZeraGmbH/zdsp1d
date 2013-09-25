@@ -506,7 +506,7 @@ bool cZDSP1Client::DspVar(QString& s,int& ir)
     //debug info
     quint32 sigStart = 1;
     lseek(myServer->m_nFPGAfd,0x0,0);
-    write(myServer->m_nFPGAfd, (char*)sigStart,4);
+    write(myServer->m_nFPGAfd, (char*)&sigStart,4);
 
     bool ret = false;
     QByteArray *ba = new QByteArray();
@@ -521,7 +521,7 @@ bool cZDSP1Client::DspVar(QString& s,int& ir)
     //debug info
     sigStart = 5;
     lseek(myServer->m_nFPGAfd,0x0,0);
-    write(myServer->m_nFPGAfd, (char*)sigStart,4);
+    write(myServer->m_nFPGAfd, (char*)&sigStart,4);
 
     return ret;
 }
@@ -548,7 +548,7 @@ sDspVar* cZDSP1Client::DspVarRead(QString& s,QByteArray* ba)
     //debug info
     quint32 sigStart = 6;
     lseek(myServer->m_nFPGAfd,0x0,0);
-    write(myServer->m_nFPGAfd, (char*)sigStart,4);
+    write(myServer->m_nFPGAfd, (char*)&sigStart,4);
 
     QString name = s.section(",",0,0);
     sDspVar *DspVar;
@@ -562,7 +562,7 @@ sDspVar* cZDSP1Client::DspVarRead(QString& s,QByteArray* ba)
     //debug info
     sigStart = 7;
     lseek(myServer->m_nFPGAfd,0x0,0);
-    write(myServer->m_nFPGAfd, (char*)sigStart,4);
+    write(myServer->m_nFPGAfd, (char*)&sigStart,4);
 
     int fd = myServer->DevFileDescriptor;
     if ( (myServer->DspDevSeek(fd, DspVar->adr) >= 0) && (myServer->DspDevRead(fd, ba->data(), n*4 ) >= 0) )
@@ -570,7 +570,7 @@ sDspVar* cZDSP1Client::DspVarRead(QString& s,QByteArray* ba)
         //debug info
         quint32 sigStart = 8;
         lseek(myServer->m_nFPGAfd,0x0,0);
-        write(myServer->m_nFPGAfd, (char*)sigStart,4);
+        write(myServer->m_nFPGAfd, (char*)&sigStart,4);
 
         return DspVar; // dev.  seek und dev. read ok
     }
