@@ -481,6 +481,8 @@ long cDspVarResolver::offs(QString& s)
 
             return -1; // sonst ist das ein fehler
         }
+
+        return pDspVar->offs;
     }
 
     offset = s.toLong(&ok,10); // prüfen auf dez. konstante
@@ -519,6 +521,8 @@ long cDspVarResolver::adr(QString& s)
 
             return -1; // sonst ist das ein fehler
         }
+
+        return pDspVar->adr;
     }
 
     adress = s.toLong(&ok,10); // prüfen auf dez. konstante
