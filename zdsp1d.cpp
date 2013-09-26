@@ -143,8 +143,12 @@ QString& cZDSP1Client::SetRavList(QString& s)
     }
 
     m_fDspMemData.resize(m_nlen); // speicher im array reservieren
+
+    DspVarResolver.setVarHash(); // wir setzen die hashtabelle neu
+
     return (sOutput);
 }
+
 
 QString& cZDSP1Client::GetRavList()
 {
@@ -662,8 +666,8 @@ bool cZDSP1Client::DspVarWrite(QString& s)
         }
         QString name = vs.section(",",0,0);
         long adr;
-        int type;
-        if ( (adr = DspVarResolver.adr(name, &type) ) == -1) break; // fehler, den namen gibt es nicht
+
+        if ( (adr = DspVarResolver.adr(name) ) == -1) break; // fehler, den namen gibt es nicht
 
         int n,alloc;
         n = alloc = 0; // keine elemente
@@ -673,6 +677,8 @@ bool cZDSP1Client::DspVarWrite(QString& s)
         bas.setByteOrder(QDataStream::LittleEndian);
         bas.setFloatingPointPrecision(QDataStream::SinglePrecision);
         bool ok2 = true;
+        int type;
+        type = DspVarResolver.type(name);
         if (type == eUnknown)
         {
             for (int j=1;;j++)
@@ -1057,7 +1063,7 @@ const char* cZDSP1Server::mTestDsp(QChar* s)
 
                 cZDSP1Client* cl = GetClient(ActSock);
                 QString sadr  = "UWSPACE";
-                ulong adr = cl->DspVarResolver.adr(sadr,NULL) ;
+                ulong adr = cl->DspVarResolver.adr(sadr) ;
                 for (i=0; i< nr; i++)
                 {
                     if (DspDevSeek(DevFileDescriptor, adr) < 0)
@@ -1888,14 +1894,14 @@ bool cZDSP1Server::LoadDSProgram()
         s2=QString("ALTINTCMDLIST");
     };
 
-    ulong offset = client->DspVarResolver.adr(s, NULL) ;
+    ulong offset = client->DspVarResolver.adr(s) ;
     if (DspDevSeek(DevFileDescriptor, offset) < 0 )  // startadr im treiber setzen
         return false;
     
     if (DspDevWrite(DevFileDescriptor, CmdMem.data(), CmdMem.size()) < 0)
         return false;
     
-    offset = client->DspVarResolver.adr(s2, NULL) ;
+    offset = client->DspVarResolver.adr(s2) ;
     if (DspDevSeek(DevFileDescriptor, offset) < 0 )  // startsadr im treiber setzen
         return false;
     

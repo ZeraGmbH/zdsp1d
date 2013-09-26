@@ -212,21 +212,21 @@ sDspCmd* findDspCmd(QString& s)
 }
 
 
-sDspVar DspWorkspaceVar[15] = 	{ {"FREQENCY",1,eFloat,0},			// 1 wert gemessene frequenz
-				  {"FREQUENCYVALUE",4,eFloat,0},		// 4 werte f. freq. ausgänge
-				  {"MAXIMUMSAMPLE",32,eFloat,0},		// 32 werte maximumspeicher
-				  {"FREQUENCYVALUEFILTER",4,eFloat,0},	// 4 gefilterte freq. ausgänge
-				  {"FREQUENCYSCALE",4,eFloat,0},		// 4 freq. skalierungswerte
-				  {"KREISFREQKOEFF",1,eFloat,0},		// kreisfrequenz korrektur koeffizient
-				  {"ETHERRORS",1,eInt,0},			// ethernet fehler speicher
-				  {"ETHSYNCLOSTCOUNT",1,eInt,0},		// ethernet synclost counter
-				  {"ETHDATACOUNT",2,eInt,0},		// anzahl sync. verluste mu
-				  {"NCHANNELS",1,eInt,0},			// anzahl messkanäle sampling system	
-				  {"NSMEAS",1,eInt,0},			// anzahl samples für 1 messperiode
-				  {"NSPERIOD",1,eInt,0},			// anzahl samples für eine signalperiode 
-				  {"_NSPERIOD",1,eFloat,0},			// 1/ anzahl samples 
-				  {"SYNCASDU",1,eInt,0},			// ob und auf welchen datensatz synchronisiert wird 
-				  {"TMCH0",1,eFloat,0}};			// periodendauer messsignal kanal0			
+sDspVar DspWorkspaceVar[15] = 	{ {"FREQENCY",1,eFloat,0,0},			// 1 wert gemessene frequenz
+                  {"FREQUENCYVALUE",4,eFloat,0,0},		// 4 werte f. freq. ausgänge
+                  {"MAXIMUMSAMPLE",32,eFloat,0,0},		// 32 werte maximumspeicher
+                  {"FREQUENCYVALUEFILTER",4,eFloat,0,0},	// 4 gefilterte freq. ausgänge
+                  {"FREQUENCYSCALE",4,eFloat,0,0},		// 4 freq. skalierungswerte
+                  {"KREISFREQKOEFF",1,eFloat,0,0},		// kreisfrequenz korrektur koeffizient
+                  {"ETHERRORS",1,eInt,0,0},			// ethernet fehler speicher
+                  {"ETHSYNCLOSTCOUNT",1,eInt,0,0},		// ethernet synclost counter
+                  {"ETHDATACOUNT",2,eInt,0,0},		// anzahl sync. verluste mu
+                  {"NCHANNELS",1,eInt,0,0},			// anzahl messkanäle sampling system
+                  {"NSMEAS",1,eInt,0,0},			// anzahl samples für 1 messperiode
+                  {"NSPERIOD",1,eInt,0,0},			// anzahl samples für eine signalperiode
+                  {"_NSPERIOD",1,eFloat,0,0},			// 1/ anzahl samples
+                  {"SYNCASDU",1,eInt,0,0},			// ob und auf welchen datensatz synchronisiert wird
+                  {"TMCH0",1,eFloat,0,0}};			// periodendauer messsignal kanal0
 
 
 
@@ -236,24 +236,24 @@ sMemSection dm32DspWorkspace = {
 	DspVar		: DspWorkspaceVar };
 	
 
-sDspVar DialogWorkSpaceVar[18] = 	{ 	  {"DSPCMDPAR",10,eInt,0},		// 10 werte cmds, paramter ... ctrl -> dsp
-					  {"DSPACK",1,eInt,0},			// semaphore ackn. dsp -> cntr.
-					  {"CTRLCMDPAR",10,eInt,0},		// 10 werte cmds, paramter ... dsp -> ctrl
-					  {"CTRLACK",1,eInt,0},			// semaphore ackn. ctrl. -> dsp
-					  {"FREQUENCYNORM",4,eFloat,0},		// 4 freq. normierungswerte
-					  {"GAINCORRECTION",32,eFloat,0},		// 32 verstärkungskorrekturwerte
-					  {"PHASECORRECTION",32,eFloat,0},	// 32 phasenkorrekturwerte
-					  {"OFFSETCORRECTION",32,eFloat,0},	// 32 offsetkorrekturwerte
-					  {"BUSYMAX",1,eFloat,0},			// akuelle auslastung [%]
-					  {"BUSY",1,eFloat,0},			// max. auslastung seit reset
-					  {"VNR",1,eFloat,0},				// versionsnummer
-					  {"GAINCORRECTION2",32,eFloat,0},	// 32 verstärkungskorrekturwerte 2.stufe
-					  {"PHASECORRECTION2",32,eFloat,0},	// 32 phasenkorrekturwerte 2. stufe
-					  {"OFFSETCORRECTION2",32,eFloat,0},	// 32 offsetkorrekturwerte 2. stufe
-					  {"ETHDESTSOURCEADRESS",3,eInt,0},	// 3*32bit -> 2*48bit
-					  {"ETHPRIORITYTAGGED",1,eInt,0},
-					  {"ETHTYPEAPPID",1,eInt,0},
-					  {"ETHROUTINGTAB",8,eInt,0} };		// 8*4 = 32 byte 1byte/kanal ASDU / CHN
+sDspVar DialogWorkSpaceVar[18] = 	{ 	  {"DSPCMDPAR",10,eInt,0,0},		// 10 werte cmds, paramter ... ctrl -> dsp
+                      {"DSPACK",1,eInt,0,0},			// semaphore ackn. dsp -> cntr.
+                      {"CTRLCMDPAR",10,eInt,0,0},		// 10 werte cmds, paramter ... dsp -> ctrl
+                      {"CTRLACK",1,eInt,0,0},			// semaphore ackn. ctrl. -> dsp
+                      {"FREQUENCYNORM",4,eFloat,0,0},		// 4 freq. normierungswerte
+                      {"GAINCORRECTION",32,eFloat,0,0},		// 32 verstärkungskorrekturwerte
+                      {"PHASECORRECTION",32,eFloat,0,0},	// 32 phasenkorrekturwerte
+                      {"OFFSETCORRECTION",32,eFloat,0,0},	// 32 offsetkorrekturwerte
+                      {"BUSYMAX",1,eFloat,0,0},			// akuelle auslastung [%]
+                      {"BUSY",1,eFloat,0,0},			// max. auslastung seit reset
+                      {"VNR",1,eFloat,0,0},				// versionsnummer
+                      {"GAINCORRECTION2",32,eFloat,0,0},	// 32 verstärkungskorrekturwerte 2.stufe
+                      {"PHASECORRECTION2",32,eFloat,0,0},	// 32 phasenkorrekturwerte 2. stufe
+                      {"OFFSETCORRECTION2",32,eFloat,0,0},	// 32 offsetkorrekturwerte 2. stufe
+                      {"ETHDESTSOURCEADRESS",3,eInt,0,0},	// 3*32bit -> 2*48bit
+                      {"ETHPRIORITYTAGGED",1,eInt,0,0},
+                      {"ETHTYPEAPPID",1,eInt,0,0},
+                      {"ETHROUTINGTAB",8,eInt,0,0} };		// 8*4 = 32 byte 1byte/kanal ASDU / CHN
 
 
 
@@ -263,7 +263,7 @@ sMemSection dm32DialogWorkSpace = {
 	DspVar		: DialogWorkSpaceVar };
 
 
-sDspVar UserWorkSpaceVar[1] = { {"UWSPACE",uwSpaceSize21262,eFloat,0} };
+sDspVar UserWorkSpaceVar[1] = { {"UWSPACE",uwSpaceSize21262,eFloat,0,0} };
 
 
 sMemSection dm32UserWorkSpace = {
@@ -272,10 +272,10 @@ sMemSection dm32UserWorkSpace = {
 	DspVar		: UserWorkSpaceVar };
 
 
-sDspVar CmdListVar[4] = 	{	{"INTCMDLIST",IntCmdListLen21262,eInt,0},                // interrupt kommando
-                {"CMDLIST",CmdListLen21262,eInt,0},		// cycl. kommando liste
-                {"ALTINTCMDLIST",IntCmdListLen21262,eInt,0}, 	// alternative kommando listen
-                {"ALTCMDLIST",CmdListLen21262,eInt,0}};
+sDspVar CmdListVar[4] = 	{	{"INTCMDLIST",IntCmdListLen21262,eInt,0,0},                // interrupt kommando
+                {"CMDLIST",CmdListLen21262,eInt,0,0},		// cycl. kommando liste
+                {"ALTINTCMDLIST",IntCmdListLen21262,eInt,0,0}, 	// alternative kommando listen
+                {"ALTCMDLIST",CmdListLen21262,eInt,0,0}};
 
 
 sMemSection dm32CmdList = {
@@ -284,14 +284,14 @@ sMemSection dm32CmdList = {
 	DspVar		: CmdListVar };
 
 
-sDspVar ChannelNr[32] = 	{ 	{"CH0",1,eInt,0}, {"CH1",1,eInt,0}, {"CH2",1,eInt,0}, {"CH3",1,eInt,0}, 
-				{"CH4",1,eInt,0}, {"CH5",1,eInt,0}, {"CH6",1,eInt,0}, {"CH7",1,eInt,0},
-				{"CH8",1,eInt,0}, {"CH9",1,eInt,0}, {"CH10",1,eInt,0}, {"CH11",1,eInt,0},
-				{"CH12",1,eInt,0}, {"CH13",1,eInt,0}, {"CH14",1,eInt,0}, {"CH15",1,eInt,0},
-				{"CH16",1,eInt,0}, {"CH17",1,eInt,0}, {"CH18",1,eInt,0}, {"CH19",1,eInt,0},
-				{"CH20",1,eInt,0}, {"CH21",1,eInt,0}, {"CH22",1,eInt,0}, {"CH23",1,eInt,0},
-				{"CH24",1,eInt,0}, {"CH25",1,eInt,0}, {"CH26",1,eInt,0}, {"CH27",1,eInt,0},
-				{"CH28",1,eInt,0}, {"CH29",1,eInt,0}, {"CH30",1,eInt,0}, {"CH31",1,eInt,0} };
+sDspVar ChannelNr[32] = 	{ 	{"CH0",1,eInt,0,0}, {"CH1",1,eInt,0,0}, {"CH2",1,eInt,0,0}, {"CH3",1,eInt,0,0},
+                {"CH4",1,eInt,0,0}, {"CH5",1,eInt,0,0}, {"CH6",1,eInt,0,0}, {"CH7",1,eInt,0,0},
+                {"CH8",1,eInt,0,0}, {"CH9",1,eInt,0,0}, {"CH10",1,eInt,0,0}, {"CH11",1,eInt,0,0},
+                {"CH12",1,eInt,0,0}, {"CH13",1,eInt,0,0}, {"CH14",1,eInt,0,0}, {"CH15",1,eInt,0,0},
+                {"CH16",1,eInt,0,0}, {"CH17",1,eInt,0,0}, {"CH18",1,eInt,0,0}, {"CH19",1,eInt,0,0},
+                {"CH20",1,eInt,0,0}, {"CH21",1,eInt,0,0}, {"CH22",1,eInt,0,0}, {"CH23",1,eInt,0,0},
+                {"CH24",1,eInt,0,0}, {"CH25",1,eInt,0,0}, {"CH26",1,eInt,0,0}, {"CH27",1,eInt,0,0},
+                {"CH28",1,eInt,0,0}, {"CH29",1,eInt,0,0}, {"CH30",1,eInt,0,0}, {"CH31",1,eInt,0,0} };
 
 
 sMemSection symbConsts1 = {
@@ -363,8 +363,18 @@ void cDspClientVar::SetOffs(long o)
 
 cDspVarResolver::cDspVarResolver()
 {
+    mVarHash.clear();
     VarParser.SetDelimiter("(,+,-,)"); // setze die trennzeichen für den parser
     VarParser.SetWhiteSpace(" (,)");
+}
+
+
+void cDspVarResolver::setVarHash()
+{
+    sMemSection* psec;
+    mVarHash.clear();
+    for ( psec = MemSectionList.first(); psec; psec = MemSectionList.next() )
+        setQHash(psec);
 }
 
 
@@ -373,7 +383,7 @@ void cDspVarResolver::addSection(sMemSection* sec)
     MemSectionList.append(sec);
 }
 
-
+/*
 long cDspVarResolver::offs(QString& s,  sMemSection** pSec, int *type)
 {
     SearchedVar = 0;
@@ -432,31 +442,122 @@ long cDspVarResolver::offs(QString& s,  sMemSection** pSec, int *type)
     if (ok) return ret;
     return -1;
 }
+*/
+
+void cDspVarResolver::setQHash(sMemSection* psec) // zum setzen der qhash
+{
+    long offs = 0;
+    for (int i = 0; i< (psec->n); i++)
+    {
+        psec->DspVar[i].offs = offs;
+        psec->DspVar[i].adr = psec->StartAdr + offs;
+        mVarHash[psec->DspVar[i].Name] = &(psec->DspVar[i]);
+        offs += psec->DspVar[i].size;
+    }
+}
 
 
 long cDspVarResolver::offs(QString& s)
 {
-    return offs(s, &sec, NULL);
-}
-
-
-long cDspVarResolver::adr(QString& s, int *type)
-{
-    long ret = offs(s, &sec, type); // -1 wenn nicht gefunden
-    if (sec)
+    long offset;
+    bool ok;
+    QString ts = s.upper();
+    QChar* cts = ts.data();
+    QString sSearch=VarParser.GetKeyword(&cts); // der namen der variable, die gesucht ist
+    if (mVarHash.contains(sSearch))
     {
-        ret += sec->StartAdr;
-        SearchedVar->adr = ret;
+        sDspVar* pDspVar = mVarHash.value(sSearch);
+        ts = ts.stripWhiteSpace();
+        ts = ts.remove(sSearch); // name raus
+        if (ts.length() > 0)
+        { // wenn noch was da, dann muss das ein +/- offset sein
+            offset = ts.toLong(&ok,10); // prüfen auf dez. konstante
+            if (ok)
+                return pDspVar->offs + offset;
+
+            offset = ts.toLong(&ok,16); // mal hex versuchen
+            if (ok)
+                return pDspVar->offs +offset;
+
+            return -1; // sonst ist das ein fehler
+        }
     }
-    return ret;
+
+    offset = s.toLong(&ok,10); // prüfen auf dez. konstante
+    if (ok)
+        return offset;
+
+    offset = s.toLong(&ok,16); // mal hex versuchen
+    if (ok)
+        return offset;
+
+    return -1;
 }
 
 
-sDspVar* cDspVarResolver::vadr(QString& s) {
-   adr (s, NULL); // adresse wird bestimmt und gespeichert
+long cDspVarResolver::adr(QString& s)
+{
+    long offset, adress;
+    bool ok;
+    QString ts = s.upper();
+    QChar* cts = ts.data();
+    QString sSearch=VarParser.GetKeyword(&cts); // der namen der variable, die gesucht ist
+    if (mVarHash.contains(sSearch))
+    {
+        sDspVar* pDspVar = mVarHash.value(sSearch);
+        ts = ts.stripWhiteSpace();
+        ts = ts.remove(sSearch); // name raus
+        if (ts.length() > 0)
+        { // wenn noch was da, dann muss das ein +/- offset sein
+            offset = ts.toLong(&ok,10); // prüfen auf dez. konstante
+            if (ok)
+                return pDspVar->adr + offset;
 
-   return SearchedVar; // zeiger auf die gesuchte variable wir übergeben
+            offset = ts.toLong(&ok,16); // mal hex versuchen
+            if (ok)
+                return pDspVar->adr +offset;
+
+            return -1; // sonst ist das ein fehler
+        }
+    }
+
+    adress = s.toLong(&ok,10); // prüfen auf dez. konstante
+    if (ok)
+        return adress;
+
+    adress = s.toLong(&ok,16); // mal hex versuchen
+    if (ok)
+        return adress;
+
+    return -1;
 }
+
+
+sDspVar* cDspVarResolver::vadr(QString& s)
+{
+    QString ts = s.upper();
+    QChar* cts = ts.data();
+    QString sSearch=VarParser.GetKeyword(&cts);
+
+    if (mVarHash.contains(sSearch))
+        return mVarHash.value(sSearch);
+    else
+        return 0;
+}
+
+
+int cDspVarResolver::type(QString &s)
+{
+    QString ts = s.upper();
+    QChar* cts = ts.data();
+    QString sSearch=VarParser.GetKeyword(&cts);
+
+    if (mVarHash.contains(sSearch))
+        return mVarHash.value(sSearch)->type;
+    else
+        return eUnknown;
+}
+
 
 cDspCmd::cDspCmd(const unsigned short CMD) // nur befehl 16bit
 {
