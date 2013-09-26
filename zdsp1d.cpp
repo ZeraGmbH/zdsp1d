@@ -503,11 +503,6 @@ QString& cZDSP1Client::FetchActValues(QString& s)
 bool cZDSP1Client::DspVar(QString& s,int& ir)
 { // einen int (32bit) wert lesen
 
-    //debug info
-    quint32 sigStart = 1;
-    lseek(myServer->m_nFPGAfd,0x0,0);
-    write(myServer->m_nFPGAfd, (char*)&sigStart,4);
-
     bool ret = false;
     QByteArray *ba = new QByteArray();
     QString ss = QString("%1,1").arg(s);
@@ -517,11 +512,6 @@ bool cZDSP1Client::DspVar(QString& s,int& ir)
         ret = true;
     }
     delete ba;
-
-    //debug info
-    sigStart = 5;
-    lseek(myServer->m_nFPGAfd,0x0,0);
-    write(myServer->m_nFPGAfd, (char*)&sigStart,4);
 
     return ret;
 }
@@ -545,33 +535,33 @@ bool cZDSP1Client::DspVar(QString& s,float& fr)
 sDspVar* cZDSP1Client::DspVarRead(QString& s,QByteArray* ba)
 {
     bool ok;
-    //debug info
-    quint32 sigStart = 6;
-    lseek(myServer->m_nFPGAfd,0x0,0);
-    write(myServer->m_nFPGAfd, (char*)&sigStart,4);
 
     QString name = s.section(",",0,0);
     sDspVar *DspVar;
+
+    //debug info
+    quint32 sigStart = 1;
+    lseek(myServer->m_nFPGAfd,0x0,0);
+    write(myServer->m_nFPGAfd, (char*)&sigStart,4);
+
     if ( (DspVar = DspVarResolver.vadr(name)) == 0) return 0; // fehler, den namen gibt es nicht
+
+    //debug info
+    sigStart = 2;
+    lseek(myServer->m_nFPGAfd,0x0,0);
+    write(myServer->m_nFPGAfd, (char*)&sigStart,4);
+
     QString p = s.section(",",1,1);
     int n = p.toInt(&ok);
     if (!ok || (n<1) ) return 0; // fehler in der anzahl der elemente
     
     ba->resize(4*n);
 
-    //debug info
-    sigStart = 7;
-    lseek(myServer->m_nFPGAfd,0x0,0);
-    write(myServer->m_nFPGAfd, (char*)&sigStart,4);
+
 
     int fd = myServer->DevFileDescriptor;
     if ( (myServer->DspDevSeek(fd, DspVar->adr) >= 0) && (myServer->DspDevRead(fd, ba->data(), n*4 ) >= 0) )
     {
-        //debug info
-        quint32 sigStart = 8;
-        lseek(myServer->m_nFPGAfd,0x0,0);
-        write(myServer->m_nFPGAfd, (char*)&sigStart,4);
-
         return DspVar; // dev.  seek und dev. read ok
     }
 
@@ -755,8 +745,6 @@ cZDSP1Server* DSPServer;
 
 void SigHandler(int)
 {
-    quint32 sigStart = 0;
-    write(DSPServer->m_nFPGAfd,(char*) &sigStart,4);
     if (DSPServer->m_nDebugLevel & 2) syslog(LOG_INFO,"dsp interrupt received\n");
     DSPServer->DspIntHandler();
 }
@@ -1792,10 +1780,6 @@ QDataStream& operator<<(QDataStream& ds,cDspCmd c)
 void cZDSP1Server::DspIntHandler()
 { // behandelt den dsp interrupt
 
-    quint32 sigStart = 1;
-    //lseek(m_nFPGAfd,0x0,0);
-    //write(m_nFPGAfd,(char*) &sigStart,4);
-
     int IRQCode;
     QString s;
     cZDSP1Client *client,*client2;
@@ -1806,21 +1790,9 @@ void cZDSP1Server::DspIntHandler()
     clientAvail = ((client = clientlist.first()) !=0); // wir nutzen immer den 1. client zum lesen
     if (clientAvail) // wir haben noch einen über den wir lesen können
     {
-        sigStart = 2;
-        lseek(m_nFPGAfd,0x0,0);
-        write(m_nFPGAfd,(char*) &sigStart,4);
-
-        QByteArray* ba = new(QByteArray);
-        client->DspVarRead(s = "MAXIMUMSAMPLE,32",ba);
-
-        // client->DspVar(s = "CTRLCMDPAR",IRQCode); // wir lesen die hksk
-
-        sigStart = 3;
-        lseek(m_nFPGAfd,0x0,0);
-        write(m_nFPGAfd,(char*) &sigStart,4);
+        client->DspVar(s = "CTRLCMDPAR",IRQCode); // wir lesen die hksk
         process = IRQCode >> 16;
         clientAvail = ( (client2 = GetClient(process)) !=0); // ist der client noch da für den der interrupt bestimmt war?
-
     }
 
     if (!clientAvail)
@@ -1841,23 +1813,16 @@ void cZDSP1Server::DspIntHandler()
 
     else
     {
-        sigStart = 4;
-        lseek(m_nFPGAfd,0x0,0);
-        write(m_nFPGAfd,(char*) &sigStart,4);
         client->DspVarWrite(s = QString("CTRLACK,%1;").arg(CmdDone)); // sonst acknowledge
-        sigStart = 5;
-        lseek(m_nFPGAfd,0x0,0);
-        write(m_nFPGAfd,(char*) &sigStart,4);
 
         IRQCode &= 0xFFFF;
-        /*
+
         s = QString("DSPINT:%1").arg(IRQCode);
 
         QByteArray block;
         block = s.toUtf8();
 
         client2->m_pNetClient->writeClient(block); // we send async message to our netclient
-        */
     }
 
     return ;
