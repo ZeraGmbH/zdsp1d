@@ -539,17 +539,7 @@ sDspVar* cZDSP1Client::DspVarRead(QString& s,QByteArray* ba)
     QString name = s.section(",",0,0);
     sDspVar *DspVar;
 
-    //debug info
-    quint32 sigStart = 1;
-    lseek(myServer->m_nFPGAfd,0x0,0);
-    write(myServer->m_nFPGAfd, (char*)&sigStart,4);
-
     if ( (DspVar = DspVarResolver.vadr(name)) == 0) return 0; // fehler, den namen gibt es nicht
-
-    //debug info
-    sigStart = 2;
-    lseek(myServer->m_nFPGAfd,0x0,0);
-    write(myServer->m_nFPGAfd, (char*)&sigStart,4);
 
     QString p = s.section(",",1,1);
     int n = p.toInt(&ok);
@@ -1790,8 +1780,6 @@ void cZDSP1Server::DspIntHandler()
     clientAvail = ((client = clientlist.first()) !=0); // wir nutzen immer den 1. client zum lesen
     if (clientAvail) // wir haben noch einen über den wir lesen können
     {
-        int tmpData[80];
-        client->DspVar(s = "DATA",tmpData[0]);
         client->DspVar(s = "CTRLCMDPAR",IRQCode); // wir lesen die hksk
         process = IRQCode >> 16;
         clientAvail = ( (client2 = GetClient(process)) !=0); // ist der client noch da für den der interrupt bestimmt war?
