@@ -348,7 +348,6 @@ bool cZDSP1Client::GenCmdList(QString& s, tDspCmdList& cl, QString& errs)
     for (int i = 0;;i++)
     {
         QString cs = s.section(';',i,i);
-        qDebug() << cs;
         if ( (cs.isEmpty()) || (cs==("Empty")) )break; // liste ist durch
         cl.append(GenDspCmd(cs, &ok));
         if (!ok)
@@ -833,7 +832,7 @@ void cZDSP1Server::doConfiguration()
             connect(myXMLConfigReader,SIGNAL(valueChanged(const QString&)),m_pDspSettings,SLOT(configXMLInfo(const QString&)));
 
             QString s = args.at(1);
-            qDebug() << s;
+
             if (myXMLConfigReader->loadXML(s)) // the first parameter should be the filename
             {
                 // xmlfile ok -> nothing to do .. the configreader will emit all configuration
@@ -1796,8 +1795,6 @@ void cZDSP1Server::DspIntHandler()
     clientAvail = ((client = clientlist.first()) !=0); // wir nutzen immer den 1. client zum lesen
     if (clientAvail) // wir haben noch einen über den wir lesen können
     {
-        int tmpData[80];
-        client->DspVar(s = "DATA",tmpData[0]);
         client->DspVar(s = "CTRLCMDPAR",IRQCode); // wir lesen die hksk
         process = IRQCode >> 16;
         clientAvail = ( (client2 = GetClient(process)) !=0); // ist der client noch da für den der interrupt bestimmt war?
