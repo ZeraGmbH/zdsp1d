@@ -344,7 +344,7 @@ bool cZDSP1Client::GenCmdList(QString& s, tDspCmdList& cl, QString& errs)
     for (int i = 0;;i++)
     {
         QString cs = s.section(';',i,i);
-        qDebug() << cs;
+
         if ( (cs.isEmpty()) || (cs==("Empty")) )break; // liste ist durch
         cl.append(GenDspCmd(cs, &ok));
         if (!ok)
@@ -817,7 +817,7 @@ void cZDSP1Server::doConfiguration()
             connect(myXMLConfigReader,SIGNAL(valueChanged(const QString&)),m_pDspSettings,SLOT(configXMLInfo(const QString&)));
 
             QString s = args.at(1);
-            qDebug() << s;
+
             if (myXMLConfigReader->loadXML(s)) // the first parameter should be the filename
             {
                 // xmlfile ok -> nothing to do .. the configreader will emit all configuration
