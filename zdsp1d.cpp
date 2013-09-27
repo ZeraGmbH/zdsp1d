@@ -1791,7 +1791,7 @@ void cZDSP1Server::DspIntHandler()
     if (clientAvail) // wir haben noch einen über den wir lesen können
     {
         int tmpData[80];
-        client->DspVar(s = "CTRLCMDPAR",tmpData[0]);
+        client->DspVar(s = "DATA",tmpData[0]);
         client->DspVar(s = "CTRLCMDPAR",IRQCode); // wir lesen die hksk
         process = IRQCode >> 16;
         clientAvail = ( (client2 = GetClient(process)) !=0); // ist der client noch da für den der interrupt bestimmt war?
