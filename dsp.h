@@ -7,6 +7,7 @@
 #include <qstring.h>
 #include <q3ptrlist.h>
 #include <qdatastream.h>
+#include <QHash>
 
 #include "parse.h"
 
@@ -50,11 +51,13 @@ struct sDspCmd { // wird zum ausdekodieren der dsp kommandos benötigt
 sDspCmd* findDspCmd(QString&);
 enum dType { eInt, eFloat, eUnknown};
 
+
 struct sDspVar { // dient ebenfalls der dekodierung 
     const char* Name; // name der variablen
     ushort size;  // anzahl worte
     dType type; // 
     ulong adr; // die abs. adresse auf welcher sich die variable befindet
+    ulong offs; // der offset innerhalb der memory section
 };
 
 
@@ -68,15 +71,20 @@ struct sMemSection { // beschreibt eine dsp memory section
 class cDspVarResolver { // der löst die Variablen anhand der memsections und namen auf 
 public:
     cDspVarResolver();
+    void setVarHash();
     void addSection(sMemSection*); // sections werden im konstruktor erstmal fest eingebunden
     long offs(QString&); // gibt die offs. adresse einer variablen zurück, -1 wenn es die variable nicht gibt, zum generiren der dsp kommandos
-    long adr(QString&, int*); // gibt die abs. adresse einer variablen im dsp zurück, -1 wenn es die variable nicht gibt, zum schreiben in den dsp
+    long adr(QString&); // gibt die abs. adresse einer variablen im dsp zurück, -1 wenn es die variable nicht gibt, zum schreiben in den dsp
     sDspVar* vadr(QString&); //  gibt einen zeiger auf sDspVar zurück, zum lesen von daten aus dem dsp
+    int type(QString &s);
+
 private:
+    QHash<QString, sDspVar*> mVarHash;
     cParse VarParser;
-    sDspVar *SearchedVar; // zeiger auf die gesuchte variable;
-    long offs(QString&, sMemSection**, int *);
-    sMemSection *sec;
+//    sDspVar *SearchedVar; // zeiger auf die gesuchte variable;
+//    long offs(QString&, sMemSection**, int *);
+    void setQHash(sMemSection* psec); // zum setzen der qhash
+//    sMemSection *sec;
     Q3PtrList<sMemSection> MemSectionList;
 };
 

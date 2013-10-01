@@ -143,8 +143,12 @@ QString& cZDSP1Client::SetRavList(QString& s)
     }
 
     m_fDspMemData.resize(m_nlen); // speicher im array reservieren
+
+    DspVarResolver.setVarHash(); // wir setzen die hashtabelle neu
+
     return (sOutput);
 }
+
 
 QString& cZDSP1Client::GetRavList()
 {
@@ -344,7 +348,6 @@ bool cZDSP1Client::GenCmdList(QString& s, tDspCmdList& cl, QString& errs)
     for (int i = 0;;i++)
     {
         QString cs = s.section(';',i,i);
-
         if ( (cs.isEmpty()) || (cs==("Empty")) )break; // liste ist durch
         cl.append(GenDspCmd(cs, &ok));
         if (!ok)
@@ -652,8 +655,8 @@ bool cZDSP1Client::DspVarWrite(QString& s)
         }
         QString name = vs.section(",",0,0);
         long adr;
-        int type;
-        if ( (adr = DspVarResolver.adr(name, &type) ) == -1) break; // fehler, den namen gibt es nicht
+
+        if ( (adr = DspVarResolver.adr(name) ) == -1) break; // fehler, den namen gibt es nicht
 
         int n,alloc;
         n = alloc = 0; // keine elemente
@@ -663,6 +666,8 @@ bool cZDSP1Client::DspVarWrite(QString& s)
         bas.setByteOrder(QDataStream::LittleEndian);
         bas.setFloatingPointPrecision(QDataStream::SinglePrecision);
         bool ok2 = true;
+        int type;
+        type = DspVarResolver.type(name);
         if (type == eUnknown)
         {
             for (int j=1;;j++)
@@ -1047,7 +1052,7 @@ const char* cZDSP1Server::mTestDsp(QChar* s)
 
                 cZDSP1Client* cl = GetClient(ActSock);
                 QString sadr  = "UWSPACE";
-                ulong adr = cl->DspVarResolver.adr(sadr,NULL) ;
+                ulong adr = cl->DspVarResolver.adr(sadr) ;
                 for (i=0; i< nr; i++)
                 {
                     if (DspDevSeek(DevFileDescriptor, adr) < 0)
@@ -1878,14 +1883,14 @@ bool cZDSP1Server::LoadDSProgram()
         s2=QString("ALTINTCMDLIST");
     };
 
-    ulong offset = client->DspVarResolver.adr(s, NULL) ;
+    ulong offset = client->DspVarResolver.adr(s) ;
     if (DspDevSeek(DevFileDescriptor, offset) < 0 )  // startadr im treiber setzen
         return false;
     
     if (DspDevWrite(DevFileDescriptor, CmdMem.data(), CmdMem.size()) < 0)
         return false;
     
-    offset = client->DspVarResolver.adr(s2, NULL) ;
+    offset = client->DspVarResolver.adr(s2) ;
     if (DspDevSeek(DevFileDescriptor, offset) < 0 )  // startsadr im treiber setzen
         return false;
     
@@ -2092,164 +2097,6 @@ cZDSP1Client* cZDSP1Server::GetClient(int s)
 
     return NULL;
 }
-
-
-/*
-int cZDSP1Server::Execute() // server ausführen
-{
-    int sock;
-    setDspType();
-    if ( (sock = socket( PF_INET, SOCK_STREAM, 0)) == -1)
-    { //   socket holen
-        if DEBUG1 syslog(LOG_ERR,"socket() failed\n");
-        return(1);
-    }
-    struct servent* se;
-    if ( (se=getservbyname( sServerName.latin1(),"tcp")) == NULL )  // holt port nr aus /etc/services
-    {
-        if DEBUG1 syslog(LOG_ERR,"internet network services not found\n");
-        return(1);
-    }
-    
-    struct sockaddr_in addr;
-    addr.sin_addr.s_addr = INADDR_ANY; // alle adressen des host
-    addr.sin_port = se->s_port; // ! s_port ist network byte order !
-    addr.sin_family=AF_INET;
-    if ( bind( sock, (struct sockaddr*) &addr, sizeof(addr)) == -1)
-    { // ip-adresse und port an socket binden
-        if DEBUG1 syslog(LOG_ERR,"bind() failed\n");
-        return(1);
-    }
-    if ( listen(sock,3) == -1)
-    { // einrichten einer warteschlange für einlaufende verbindungsaufbauwünsche
-        if DEBUG1 syslog(LOG_ERR,"listen() faild\n");
-        return(1);
-    }
-    char InputBuffer[InpBufSize];
-    int nBytes;
-    fd_set rfds,wfds; // menge von deskriptoren für read bzw. write
-    int fd,fdmax,s,rm;
-    for (;;) {
-        FD_ZERO (&rfds);  // deskriptor menge löschen
-        FD_ZERO (&wfds);
-
-        if (gotSIGIO)
-        {
-            DspIntHandler(); // interrupt behandeln
-            gotSIGIO = 0; // wenn behandelt -> flagge rücksetzen
-        }
-
-        fdmax=sock; // start socket
-        FD_SET(sock,&rfds);
-        if ( ! clientlist.isEmpty())
-            for ( cZDSP1Client* client=clientlist.first(); client; client=clientlist.next() )
-            {
-                fd=client->sock;
-                FD_SET(fd,&rfds);
-                if ( client->OutpAvail() || client->AsyncMessageAvail() ) // wir haben eine antwort oder eine asynch. meldung
-                    FD_SET(fd,&wfds);
-                if (fd>fdmax) fdmax=fd;
-            }
-
-        rm = pselect(fdmax+1,&rfds,&wfds,NULL,NULL,&origSigmask); // blockierender aufruf
-
-        if (rm >= 0)  // wir wollten und können was senden bzw. wir können was lesen oder es war ein interrupt
-        {
-
-            if ( ! clientlist.isEmpty())
-            { // erstmal input, bzw. client abmeldungen bearbeiten
-                for ( cZDSP1Client* client=clientlist.first(); client; client=clientlist.next() )
-                {
-                    fd=client->sock;
-                    if (FD_ISSET(fd,&rfds) )
-                    { // sind daten für den client da, oder hat er sich abgemeldet ?
-                        if ( (nBytes=recv(fd,InputBuffer,InpBufSize,0)) > 0  )
-                        { // daten sind da
-                            bool InpRdy=false;
-                            switch (InputBuffer[nBytes-1]) { // letztes zeichen
-                            case 0x0d: // cr
-                                InputBuffer[--nBytes]=0; // c string ende daraus machen
-                                InpRdy=true;
-                                break;
-                            case 0x0a: // linefeed
-                                InputBuffer[--nBytes]=0;
-                                if (nBytes)
-                                    if (InputBuffer[nBytes-1] == 0x0d) InputBuffer[--nBytes]=0;
-                                InpRdy=true;
-                                break;
-                            case 0x04: // eof
-                                InputBuffer[nBytes-1]=0; // c string ende daraus machen
-                                InpRdy=true;
-                                break;
-                            case 0:
-                                InpRdy=true; // daten komplett und 0 terminiert
-                                break;
-                            default:
-                                InputBuffer[nBytes]=0; // teil string komplettieren
-                            }
-
-                            client->AddInput(&InputBuffer[0]);
-                            if (InpRdy) {
-                                ActSock=fd;
-                                client->SetOutput(pCmdInterpreter->CmdExecute(client->GetInput())); // führt kommando aus und setzt output
-                                client->ClearInput();
-                            }
-                        }
-                        else
-                        {
-                            DelClient(fd); // client hat sich abgemeldet
-                            close(fd);
-                        }
-                    }
-                }
-            }
-
-
-            if ( ! clientlist.isEmpty())
-            { // jetzt den output bearbeiten
-                for ( cZDSP1Client* client=clientlist.first(); client; client=clientlist.next() )
-                {
-                    fd=client->sock;
-                    if (FD_ISSET(fd,&wfds) )
-                    { // soll und kann was an den client gesendet werden ?
-                        if (client->OutpAvail())
-                        {
-                            QString out = client->GetOutput();
-                            out+="\n";
-                            send(fd,out.latin1(),out.length(),0);
-                            client->SetOutput(""); // kein output mehr da
-                        }
-                        else
-                            if (client->AsyncMessageAvail())
-                            {
-                                QString out = client->GetAsyncMessage();
-                                out+="\n";
-                                send(fd,out.latin1(),out.length(),0);
-                            }
-                    }
-                }
-            }
-
-            if ( FD_ISSET(sock,&rfds) )
-            { // hier ggf.  neuen client hinzunehmen
-                int addrlen=sizeof(addr);
-                if ( (s=accept(sock,(struct sockaddr*) &addr, (socklen_t*) &addrlen) ) == -1 )
-                {
-                    if DEBUG1 syslog(LOG_ERR,"accept() failed\n");
-                }
-                else
-                {
-                    AddClient(s);
-                }
-            }
-
-
-
-        }
-    }
-    close(sock);
-}
-*/
 
 
 void cZDSP1Server::establishNewConnection(Zera::Net::cClient *newClient)
