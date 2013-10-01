@@ -132,7 +132,7 @@
 
 #include "dsp.h"
 
-static sDspCmd DspCmd[68] = {	{"INVALID", 0, CMD ,0},
+static sDspCmd DspCmd[69] = {	{"INVALID", 0, CMD ,0},
 				{"USERMEMOFFSET", 1, CMD1i32, 0 },
 				{"DSPMEMOFFSET", 2, CMD1i32, 0 },
 				{"COPYDATA", 3, CMD3i16, 0 },	
@@ -199,7 +199,8 @@ static sDspCmd DspCmd[68] = {	{"INVALID", 0, CMD ,0},
                 {"GETSTIME",64,CMD1i16,0},
                 {"TESTTIMESKIPNEX",65,CMD2i16,0},
                 {"SUBVCC",66,CMD3i16,0},
-                {"SUBVVG",67,CMD3i16,0}};
+                {"SUBVVG",67,CMD3i16,0},
+                {"DSPINTPOST",68,CMD1i16,0}};
 
 
 sDspCmd* findDspCmd(QString& s)
@@ -238,7 +239,7 @@ sMemSection dm32DspWorkspace = {
 
 sDspVar DialogWorkSpaceVar[18] = 	{ 	  {"DSPCMDPAR",10,eInt,0,0},		// 10 werte cmds, paramter ... ctrl -> dsp
                       {"DSPACK",1,eInt,0,0},			// semaphore ackn. dsp -> cntr.
-                      {"CTRLCMDPAR",10,eInt,0,0},		// 10 werte cmds, paramter ... dsp -> ctrl
+                      {"CTRLCMDPAR",20,eInt,0,0},		// 20 werte cmds, paramter ... dsp -> ctrl
                       {"CTRLACK",1,eInt,0,0},			// semaphore ackn. ctrl. -> dsp
                       {"FREQUENCYNORM",4,eFloat,0,0},		// 4 freq. normierungswerte
                       {"GAINCORRECTION",32,eFloat,0,0},		// 32 verstärkungskorrekturwerte

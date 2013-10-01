@@ -37,7 +37,7 @@
 //  ressourcemanager support added, linux event loop changed to qt event loop(qcoreapllication)
 //  dsp var decoding uses nhash tables now (qhash)
 //  server configuration with xml implemented
-//  new dsp command {"DSPINTPOST,69,CMD1i16,0}
+//  new dsp command {"DSPINTPOST,68,CMD1i16,0}
 //  serialized dsp interrupts support implemented
 //  meas. modules merging DSPINTPOST added at end of list
 

@@ -1775,52 +1775,43 @@ QDataStream& operator<<(QDataStream& ds,cDspCmd c)
 void cZDSP1Server::DspIntHandler()
 { // behandelt den dsp interrupt
 
-    int IRQCode;
+    QByteArray *ba;
     QString s;
     cZDSP1Client *client,*client2;
-    bool clientAvail;
-
     int process = 0;
 
-    clientAvail = ((client = clientlist.first()) !=0); // wir nutzen immer den 1. client zum lesen
-    if (clientAvail) // wir haben noch einen über den wir lesen können
+    if ((client = clientlist.first()) !=0) // wenn vorhanden nutzen wir immer den 1. client zum lesen
     {
-        client->DspVar(s = "CTRLCMDPAR",IRQCode); // wir lesen die hksk
-        process = IRQCode >> 16;
-        clientAvail = ( (client2 = GetClient(process)) !=0); // ist der client noch da für den der interrupt bestimmt war?
-    }
+        ba = new QByteArray();
 
-    if (!clientAvail)
-    {
-        if DEBUG1 syslog(LOG_ERR,"dsp interrupt mismatch, no such client (%d)\n",process);
-        if (client != 0) // wir haben noch einen client zum rücksetzen der semaphore, wenn nicht -> ???? das darf aber nicht ->
+        if (client->DspVarRead(s = "CTRLCMDPAR,20", ba)) // 20 worte lesen
         {
-
-            client->DspVarWrite(s = QString("CTRLACK,%1;").arg(CmdDone)); // acknowledge falls fehler
+            ulong* pardsp = (ulong*) ba->data();
+            int n = pardsp[0]; // anzahl der interrupts
+            for (int i = 1; i < (n+1); i++)
+            {
+                process = pardsp[i] >> 16;
+                if ((client2 = GetClient(process)) !=0) // gibts den client noch, der den interrupt haben wollte
+                {
+                    s = QString("DSPINT:%1").arg(pardsp[i] & 0xFFFF);
+                    QByteArray block;
+                    block = s.toUtf8();
+                    client2->m_pNetClient->writeClient(block); // we send async message to our netclient
+                }
+            }
 
         }
-        else
-        {
-            cZDSP1Client *dummyClient = new cZDSP1Client(0, 0, this); // dummyClient einrichten
-            dummyClient->DspVarWrite(s = QString("CTRLACK,%1;").arg(CmdDone)); // und rücksetzen
-        }
+
+        client->DspVarWrite(s = QString("CTRLACK,%1;").arg(CmdDone)); // jetzt in jedem fall acknowledge
+        delete ba;
+
     }
 
     else
     {
-        client->DspVarWrite(s = QString("CTRLACK,%1;").arg(CmdDone)); // sonst acknowledge
-
-        IRQCode &= 0xFFFF;
-
-        s = QString("DSPINT:%1").arg(IRQCode);
-
-        QByteArray block;
-        block = s.toUtf8();
-
-        client2->m_pNetClient->writeClient(block); // we send async message to our netclient
+        cZDSP1Client *dummyClient = new cZDSP1Client(0, 0, this); // dummyClient einrichten
+        dummyClient->DspVarWrite(s = QString("CTRLACK,%1;").arg(CmdDone)); // und rücksetzen
     }
-
-    return ;
 }
 
 
@@ -1865,8 +1856,13 @@ bool cZDSP1Server::LoadDSProgram()
             for ( int i = 0; i < cmdl2.size(); i++ ) mds2 << cmdl2[i]; // interrupt liste
         }
     }
-    s =  QString( "INVALID()");
+
     client = it.toFirst();
+    s = QString( "DSPINTPOST()"); // wir triggern das senden der serialisierten interrupts
+    cmd = client->GenDspCmd(s, &ok);
+    mds1 << cmd;
+
+    s =  QString( "INVALID()");
     cmd = client->GenDspCmd(s, &ok);
     mds1 << cmd; // kommando listen ende
     mds2 << cmd;
