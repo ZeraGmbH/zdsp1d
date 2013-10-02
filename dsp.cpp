@@ -237,7 +237,7 @@ sMemSection dm32DspWorkspace = {
 	DspVar		: DspWorkspaceVar };
 	
 
-sDspVar DialogWorkSpaceVar[18] = 	{ 	  {"DSPCMDPAR",10,eInt,0,0},		// 10 werte cmds, paramter ... ctrl -> dsp
+sDspVar DialogWorkSpaceVar[19] = 	{ 	  {"DSPCMDPAR",10,eInt,0,0},		// 10 werte cmds, paramter ... ctrl -> dsp
                       {"DSPACK",1,eInt,0,0},			// semaphore ackn. dsp -> cntr.
                       {"CTRLCMDPAR",20,eInt,0,0},		// 20 werte cmds, paramter ... dsp -> ctrl
                       {"CTRLACK",1,eInt,0,0},			// semaphore ackn. ctrl. -> dsp
@@ -254,8 +254,8 @@ sDspVar DialogWorkSpaceVar[18] = 	{ 	  {"DSPCMDPAR",10,eInt,0,0},		// 10 werte c
                       {"ETHDESTSOURCEADRESS",3,eInt,0,0},	// 3*32bit -> 2*48bit
                       {"ETHPRIORITYTAGGED",1,eInt,0,0},
                       {"ETHTYPEAPPID",1,eInt,0,0},
-                      {"ETHROUTINGTAB",8,eInt,0,0} };		// 8*4 = 32 byte 1byte/kanal ASDU / CHN
-
+                      {"ETHROUTINGTAB",8,eInt,0,0}, 		// 8*4 = 32 byte 1byte/kanal ASDU / CHN
+                      {"INTERRUPTERROR",1,eInt,0,0} };
 
 
 sMemSection dm32DialogWorkSpace = {

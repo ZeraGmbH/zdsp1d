@@ -811,6 +811,12 @@ void cZDSP1Server::doConfiguration()
     }
     else
     {
+        m_nFPGAfd = open("/dev/zFPGA1reg",O_RDWR);
+        lseek(m_nFPGAfd,0x0,0);
+        quint32 sigStart = 0;
+        write(m_nFPGAfd,(char*) &sigStart, 4);
+        sigStart = 1;
+        write(m_nFPGAfd,(char*) &sigStart, 4);
         if (myXMLConfigReader->loadSchema(defaultXSDFile))
         {
             // we want to initialize all settings first
@@ -839,14 +845,17 @@ void cZDSP1Server::doConfiguration()
             m_nerror = xsdfileError;
             emit abortInit();
         }
+
+        sigStart = 2;
+        write(m_nFPGAfd,(char*) &sigStart, 4);
+
     }
 }
 
 
 void cZDSP1Server::doSetupServer()
 {
-    m_nFPGAfd = open("/dev/zFPGA1reg",O_RDWR);
-    lseek(m_nFPGAfd,0x0,0);
+
 
     cParse* parser=new(cParse); // das ist der parser
     pCmdInterpreter=new cCmdInterpreter(this,InitCmdTree(),parser); // das ist der kommando interpreter
