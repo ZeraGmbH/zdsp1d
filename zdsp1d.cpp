@@ -845,10 +845,6 @@ void cZDSP1Server::doConfiguration()
             m_nerror = xsdfileError;
             emit abortInit();
         }
-
-        sigStart = 2;
-        write(m_nFPGAfd,(char*) &sigStart, 4);
-
     }
 }
 
@@ -856,6 +852,8 @@ void cZDSP1Server::doConfiguration()
 void cZDSP1Server::doSetupServer()
 {
 
+    quint32 sigStart = 2;
+    write(m_nFPGAfd,(char*) &sigStart, 4);
 
     cParse* parser=new(cParse); // das ist der parser
     pCmdInterpreter=new cCmdInterpreter(this,InitCmdTree(),parser); // das ist der kommando interpreter
