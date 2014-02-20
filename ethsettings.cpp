@@ -47,7 +47,7 @@ void cETHSettings::configXMLInfo(QString key)
         switch (m_ConfigXMLMap[key])
         {
         case setRMIPAdress:
-            m_sRMIPAdr = m_pXMLReader->getValue(key).toString();
+            m_sRMIPAdr = m_pXMLReader->getValue(key);
             break;
         case setServerPort:
             m_nServerPort = m_pXMLReader->getValue(key).toInt(&ok);
