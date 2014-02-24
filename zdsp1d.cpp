@@ -30,6 +30,7 @@
 //Added by qt3to4:
 #include <Q3TextStream>
 #include <zeraserver.h>
+#include <netmessages.pb.h>
 
 #include "zeraglobal.h"
 #include "zdspglobal.h"
@@ -393,6 +394,12 @@ tDspMemArray& cZDSP1Client::GetDspMemData()
 }
 
 
+int cZDSP1Client::getSocket()
+{
+    return sock;
+}
+
+
 bool cZDSP1Client::InitiateActValues(QString& s)
 {
     int fd = myServer->DevFileDescriptor;
@@ -753,6 +760,7 @@ cZDSP1Server::cZDSP1Server()
     :cZHServer()
 {
     clientlist.setAutoDelete( TRUE ); // die liste hält die objekte
+    m_nSocketIdentifier = 0; // identifiers for clients, real fd's in former times
 
     m_pDebugSettings = 0;
     m_pETHSettings = 0;
@@ -888,13 +896,21 @@ void cZDSP1Server::doSetupServer()
         SetFASync();
 
         setDspType(); // now we can interrogate the mounted dsp device type
-        // our resource mananager connection must be opened after configuration is done
-        m_pRMConnection = new cRMConnection(m_pETHSettings->getRMIPadr(), m_pETHSettings->getPort(resourcemanager), m_pDebugSettings->getDebugLevel());
-        connect(m_pRMConnection, SIGNAL(connectionRMError()), this, SIGNAL(abortInit()));
-        // so we must complete our state machine here
-        stateconnect2RM->addTransition(m_pRMConnection, SIGNAL(connected()), stateSendRMIdentandRegister);
+        if (!bootDsp())
+        {
+            m_nerror = dspBootError;
+            emit abortInit();
+        }
+        else
+        {
+            // our resource mananager connection must be opened after configuration is done
+            m_pRMConnection = new cRMConnection(m_pETHSettings->getRMIPadr(), m_pETHSettings->getPort(resourcemanager), m_pDebugSettings->getDebugLevel());
+            connect(m_pRMConnection, SIGNAL(connectionRMError()), this, SIGNAL(abortInit()));
+            // so we must complete our state machine here
+            stateconnect2RM->addTransition(m_pRMConnection, SIGNAL(connected()), stateSendRMIdentandRegister);
 
-        emit serverSetup(); // so we enter state machine's next state
+            emit serverSetup(); // so we enter state machine's next state
+        }
     }
 
 }
@@ -1142,31 +1158,38 @@ const char* cZDSP1Server::mResetDsp(QChar*)
 }
 
 
-const char* cZDSP1Server::mBootDsp(QChar *)
+bool cZDSP1Server::bootDsp()
 {
     QFile f (m_sDspBootPath);
     if (!f.open(QIODevice::Unbuffered | QIODevice::ReadOnly))
     { // dsp bootfile öffnen
         if (DEBUG1)  syslog(LOG_ERR,"error opening dsp boot file: %s\n",m_sDspBootPath.latin1());
         Answer = ERRPATHString;
-        return Answer.latin1();
+        return false;
     }
-    
+
     long len = f.size();
     QByteArray BootMem(len);
     f.readBlock(BootMem.data(),len);
     f.close();
-    
+
     int r = ioctl(DevFileDescriptor,ADSP_BOOT,BootMem.data()); // und booten
-    
+
     if ( r < 0 )
     {
         if (DEBUG1)  syslog(LOG_ERR,"error %d booting dsp device: %s\n",r,m_sDspDeviceNode.latin1());
         Answer = ERREXECString; // fehler bei der ausführung
-        return Answer.latin1();
+        return false;
     }
 
     Answer = ACKString;
+    return true;
+}
+
+
+const char* cZDSP1Server::mBootDsp(QChar *)
+{
+    bootDsp();
     return Answer.latin1();
 }
 
@@ -1793,6 +1816,7 @@ void cZDSP1Server::DspIntHandler()
 
         if (client->DspVarRead(s = "CTRLCMDPAR,20", ba)) // 20 worte lesen
         {
+            QByteArray block;
             ulong* pardsp = (ulong*) ba->data();
             int n = pardsp[0]; // anzahl der interrupts
             for (int i = 1; i < (n+1); i++)
@@ -1801,9 +1825,25 @@ void cZDSP1Server::DspIntHandler()
                 if ((client2 = GetClient(process)) !=0) // gibts den client noch, der den interrupt haben wollte
                 {
                     s = QString("DSPINT:%1").arg(pardsp[i] & 0xFFFF);
-                    QByteArray block;
-                    block = s.toUtf8();
-                    client2->m_pNetClient->writeClient(block); // we send async message to our netclient
+
+                    if (m_clientIDHash.contains(client2)) // es war ein client der über protobuf (clientid) angelegt wurde
+                    {
+                        ProtobufMessage::NetMessage protobufIntMessage;
+                        ProtobufMessage::NetMessage::NetReply *intMessage = protobufIntMessage.mutable_reply();
+
+                        intMessage->set_body(s.toStdString());
+
+                        protobufIntMessage.set_clientid(m_clientIDHash[client2]);
+                        protobufIntMessage.set_messagenr(0); // interrupt
+
+                        block = client2->m_pNetClient->translatePB2ByteArray(&protobufIntMessage);
+                        client2->m_pNetClient->writeClient(block);
+                    }
+                    else
+                    {
+                        block = s.toUtf8();
+                        client2->m_pNetClient->writeClient(block); // we send async message to our netclient
+                    }
                 }
             }
 
@@ -2120,18 +2160,59 @@ void cZDSP1Server::deleteConnection()
 void cZDSP1Server::executeCommand(const QByteArray cmd)
 {
     QString m_sInput, m_sOutput;
+    QByteArray block;
+    ProtobufMessage::NetMessage protobufCommand;
 
     Zera::Net::cClient* client = qobject_cast<Zera::Net::cClient*>(sender());
-    ActSock = client->getSocket();
 
-    m_sInput = QString::fromUtf8(cmd.data(),cmd.size());
-    m_sOutput = pCmdInterpreter->CmdExecute(m_sInput);
+    if (protobufCommand.ParseFromArray(cmd, cmd.count()))
+    {
+        QByteArray clientId = QByteArray(protobufCommand.clientid().c_str(), protobufCommand.clientid().size());
+        quint32 messageNr = protobufCommand.messagenr();
+        ProtobufMessage::NetMessage::ScpiCommand scpiCmd = protobufCommand.scpi();
 
-    QByteArray block;
-    block = m_sOutput.toUtf8();
+        if (!m_zdspdClientHash.contains(clientId)) // we didn't get any command from here yet
+        {
+            cZDSP1Client *zdspclient = AddClient(client); // we add a new client with the same socket but different identifier
+            m_zdspdClientHash[clientId] = zdspclient;
+            m_clientIDHash[zdspclient] = clientId; // we need this list in case of interrupts
+        }
 
-    if (client)
-        client->writeClient(block);
+        ActSock = m_zdspdClientHash[clientId]->getSocket(); // we set the actual socket (identifier) we have to work on
+        m_sInput = QString::fromStdString(scpiCmd.command()) +  " " + QString::fromStdString(scpiCmd.parameter());
+        m_sOutput = pCmdInterpreter->CmdExecute(m_sInput);
+
+        ProtobufMessage::NetMessage protobufAnswer;
+        ProtobufMessage::NetMessage::NetReply *Answer = protobufAnswer.mutable_reply();
+
+        if (m_sOutput.contains(NACKString))
+            Answer->set_rtype(ProtobufMessage::NetMessage_NetReply_ReplyType_NACK);
+        if (m_sOutput.contains((ACKString)))
+            Answer->set_rtype(ProtobufMessage::NetMessage_NetReply_ReplyType_ACK);
+        else
+            Answer->set_body(m_sOutput.toStdString());
+
+        protobufAnswer.set_clientid(clientId, clientId.count());
+        protobufAnswer.set_messagenr(messageNr);
+
+        if (client)
+        {
+            block = client->translatePB2ByteArray(Answer);
+            client->writeClient(block);
+        }
+    }
+    else
+    {
+        ActSock = client->getSocket();
+
+        m_sInput = QString::fromUtf8(cmd.data(),cmd.size());
+        m_sOutput = pCmdInterpreter->CmdExecute(m_sInput);
+
+        block = m_sOutput.toUtf8();
+
+        if (client)
+            client->writeClient(block);
+    }
 }
 
 
@@ -2143,11 +2224,17 @@ void cZDSP1Server::SetFASync()
 }
 
 
-void cZDSP1Server::AddClient(Zera::Net::cClient* m_pNetClient)
-{ // fügt einen client hinzu
-    int socket = m_pNetClient->getSocket();
-    clientlist.append(new cZDSP1Client(socket, m_pNetClient,this));
-    if DEBUG3 syslog(LOG_INFO,"client %d added\n",socket);
+cZDSP1Client* cZDSP1Server::AddClient(Zera::Net::cClient* m_pNetClient)
+{
+    // fügt einen client hinzu
+    // int socket = m_pNetClient->getSocket();
+    m_nSocketIdentifier++;
+    if (m_nSocketIdentifier == 0)
+        m_nSocketIdentifier++;
+    cZDSP1Client* client = new cZDSP1Client(m_nSocketIdentifier, m_pNetClient,this);
+    clientlist.append(client);
+    if DEBUG3 syslog(LOG_INFO,"client %d added\n", m_nSocketIdentifier);
+    return client;
 }
 
 
@@ -2170,16 +2257,16 @@ const char* cZDSP1Server::SCPICmd(SCPICmdType cmd, QChar *s)
 {
     switch ((int)cmd)
     {
-    case    TestDsp:        return mTestDsp(s);
-    case 	ResetDsp:		return mResetDsp(s);
-    case	BootDsp: 		return mBootDsp(s);
-    case 	SetDspBootPath: 		return mSetDspBootPath(s);
-    case  	Fetch:			return mFetch(s);
+    case    TestDsp:            return mTestDsp(s);
+    case 	ResetDsp:           return mResetDsp(s);
+    case	BootDsp:            return mBootDsp(s);
+    case 	SetDspBootPath:     return mSetDspBootPath(s);
+    case  	Fetch:              return mFetch(s);
     case 	Initiate:			return mInitiate(s);
     case 	SetRavList: 		return mSetRavList(s);
     case 	SetCmdList: 		return mSetCmdList(s);
     case   SetCmdIntList: 		return mSetCmdIntList(s);
-    case 	Measure: 		return mMeasure(s);
+    case 	Measure:            return mMeasure(s);
     case 	UnloadCmdList: 		return mUnloadCmdList(s);
     case 	LoadCmdList: 		return mLoadCmdList(s);
     case 	DspMemoryRead: 		return mDspMemoryRead(s);

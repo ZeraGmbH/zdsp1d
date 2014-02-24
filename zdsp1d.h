@@ -9,6 +9,7 @@
 #include <qstring.h>
 #include <qstringlist.h>
 #include <qmap.h>
+#include <QHash>
 #include <q3valuelist.h>
 //Added by qt3to4:
 #include <Q3PtrList>
@@ -36,9 +37,9 @@ class cRMConnection;
 class cZDSP1Client
 {
 public:
-    cZDSP1Client(){};
+    cZDSP1Client(){}
     cZDSP1Client(int socket, Zera::Net::cClient* netclient, cZDSP1Server *server);
-    ~cZDSP1Client(){}; //  allokierten speicher ggf. freigeben
+    ~cZDSP1Client(){} //  allokierten speicher ggf. freigeben
     
     
     QString& SetRavList(QString&);
@@ -65,6 +66,7 @@ public:
     tDspCmdList& GetDspCmdList(); // damit der server die komplette liste aller clients
     tDspCmdList& GetDspIntCmdList(); // an den dsp übertragen kann
     tDspMemArray& GetDspMemData(); 
+    int getSocket();
     cDspVarResolver DspVarResolver; // zum auflösen der variablen aus kommandos
     int sock; // socket für den die verbindung besteht
     Zera::Net::cClient* m_pNetClient; // our network client
@@ -98,7 +100,7 @@ class cZDSP1Server: public QObject, public cZHServer, public cbIFace {
 public:
     cZDSP1Server();
     virtual ~cZDSP1Server();
-    virtual void AddClient(Zera::Net::cClient *m_pNetClient); // fügt einen client hinzu
+    virtual cZDSP1Client* AddClient(Zera::Net::cClient *m_pNetClient); // fügt einen client hinzu
     virtual void DelClient(Zera::Net::cClient *m_pNetClient); // entfernt einen client
 
     virtual const char* SCPICmd( SCPICmdType, QChar*);
@@ -132,10 +134,16 @@ signals:
 
 private:
     Zera::Net::cServer* myServer; // the real server that does the communication job
+    quint16 m_nSocketIdentifier; // we will use this instead of real sockets, because protobuf extension clientId
+    QHash<QByteArray, cZDSP1Client*> m_zdspdClientHash;
+    QHash<cZDSP1Client*, QByteArray> m_clientIDHash; // liste der clientID's für die dspclients die über protobuf erzeugt wurden
     quint8 m_nerror;
     uchar ActivatedCmdList;
-    Q3PtrList<cZDSP1Client> clientlist; // liste der clients
+    Q3PtrList<cZDSP1Client> clientlist; // liste aller clients
     
+
+    bool bootDsp();
+
     // die routinen für das system modell
     const char* mCommand2Dsp(QString&); // indirekt für system modell    
     
