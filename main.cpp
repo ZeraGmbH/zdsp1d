@@ -11,7 +11,6 @@
 
 int main( int argc, char *argv[] )
 {
-    pid_t pid;
     openlog(ServerBasisName, LOG_PID, LOG_DAEMON); // verbindung zum syslogd aufnehmen
 
     QCoreApplication* app = new QCoreApplication (argc, argv);
@@ -19,6 +18,7 @@ int main( int argc, char *argv[] )
 
     int r = 0;
 #ifndef ZDSP1DDEBUG
+    pid_t pid;
     if ( (pid=fork() ) < 0 ) // we generate a child process
     {
         syslog(LOG_EMERG,"fork() failed\n") ; // error message to syslogd if not
@@ -51,6 +51,8 @@ int main( int argc, char *argv[] )
         syslog(LOG_EMERG,"Abort, xml file error\n") ;
     if (r == dspDeviceError)
         syslog(LOG_EMERG,"Abort, device not found\n") ;
+    if (r == dspBootError)
+        syslog(LOG_EMERG,"Abort, device boot error\n") ;
 
     syslog(LOG_INFO,"zdsp1d server child process terminated ret = %d\n", r);
     delete zdsp1d;
