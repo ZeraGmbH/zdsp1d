@@ -896,12 +896,8 @@ void cZDSP1Server::doSetupServer()
         SetFASync();
 
         setDspType(); // now we can interrogate the mounted dsp device type
-        if (!bootDsp())
-        {
-            m_nerror = dspBootError;
-            emit abortInit();
-        }
-        else
+
+        if (resetDsp() && bootDsp()) // and try to reset and then boot it
         {
             // our resource mananager connection must be opened after configuration is done
             m_pRMConnection = new cRMConnection(m_pETHSettings->getRMIPadr(), m_pETHSettings->getPort(resourcemanager), m_pDebugSettings->getDebugLevel());
@@ -910,6 +906,11 @@ void cZDSP1Server::doSetupServer()
             stateconnect2RM->addTransition(m_pRMConnection, SIGNAL(connected()), stateSendRMIdentandRegister);
 
             emit serverSetup(); // so we enter state machine's next state
+        }
+        else
+        {
+            m_nerror = dspBootError;
+            emit abortInit();
         }
     }
 
@@ -1140,20 +1141,25 @@ const char* cZDSP1Server::mTestDsp(QChar* s)
 }
 
 
-
-const char* cZDSP1Server::mResetDsp(QChar*)
+bool cZDSP1Server::resetDsp()
 {
-
     int r = ioctl(DevFileDescriptor,ADSP_RESET); // und reset
-    
+
     if ( r < 0 )
     {
         if (DEBUG1)  syslog(LOG_ERR,"error %d reset dsp device: %s\n",r,m_sDspDeviceNode.latin1());
         Answer = ERREXECString; // fehler bei der ausführung
-        return Answer.latin1();
+        return false;
     }
-
     Answer = ACKString;
+    return true;
+}
+
+
+const char* cZDSP1Server::mResetDsp(QChar*)
+{
+
+    resetDsp();
     return Answer.latin1();
 }
 

@@ -141,7 +141,7 @@ private:
     uchar ActivatedCmdList;
     Q3PtrList<cZDSP1Client> clientlist; // liste aller clients
     
-
+    bool resetDsp();
     bool bootDsp();
 
     // die routinen für das system modell
