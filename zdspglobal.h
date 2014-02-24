@@ -61,6 +61,7 @@ enum ServerErrors
     xsdfileError,
     xmlfileError,
     dspDeviceError,
+    dspBootError,
     pipeError,
     rmConnectionError
 };
