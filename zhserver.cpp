@@ -8,7 +8,6 @@
 #include <iostream>
 #include <qstring.h>
 #include <qstringlist.h>
-#include <q3valuelist.h>
 
 #include "zdspglobal.h"
 #include "zhserver.h"
@@ -32,7 +31,7 @@ cNode* cNodeZHServer::TestNode(cCmdInterpreter* ci,QChar** inp)
     QChar* tinp=*inp;
     QString stmp;
     stmp=ci->m_pParser->GetKeyword(&tinp); // lässt das nächste schlüsselwort vom parser lesen
-    QString STMP=stmp.upper();
+    QString STMP = stmp.toUpper();
     m_nNodeStat=isUnknown; // erst mal unbekannt
     for ( QStringList::iterator it = sNodeNames->begin(); it != sNodeNames->end(); ++it )
     {
@@ -47,7 +46,7 @@ cNode* cNodeZHServer::TestNode(cCmdInterpreter* ci,QChar** inp)
     if (m_nNodeStat == isUnknown) return (pNextNode); // zum prüfen des nächsten knoten ( solange != NULL gehts weiter )
     *inp=tinp; // hinter dem schlüsselwort gehts weiter
     
-    char c = ci->m_pParser->GetChar(inp).toAscii();
+    char c = ci->m_pParser->GetChar(inp).toLatin1();
 
     switch (c)
     {

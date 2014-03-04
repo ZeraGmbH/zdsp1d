@@ -3,11 +3,11 @@
 #ifndef KPARSER_H
 #define KPARSER_H
 
-#include <qstring.h>
+#include <QString>
 
 class cParse { // sucht nach zusammenhängenden wörtern mit frei wählbaren delimitern und whitespaces
 public:
-    cParse() {delimiter = " :?;"; whitespace = " ";}; // setzt default delimiter, whitespace
+    cParse() {delimiter = " :?;"; whitespace = " ";} // setzt default delimiter, whitespace
     const QString GetKeyword(QChar**); // liesst nächstes schlüsselwort aus string
     QChar GetChar(QChar **); // liesst das nächste zeichen aus string
     const QString SetDelimiter(const QString s);

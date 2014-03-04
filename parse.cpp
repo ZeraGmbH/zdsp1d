@@ -11,7 +11,7 @@ const QString cParse::GetKeyword(QChar **s)
         for (;;) {
             ls+=tc;
             tc=**s; // hole nächstes zeichen
-            if ( delimiter.contains(tc,false) ) break; // wenn zeichen delimiter -> fertig
+            if ( delimiter.contains(tc,Qt::CaseInsensitive) ) break; // wenn zeichen delimiter -> fertig
             if (tc.isNull()) break; // string zu ende -> fertig
             (*s)++; // sonst nächstes zeichen
         }
@@ -29,7 +29,7 @@ QChar cParse::GetChar(QChar** s)
             tc = **s;
             (*s)++;
         }
-        while ( (!tc.isNull()) && (whitespace.contains(tc,false)) ); // ignoriere whitespace character
+        while ( (!tc.isNull()) && (whitespace.contains(tc,Qt::CaseInsensitive)) ); // ignoriere whitespace character
     }
 
     return(tc); // return = 0 oder zeichen != whitespace

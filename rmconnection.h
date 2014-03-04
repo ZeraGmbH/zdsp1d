@@ -4,14 +4,15 @@
 #include <QObject>
 #include <QAbstractSocket>
 
+namespace google {
+namespace protobuf {
+class Message;
+}
+}
+
+
 class QString;
-
-namespace Zera {
-namespace NetClient {
-class  cClientNetBase;
-}
-
-}
+class ProtoNetPeer;
 
 
 class cRMConnection: public QObject
@@ -31,11 +32,11 @@ private:
     quint16 m_nPort;
     quint8 m_nDebugLevel;
     QString m_sCommand;
-    Zera::NetClient::cClientNetBase* m_pResourceManagerClient;
+    ProtoNetPeer* m_pResourceManagerClient;
 
 private slots:
     void tcpErrorHandler(QAbstractSocket::SocketError errorCode);
-    void responseHandler(QByteArray message);
+    void responseHandler(google::protobuf::Message* message);
 
 signals:
     void connectionRMError();

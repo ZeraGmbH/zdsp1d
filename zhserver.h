@@ -10,9 +10,8 @@
 #define ZHSERVER_H
 
 #include <netinet/in.h>
-#include <q3ptrlist.h>
-#include <qstringlist.h>
-#include <qstring.h>
+#include <QStringList>
+#include <QString>
 
 #include "scpi.h"
 #include "dsp1scpi.h"
@@ -36,7 +35,7 @@ namespace Zera
 class cNodeZHServer: public cNode {
 public:
     cNodeZHServer(QStringList*,QString*,int,cNode*,cNode*,SCPICmdType,SCPICmdType); 
-    virtual ~cNodeZHServer(){};
+    virtual ~cNodeZHServer(){}
     // konstruktor, psNodeNames,psNode2Set, nNodedef, pNextNode, pNewLevelNode, Cmd, Query
     virtual cNode* TestNode(cCmdInterpreter*, QChar **); // zeiger, zeiger auf zeiger auf inputzeile, testet den knoten
     void SetNodeNameList(QStringList*); // zum späteren umschreiben der liste der knotennamen

@@ -4,9 +4,9 @@
 #ifndef DSP_H
 #define DSP_H
 
-#include <qstring.h>
-#include <q3ptrlist.h>
-#include <qdatastream.h>
+#include <QString>
+#include <QList>
+#include <QDataStream>
 #include <QHash>
 
 #include "parse.h"
@@ -85,7 +85,7 @@ private:
 //    long offs(QString&, sMemSection**, int *);
     void setQHash(sMemSection* psec); // zum setzen der qhash
 //    sMemSection *sec;
-    Q3PtrList<sMemSection> MemSectionList;
+    QList<sMemSection*> MemSectionList;
 };
 
 

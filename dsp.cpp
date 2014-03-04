@@ -270,7 +270,7 @@ sDspVar UserWorkSpaceVar[1] = { {"UWSPACE",uwSpaceSize21262,eFloat,0,0} };
 sMemSection dm32UserWorkSpace = {
     StartAdr		: dm32UserWorkSpaceBase21262,
 	n 		: 1,
-	DspVar		: UserWorkSpaceVar };
+    DspVar		: UserWorkSpaceVar };
 
 
 sDspVar CmdListVar[4] = 	{	{"INTCMDLIST",IntCmdListLen21262,eInt,0,0},                // interrupt kommando
@@ -311,14 +311,14 @@ bool cDspClientVar::Init(QString& s)
     int n,fs;
     if ( (n = s.count(',')) > 0 )
     {
-        m_sName = s.section(',',0,0).stripWhiteSpace();
-        fs = s.section(',',1,1).stripWhiteSpace().toInt(&ret); // der erste parameter ist die feldgrösse
+        m_sName = s.section(',',0,0).remove(' ');
+        fs = s.section(',',1,1).remove(' ').toInt(&ret); // der erste parameter ist die feldgrösse
         if (ret)
             m_nSize = fs;
 
         if (n > 1) // wir haben noch einen parameter, dann ist das der typ
         {
-            fs = s.section(',',2,2).stripWhiteSpace().toInt(&ret);
+            fs = s.section(',',2,2).remove(' ').toInt(&ret);
             if (ret)
             {
                 if ( (ret = ( (fs == eInt) || (fs == eFloat) )))
@@ -372,10 +372,9 @@ cDspVarResolver::cDspVarResolver()
 
 void cDspVarResolver::setVarHash()
 {
-    sMemSection* psec;
     mVarHash.clear();
-    for ( psec = MemSectionList.first(); psec; psec = MemSectionList.next() )
-        setQHash(psec);
+    for (int i = 0; i < MemSectionList.count(); i++)
+        setQHash(MemSectionList.at(i));
 }
 
 
@@ -462,13 +461,13 @@ long cDspVarResolver::offs(QString& s)
 {
     long offset;
     bool ok;
-    QString ts = s.upper();
+    QString ts = s.toUpper();
     QChar* cts = ts.data();
     QString sSearch=VarParser.GetKeyword(&cts); // der namen der variable, die gesucht ist
     if (mVarHash.contains(sSearch))
     {
         sDspVar* pDspVar = mVarHash.value(sSearch);
-        ts = ts.stripWhiteSpace();
+        ts = ts.remove(' ');
         ts = ts.remove(sSearch); // name raus
         if (ts.length() > 0)
         { // wenn noch was da, dann muss das ein +/- offset sein
@@ -502,13 +501,13 @@ long cDspVarResolver::adr(QString& s)
 {
     long offset, adress;
     bool ok;
-    QString ts = s.upper();
+    QString ts = s.toUpper();
     QChar* cts = ts.data();
     QString sSearch=VarParser.GetKeyword(&cts); // der namen der variable, die gesucht ist
     if (mVarHash.contains(sSearch))
     {
         sDspVar* pDspVar = mVarHash.value(sSearch);
-        ts = ts.stripWhiteSpace();
+        ts = ts.remove(' ');
         ts = ts.remove(sSearch); // name raus
         if (ts.length() > 0)
         { // wenn noch was da, dann muss das ein +/- offset sein
@@ -540,7 +539,7 @@ long cDspVarResolver::adr(QString& s)
 
 sDspVar* cDspVarResolver::vadr(QString& s)
 {
-    QString ts = s.upper();
+    QString ts = s.toUpper();
     QChar* cts = ts.data();
     QString sSearch=VarParser.GetKeyword(&cts);
 
@@ -553,7 +552,7 @@ sDspVar* cDspVarResolver::vadr(QString& s)
 
 int cDspVarResolver::type(QString &s)
 {
-    QString ts = s.upper();
+    QString ts = s.toUpper();
     QChar* cts = ts.data();
     QString sSearch=VarParser.GetKeyword(&cts);
 

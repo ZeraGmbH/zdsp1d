@@ -5,10 +5,10 @@ include(zdsp1d.user.pri)
 
 QMAKE_CXXFLAGS += -O0
 
-LIBS +=  -lzeranet
-LIBS +=  -lzeranetclient
+
 LIBS +=  -lzeraxmlconfig
 LIBS +=  -lprotobuf
+LIBS +=  -lproto-net-qt
 LIBS +=  -lzera-resourcemanager-protobuf
 
 CONFIG	+= qt debug
@@ -48,7 +48,7 @@ unix {
 }
 
 #The following line was inserted by qt3to4
-QT +=  qt3support xml network
+QT += xml network
 
 target.path = /usr/bin
 INSTALLS += target

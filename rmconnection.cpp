@@ -1,6 +1,6 @@
 #include <syslog.h>
 #include <QString>
-#include <zeraclientnetbase.h>
+#include <protonetpeer.h>
 #include <netmessages.pb.h>
 
 #include "zdspglobal.h"
@@ -15,12 +15,12 @@ cRMConnection::cRMConnection(QString ipadr, quint16 port, quint8 dlevel)
 
 void cRMConnection::connect2RM()
 {
-    m_pResourceManagerClient = new Zera::NetClient::cClientNetBase(this);
-    connect(m_pResourceManagerClient, SIGNAL(tcpError(QAbstractSocket::SocketError)), this, SLOT(tcpErrorHandler(QAbstractSocket::SocketError)));
-    connect(m_pResourceManagerClient, SIGNAL(connected()), this, SIGNAL(connected()));
-    connect(m_pResourceManagerClient, SIGNAL(connectionLost()), this, SIGNAL(connectionRMError()));
-    connect(m_pResourceManagerClient, SIGNAL(messageAvailable(QByteArray)), this, SLOT(responseHandler(QByteArray)));
-    m_pResourceManagerClient->startNetwork(m_sIPAdr, m_nPort);
+    m_pResourceManagerClient = new ProtoNetPeer(this);
+    connect(m_pResourceManagerClient, SIGNAL(sigSocketError(QAbstractSocket::SocketError)), this, SLOT(tcpErrorHandler(QAbstractSocket::SocketError)));
+    connect(m_pResourceManagerClient, SIGNAL(sigConnectionEstablished()), this, SIGNAL(connected()));
+    connect(m_pResourceManagerClient, SIGNAL(sigConnectionClosed()), this, SIGNAL(connectionRMError()));
+    connect(m_pResourceManagerClient, SIGNAL(sigMessageReceived(google::protobuf::Message*)), this, SLOT(responseHandler(google::protobuf::Message*)));
+    m_pResourceManagerClient->startConnection(m_sIPAdr, m_nPort);
 }
 
 
@@ -43,24 +43,22 @@ void cRMConnection::tcpErrorHandler(QAbstractSocket::SocketError errorCode)
 }
 
 
-void cRMConnection::responseHandler(QByteArray message)
+void cRMConnection::responseHandler(google::protobuf::Message *message)
 {
-    ProtobufMessage::NetMessage answer;
-    if (answer.ParseFromArray(message, message.count()))
+    ProtobufMessage::NetMessage *answer;
+
+
+    // ProtoNetPeer* client = qobject_cast<ProtoNetPeer*>(sender());
+    answer = static_cast<ProtobufMessage::NetMessage*>(message);
+
+
+    if ( !(answer->has_reply() && answer->reply().rtype() == answer->reply().ACK))
     {
-        if ( !(answer.has_reply() && answer.reply().rtype() == answer.reply().ACK))
+        if (DEBUG1)
         {
-            if (DEBUG1)
-            {
-                QByteArray ba = m_sCommand.toLocal8Bit();
-                syslog(LOG_ERR,"command: %s, was not acknowledged\n", ba.data() );
-            }
-            emit connectionRMError();
+            QByteArray ba = m_sCommand.toLocal8Bit();
+            syslog(LOG_ERR,"command: %s, was not acknowledged\n", ba.data() );
         }
-    }
-    else
-    {
-        if (DEBUG1) syslog(LOG_ERR,"answer from resource manager not protobuf \n");
         emit connectionRMError();
     }
 }

@@ -6,23 +6,19 @@
 #define ZDSP1D_H
 
 #include <QObject>
-#include <qstring.h>
-#include <qstringlist.h>
-#include <qmap.h>
+#include <QList>
+#include <QString>
+#include <QStringList>
+#include <QMap>
 #include <QHash>
-#include <q3valuelist.h>
-//Added by qt3to4:
-#include <Q3PtrList>
-//#include <Q3MemArray>
 #include <QVector>
+#include <protonetserver.h>
 
 #include "dsp1scpi.h"
 #include "zhserver.h"
 #include "dsp.h"
 
 
-typedef Q3ValueList<cDspCmd> tDspCmdList;
-typedef Q3ValueList<cDspClientVar> tDspVarList;
 typedef QVector<float> tDspMemArray;
 
 class QByteArray;
@@ -38,7 +34,7 @@ class cZDSP1Client
 {
 public:
     cZDSP1Client(){}
-    cZDSP1Client(int socket, Zera::Net::cClient* netclient, cZDSP1Server *server);
+    cZDSP1Client(int socket, ProtoNetPeer *netclient, cZDSP1Server *server);
     ~cZDSP1Client(){} //  allokierten speicher ggf. freigeben
     
     
@@ -63,19 +59,19 @@ public:
     sDspVar* DspVarRead(QString&,QByteArray*); // lesen dsp variable;  name , länge stehen im parameter string; werte im anschluss im qbytearray
     const char* DspVarWriteRM(QString&); // dito schreiben mit rückmeldung
     bool DspVarWrite(QString&);  // schreiben  true wenn ok
-    tDspCmdList& GetDspCmdList(); // damit der server die komplette liste aller clients
-    tDspCmdList& GetDspIntCmdList(); // an den dsp übertragen kann
+    QList<cDspCmd>& GetDspCmdList(); // damit der server die komplette liste aller clients
+    QList<cDspCmd>& GetDspIntCmdList(); // an den dsp übertragen kann
     tDspMemArray& GetDspMemData(); 
     int getSocket();
     cDspVarResolver DspVarResolver; // zum auflösen der variablen aus kommandos
     int sock; // socket für den die verbindung besteht
-    Zera::Net::cClient* m_pNetClient; // our network client
+    ProtoNetPeer* m_pNetClient; // our network client
 
 private:
-    void init(int socket, Zera::Net::cClient *netclient, cZDSP1Server* server);
+    void init(int socket, ProtoNetPeer *netclient, cZDSP1Server* server);
     cZDSP1Server* myServer; 
     bool m_bActive;
-    bool GenCmdList(QString&, tDspCmdList&,QString&);
+    bool GenCmdList(QString&, QList<cDspCmd>& ,QString&);
     bool syntaxCheck(QString&);
           
     int Encryption;
@@ -87,9 +83,9 @@ private:
 //    ulong m_nStartAdr; // die absolute adresse an der ein variablen "block" im dsp steht 
     int m_nlen; // länge des gesamten datenblocks (in float bzw. long)
     tDspMemArray m_fDspMemData; // der datenblock bzw. kopie desselben
-    tDspVarList m_DspVarList; // liste mit variablen beschreibungen
-    tDspCmdList m_DspCmdList; // liste mit dsp kommandos (periodisch)
-    tDspCmdList  m_DspIntCmdList; // liste mit dsp kommandos (interrupt)
+    QList<cDspClientVar> m_DspVarList; // liste mit variablen beschreibungen
+    QList<cDspCmd> m_DspCmdList; // liste mit dsp kommandos (periodisch)
+    QList<cDspCmd>  m_DspIntCmdList; // liste mit dsp kommandos (interrupt)
     QVector<sDspVar> varArray; // array von sDspVar
     sMemSection msec; // eine memory section für den DspVarResolver 
 
@@ -100,8 +96,8 @@ class cZDSP1Server: public QObject, public cZHServer, public cbIFace {
 public:
     cZDSP1Server();
     virtual ~cZDSP1Server();
-    virtual cZDSP1Client* AddClient(Zera::Net::cClient *m_pNetClient); // fügt einen client hinzu
-    virtual void DelClient(Zera::Net::cClient *m_pNetClient); // entfernt einen client
+    virtual cZDSP1Client* AddClient(ProtoNetPeer *m_pNetClient); // fügt einen client hinzu
+    virtual void DelClient(ProtoNetPeer *netClient); // entfernt einen client
 
     virtual const char* SCPICmd( SCPICmdType, QChar*);
     virtual const char* SCPIQuery( SCPICmdType);
@@ -133,13 +129,13 @@ signals:
     void abortInit();
 
 private:
-    Zera::Net::cServer* myServer; // the real server that does the communication job
+    ProtoNetServer* myServer; // the real server that does the communication job
     quint16 m_nSocketIdentifier; // we will use this instead of real sockets, because protobuf extension clientId
     QHash<QByteArray, cZDSP1Client*> m_zdspdClientHash;
     QHash<cZDSP1Client*, QByteArray> m_clientIDHash; // liste der clientID's für die dspclients die über protobuf erzeugt wurden
     quint8 m_nerror;
     uchar ActivatedCmdList;
-    Q3PtrList<cZDSP1Client> clientlist; // liste aller clients
+    QList<cZDSP1Client*> clientlist; // liste aller clients
     
     bool resetDsp();
     bool bootDsp();
@@ -213,8 +209,8 @@ private:
     int readMagicId();
     bool Test4HWPresent(); 
     bool Test4DspRunning();
-    cZDSP1Client* GetClient(int);
-    
+    cZDSP1Client* GetClient(int s);
+    cZDSP1Client* GetClient(ProtoNetPeer* peer);
     QString m_sDspDeviceVersion; // version der hardware
     QString m_sDspSerialNumber; // seriennummer der hardware
     QString m_sDspDeviceNode; // für den zugriff zur hardware
@@ -230,7 +226,7 @@ private:
 
 
 private slots:
-    virtual void establishNewConnection(Zera::Net::cClient* newClient);
+    virtual void establishNewConnection(ProtoNetPeer* newClient);
     virtual void deleteConnection();
     virtual void executeCommand(const QByteArray cmd);
 
