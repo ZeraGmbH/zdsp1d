@@ -16,6 +16,8 @@
 .#*
 *.*#
 .DS_Store
+*.user.pri
+*.prl
 *.debug
 Makefile*
 *.prl
