@@ -788,7 +788,7 @@ cZDSP1Server::cZDSP1Server()
 
     stateCONF->setInitialState(statexmlConfiguration);
 
-    statexmlConfiguration->addTransition(myXMLConfigReader, SIGNAL(finishedParsingXML()), statesetupServer);
+    statexmlConfiguration->addTransition(myXMLConfigReader, SIGNAL(finishedParsingXML(bool)), statesetupServer);
     statesetupServer->addTransition(this, SIGNAL(serverSetup()), stateconnect2RM);
 
     m_pInitializationMachine->addState(stateCONF);
