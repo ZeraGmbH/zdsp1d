@@ -1196,7 +1196,7 @@ bool cZDSP1Server::bootDsp()
     BootMem.resize(len);
     f.readLine(BootMem.data(), len);
     f.close();
-    qDebug() << "md5sum bootfile = " << QCryptographicHash::hash(BootMem, QCryptographicHash::Md5);
+    qDebug() << "md5sum bootfile = " << QString(QCryptographicHash::hash(BootMem, QCryptographicHash::Md5).toHex());
 
     int r = ioctl(DevFileDescriptor,ADSP_BOOT,BootMem.data()); // und booten
 
