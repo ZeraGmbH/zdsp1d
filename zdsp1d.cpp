@@ -28,6 +28,7 @@
 #include <QFile>
 #include <qbuffer.h>
 #include <QTcpSocket>
+#include <QCryptographicHash>
 
 #include <QTextStream>
 #include <protonetserver.h>
@@ -1182,6 +1183,7 @@ const char* cZDSP1Server::mResetDsp(QChar*)
 bool cZDSP1Server::bootDsp()
 {
     QFile f (m_sDspBootPath);
+    qDebug() << m_sDspBootPath;
     if (!f.open(QIODevice::Unbuffered | QIODevice::ReadOnly))
     { // dsp bootfile öffnen
         if (DEBUG1)  syslog(LOG_ERR,"error opening dsp boot file: %s\n",m_sDspBootPath.toLatin1().data());
@@ -1194,6 +1196,7 @@ bool cZDSP1Server::bootDsp()
     BootMem.resize(len);
     f.readLine(BootMem.data(), len);
     f.close();
+    qDebug() << "md5sum bootfile = " << QCryptographicHash::hash(BootMem, QCryptographicHash::Md5);
 
     int r = ioctl(DevFileDescriptor,ADSP_BOOT,BootMem.data()); // und booten
 
