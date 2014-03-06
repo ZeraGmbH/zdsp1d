@@ -26,7 +26,8 @@ HEADERS	+= zdspglobal.h \
     ethsettings.h \
     debugsettings.h \
     dspsettings.h \
-    rmconnection.h
+    rmconnection.h \
+    zdspdprotobufwrapper.h
 
 SOURCES	+= main.cpp \
 	parse.cpp \
@@ -39,7 +40,8 @@ SOURCES	+= main.cpp \
     debugsettings.cpp \
     ethsettings.cpp \
     dspsettings.cpp \
-    rmconnection.cpp
+    rmconnection.cpp \
+    zdspdprotobufwrapper.cpp
 
 unix {
   UI_DIR = .ui

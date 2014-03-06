@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QAbstractSocket>
 
+#include "zdspdprotobufwrapper.h"
+
 namespace google {
 namespace protobuf {
 class Message;
@@ -33,6 +35,7 @@ private:
     quint8 m_nDebugLevel;
     QString m_sCommand;
     ProtoNetPeer* m_pResourceManagerClient;
+    cZDSPDProtobufWrapper m_ProtobufWrapper;
 
 private slots:
     void tcpErrorHandler(QAbstractSocket::SocketError errorCode);

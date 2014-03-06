@@ -890,6 +890,7 @@ void cZDSP1Server::doSetupServer()
     m_nDebugLevel = m_pDebugSettings->getDebugLevel();
 
     myServer =  new ProtoNetServer(this);
+    myServer->setDefaultWrapper(&m_ProtobufWrapper);
     connect(myServer, SIGNAL(sigClientConnected(ProtoNetPeer*)), this, SLOT(establishNewConnection(ProtoNetPeer*)));
     myServer->startServer(m_pETHSettings->getPort(server)); // and can start the server now
 
@@ -2196,8 +2197,8 @@ cZDSP1Client* cZDSP1Server::GetClient(ProtoNetPeer *peer)
 
 void cZDSP1Server::establishNewConnection(ProtoNetPeer *newClient)
 {
-    connect(newClient,SIGNAL(messageReceived(QByteArray)),this,SLOT(executeCommand(QByteArray)));
-    connect(newClient,SIGNAL(clientDisconnected()),this,SLOT(deleteConnection()));
+    connect(newClient, SIGNAL(sigMessageReceived(google::protobuf::Message*)), this, SLOT(executeCommand(google::protobuf::Message*)));
+    connect(newClient, SIGNAL(sigConnectionClosed()), this, SLOT(deleteConnection()));
     AddClient(newClient); // we additionally add the client to our list
 }
 
@@ -2209,69 +2210,67 @@ void cZDSP1Server::deleteConnection()
 }
 
 
-void cZDSP1Server::executeCommand(const QByteArray cmd)
+void cZDSP1Server::executeCommand(google::protobuf::Message *cmd)
 {
     QString m_sInput, m_sOutput;
-    QByteArray block;
-    ProtobufMessage::NetMessage protobufCommand;
+    ProtobufMessage::NetMessage *protobufCommand;
 
     ProtoNetPeer* client = qobject_cast<ProtoNetPeer*>(sender());
+    protobufCommand = static_cast<ProtobufMessage::NetMessage*>(cmd);
 
-    if (protobufCommand.ParseFromArray(cmd, cmd.count()))
+    if ( (protobufCommand != 0) && (client != 0))
     {
-        QByteArray clientId = QByteArray(protobufCommand.clientid().c_str(), protobufCommand.clientid().size());
-        quint32 messageNr = protobufCommand.messagenr();
-        ProtobufMessage::NetMessage::ScpiCommand scpiCmd = protobufCommand.scpi();
-
-        if (!m_zdspdClientHash.contains(clientId)) // we didn't get any command from here yet
+        if (protobufCommand->has_clientid() && protobufCommand->has_messagenr())
         {
-            cZDSP1Client *zdspclient = AddClient(client); // we add a new client with the same socket but different identifier
-            m_zdspdClientHash[clientId] = zdspclient;
-            m_clientIDHash[zdspclient] = clientId; // we need this list in case of interrupts
-        }
+            QByteArray clientId = QByteArray(protobufCommand->clientid().c_str(), protobufCommand->clientid().size());
+            quint32 messageNr = protobufCommand->messagenr();
+            ProtobufMessage::NetMessage::ScpiCommand scpiCmd = protobufCommand->scpi();
 
-        ActSock = m_zdspdClientHash[clientId]->getSocket(); // we set the actual socket (identifier) we have to work on
-        m_sInput = QString::fromStdString(scpiCmd.command()) +  " " + QString::fromStdString(scpiCmd.parameter());
-        m_sOutput = pCmdInterpreter->CmdExecute(m_sInput);
+            if (!m_zdspdClientHash.contains(clientId)) // we didn't get any command from here yet
+            {
+                cZDSP1Client *zdspclient = AddClient(client); // we add a new client with the same socket but different identifier
+                m_zdspdClientHash[clientId] = zdspclient;
+                m_clientIDHash[zdspclient] = clientId; // we need this list in case of interrupts
+            }
 
-        ProtobufMessage::NetMessage protobufAnswer;
-        ProtobufMessage::NetMessage::NetReply *Answer = protobufAnswer.mutable_reply();
+            ActSock = m_zdspdClientHash[clientId]->getSocket(); // we set the actual socket (identifier) we have to work on
+            m_sInput = QString::fromStdString(scpiCmd.command()) +  " " + QString::fromStdString(scpiCmd.parameter());
+            m_sOutput = pCmdInterpreter->CmdExecute(m_sInput);
 
-        if (m_sOutput.contains(NACKString))
-            Answer->set_rtype(ProtobufMessage::NetMessage_NetReply_ReplyType_NACK);
-        if (m_sOutput.contains((ACKString)))
-            Answer->set_rtype(ProtobufMessage::NetMessage_NetReply_ReplyType_ACK);
-        else
-            Answer->set_body(m_sOutput.toStdString());
+            ProtobufMessage::NetMessage protobufAnswer;
+            ProtobufMessage::NetMessage::NetReply *Answer = protobufAnswer.mutable_reply();
 
-        protobufAnswer.set_clientid(clientId, clientId.count());
-        protobufAnswer.set_messagenr(messageNr);
+            if (m_sOutput.contains(NACKString))
+                Answer->set_rtype(ProtobufMessage::NetMessage_NetReply_ReplyType_NACK);
+            if (m_sOutput.contains((ACKString)))
+                Answer->set_rtype(ProtobufMessage::NetMessage_NetReply_ReplyType_ACK);
+            else
+                Answer->set_body(m_sOutput.toStdString());
 
-        if (client)
-        {
+            protobufAnswer.set_clientid(clientId, clientId.count());
+            protobufAnswer.set_messagenr(messageNr);
+
             client->sendMessage(&protobufAnswer);
         }
-    }
-    else
-    {
-        ActSock = GetClient(client)->getSocket();
+        else
+        {
+            ActSock = GetClient(client)->getSocket();
 
-        m_sInput = QString::fromUtf8(cmd.data(),cmd.size());
-        m_sOutput = pCmdInterpreter->CmdExecute(m_sInput);
+            m_sInput =  QString::fromStdString(protobufCommand->scpi().command());
+            m_sOutput = pCmdInterpreter->CmdExecute(m_sInput);
 
-        QByteArray block;
+            QByteArray block;
 
-        QDataStream out(&block, QIODevice::WriteOnly);
-        out.setVersion(QDataStream::Qt_4_0);
-        out << (qint32)0;
+            QDataStream out(&block, QIODevice::WriteOnly);
+            out.setVersion(QDataStream::Qt_4_0);
+            out << (qint32)0;
 
-        out << m_sOutput.toUtf8();
-        out.device()->seek(0);
-        out << (qint32)(block.size() - sizeof(qint32));
+            out << m_sOutput.toUtf8();
+            out.device()->seek(0);
+            out << (qint32)(block.size() - sizeof(qint32));
 
-        if (client)
             client->getTcpSocket()->write(block);
-
+        }
     }
 }
 

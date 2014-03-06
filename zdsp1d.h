@@ -17,6 +17,7 @@
 #include "dsp1scpi.h"
 #include "zhserver.h"
 #include "dsp.h"
+#include "zdspdprotobufwrapper.h"
 
 
 typedef QVector<float> tDspMemArray;
@@ -130,6 +131,7 @@ signals:
 
 private:
     ProtoNetServer* myServer; // the real server that does the communication job
+    cZDSPDProtobufWrapper m_ProtobufWrapper;
     quint16 m_nSocketIdentifier; // we will use this instead of real sockets, because protobuf extension clientId
     QHash<QByteArray, cZDSP1Client*> m_zdspdClientHash;
     QHash<cZDSP1Client*, QByteArray> m_clientIDHash; // liste der clientID's für die dspclients die über protobuf erzeugt wurden
@@ -228,7 +230,7 @@ private:
 private slots:
     virtual void establishNewConnection(ProtoNetPeer* newClient);
     virtual void deleteConnection();
-    virtual void executeCommand(const QByteArray cmd);
+    virtual void executeCommand(google::protobuf::Message* cmd);
 
     void doConfiguration();
     void doSetupServer();
