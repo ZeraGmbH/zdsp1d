@@ -1191,10 +1191,11 @@ bool cZDSP1Server::bootDsp()
         return false;
     }
 
-    long len = f.size();
+    //long len = f.size();
     QByteArray BootMem;
-    BootMem.resize(len);
-    f.readLine(BootMem.data(), len);
+    //BootMem.resize(len);
+    //f.readLine(BootMem.data(), len);
+    BootMem = f.readAll();
     f.close();
     qDebug() << "md5sum bootfile = " << QString(QCryptographicHash::hash(BootMem, QCryptographicHash::Md5).toHex());
 
