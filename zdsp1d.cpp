@@ -158,6 +158,7 @@ QString& cZDSP1Client::SetRavList(QString& s)
 
 QString& cZDSP1Client::GetRavList()
 {
+    sOutput = "";
     QTextStream ts( &sOutput, QIODevice::WriteOnly );
     if ( !m_DspVarList.empty() )
     {
@@ -1240,6 +1241,7 @@ bool cZDSP1Server::setSamplingSystem()
                                                                      .arg(m_pDspSettings->getsamplesMeasurePeriod()));
         if (Answer == ACKString)
             return true;
+        usleep(10000); // give dsp a bit time before next try
     }
 
     return false;
