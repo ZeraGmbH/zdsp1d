@@ -88,7 +88,7 @@ private:
     QList<cDspCmd> m_DspCmdList; // liste mit dsp kommandos (periodisch)
     QList<cDspCmd>  m_DspIntCmdList; // liste mit dsp kommandos (interrupt)
     QVector<sDspVar> varArray; // array von sDspVar
-    sMemSection msec; // eine memory section für den DspVarResolver 
+    sMemSection msec; // eine memory section für den DspVarResolver für die variablen des clients
 
 };
 

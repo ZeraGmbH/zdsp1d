@@ -141,7 +141,7 @@ QString& cZDSP1Client::SetRavList(QString& s)
         varArray.resize(msec.n);
         for (i = 0;i < msec.n; i++)
         { // und machen diese dem resolver zugänglich
-            varArray[i].Name = (char*) m_DspVarList[i].name().data();
+            varArray[i].Name = (char*) m_DspVarList[i].name().toLatin1().data();
             varArray[i].size = m_DspVarList[i].size();
             varArray[i].type = (dType)m_DspVarList[i].type();
         }
