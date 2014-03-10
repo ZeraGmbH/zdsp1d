@@ -98,6 +98,8 @@ void cZDSP1Client::init(int socket, ProtoNetPeer *netclient, cZDSP1Server *serve
     DspVarResolver.addSection( &symbConsts1);
     DspVarResolver.addSection( &msec);
     msec.StartAdr = msec.n = 0;
+    DspVarResolver.setVarHash(); // wir setzen die hashtabelle und initialisieren diese
+
     Encryption = 0; // es werden alle var. abfragen im klartext gesendet
     m_bActive = false;
 }
