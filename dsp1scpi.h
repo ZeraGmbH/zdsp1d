@@ -1,5 +1,7 @@
 // header datei für scpi erweiterung für dsp server
 
+#include <QString>
+
 #ifndef SCPIDSPS_H
 #define SCPIDSPS_H
 
@@ -68,8 +70,8 @@ enum SCPICmdType  {	nixCmd, // 0 is nix
 class cbIFace { // call back interface 
 public:    
     virtual ~cbIFace(){}; // rein virtuell
-    virtual const char* SCPICmd( SCPICmdType, QChar*) = 0;
-    virtual const char* SCPIQuery( SCPICmdType) = 0;
+    virtual QString SCPICmd( SCPICmdType, QChar*) = 0;
+    virtual QString SCPIQuery( SCPICmdType) = 0;
 };
 
 #endif

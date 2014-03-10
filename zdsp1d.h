@@ -100,8 +100,8 @@ public:
     virtual cZDSP1Client* AddClient(ProtoNetPeer *m_pNetClient); // fügt einen client hinzu
     virtual void DelClient(ProtoNetPeer *netClient); // entfernt einen client
 
-    virtual const char* SCPICmd( SCPICmdType, QChar*);
-    virtual const char* SCPIQuery( SCPICmdType);
+    virtual QString SCPICmd( SCPICmdType, QChar*);
+    virtual QString SCPIQuery( SCPICmdType);
     
     int m_nFPGAfd;
     void SetFASync(); // async. benachrichtung einschalten
@@ -144,68 +144,66 @@ private:
     bool setSamplingSystem();
 
     // die routinen für das system modell
-    const char* mCommand2Dsp(QString&); // indirekt für system modell    
+    QString mCommand2Dsp(QString&); // indirekt für system modell
     
-    const char* mTestDsp(QChar *);
-    const char* mResetDsp(QChar*);
-    const char* mBootDsp(QChar*);
-    const char* mSetDspBootPath(QChar*);
-    const char* mGetDspBootPath();
-    const char* mGetPCBSerialNumber();
-    const char* mSetDspDebugLevel(QChar*);
-    const char* mGetDebugLevel();
-    const char* mGetDeviceVersion();
-    const char* mGetServerVersion();  
-    const char* mSetSamplingSystem(QChar*);
-    const char* mGetSamplingSystem();
-    const char* mSetCommEncryption(QChar*);
-    const char* mGetCommEncryption();
-    const char* mSetEN61850DestAdr(QChar*);
-    const char* mGetEN61850DestAdr();
-    const char* mSetEN61850SourceAdr(QChar*);
-    const char* mGetEN61850SourceAdr();
-    const char* mSetEN61850EthTypeAppId(QChar*);
-    const char* mGetEN61850EthTypeAppId();
-    const char* mSetEN61850PriorityTagged(QChar*);
-    const char* mGetEN61850PriorityTagged();
-    const char* mSetEN61850EthSync(QChar*);
-    const char* mGetEN61850EthSync();
-    const char* mSetDspCommandStat(QChar*);
-    const char* mGetDspCommandStat();
-    const char* mSetEN61850DataCount(QChar*);
-    const char* mGetEN61850DataCount();
-    const char* mSetEN61850SyncLostCount(QChar*);
-    const char* mGetEN61850SyncLostCount();
-    const char* mTriggerIntListHKSK(QChar*);
-    const char* mTriggerIntListALL(QChar*);
-    const char* mResetMaxima(QChar*);
+    QString mTestDsp(QChar *);
+    QString mResetDsp(QChar*);
+    QString mBootDsp(QChar*);
+    QString mSetDspBootPath(QChar*);
+    QString mGetDspBootPath();
+    QString mGetPCBSerialNumber();
+    QString mGetDeviceVersion();
+    QString mGetServerVersion();
+    QString mSetSamplingSystem(QChar*);
+    QString mGetSamplingSystem();
+    QString mSetCommEncryption(QChar*);
+    QString mGetCommEncryption();
+    QString mSetEN61850DestAdr(QChar*);
+    QString mGetEN61850DestAdr();
+    QString mSetEN61850SourceAdr(QChar*);
+    QString mGetEN61850SourceAdr();
+    QString mSetEN61850EthTypeAppId(QChar*);
+    QString mGetEN61850EthTypeAppId();
+    QString mSetEN61850PriorityTagged(QChar*);
+    QString mGetEN61850PriorityTagged();
+    QString mSetEN61850EthSync(QChar*);
+    QString mGetEN61850EthSync();
+    QString mSetDspCommandStat(QChar*);
+    QString mGetDspCommandStat();
+    QString mSetEN61850DataCount(QChar*);
+    QString mGetEN61850DataCount();
+    QString mSetEN61850SyncLostCount(QChar*);
+    QString mGetEN61850SyncLostCount();
+    QString mTriggerIntListHKSK(QChar*);
+    QString mTriggerIntListALL(QChar*);
+    QString mResetMaxima(QChar*);
         
     // die routinen für das status modell
     
-    const char* mResetDeviceLoadMax();
-    const char* mGetDeviceLoadMax();
-    const char* mGetDeviceLoadAct();   
-    const char* mGetDspStatus();
-    const char* mGetDeviceStatus();
+    QString mResetDeviceLoadMax();
+    QString mGetDeviceLoadMax();
+    QString mGetDeviceLoadAct();
+    QString mGetDspStatus();
+    QString mGetDeviceStatus();
   
     // die routinen für das measure modell
     
-    const char* mFetch(QChar *);
-    const char* mInitiate(QChar*);
-    const char* mUnloadCmdList(QChar*);
-    const char* mLoadCmdList(QChar*);
-    const char* mSetRavList(QChar*);
-    const char* mGetRavList();
-    const char* mSetCmdIntList(QChar*);
-    const char* mGetCmdIntList();
-    const char* mSetCmdList(QChar*);
-    const char* mGetCmdList();
-    const char* mMeasure(QChar*);
+    QString mFetch(QChar *);
+    QString mInitiate(QChar*);
+    QString mUnloadCmdList(QChar*);
+    QString mLoadCmdList(QChar*);
+    QString mSetRavList(QChar*);
+    QString mGetRavList();
+    QString mSetCmdIntList(QChar*);
+    QString mGetCmdIntList();
+    QString mSetCmdList(QChar*);
+    QString mGetCmdList();
+    QString mMeasure(QChar*);
     
     // die routinen für das memory modell
     
-    const char* mDspMemoryRead(QChar *);
-    const char* mDspMemoryWrite(QChar *);
+    QString mDspMemoryRead(QChar *);
+    QString mDspMemoryWrite(QChar *);
     
     bool LoadDSProgram();
     bool setDspType();

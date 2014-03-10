@@ -1034,7 +1034,7 @@ int cZDSP1Server::DspDevRead(int fd,char* buf,int len)
 }
 
 
-const char* cZDSP1Server::mTestDsp(QChar* s)
+QString cZDSP1Server::mTestDsp(QChar* s)
 {
     int nr, tmode;
     bool ok, tstart;
@@ -1170,7 +1170,8 @@ const char* cZDSP1Server::mTestDsp(QChar* s)
     }
 
     else Answer = ERRVALString; // fehler wert
-    return Answer.toLatin1().data();
+
+    return Answer;
 }
 
 
@@ -1189,11 +1190,10 @@ bool cZDSP1Server::resetDsp()
 }
 
 
-const char* cZDSP1Server::mResetDsp(QChar*)
+QString cZDSP1Server::mResetDsp(QChar*)
 {
-
     resetDsp();
-    return Answer.toLatin1().data();
+    return Answer;
 }
 
 
@@ -1246,10 +1246,10 @@ bool cZDSP1Server::setSamplingSystem()
 }
 
 
-const char* cZDSP1Server::mBootDsp(QChar *)
+QString cZDSP1Server::mBootDsp(QChar *)
 {
     bootDsp();
-    return Answer.toLatin1().data();
+    return Answer;
 }
 
 
@@ -1266,30 +1266,30 @@ int cZDSP1Server::SetBootPath(const char * s)
 }
 
 
-const char* cZDSP1Server::mSetDspBootPath(QChar *s)
+QString cZDSP1Server::mSetDspBootPath(QChar *s)
 {
     QString par = pCmdInterpreter->m_pParser->GetKeyword(&s); // holt den parameter aus dem kommando
     if ( SetBootPath(par.toLatin1().data()) )
         Answer = ERRPATHString;
     else
         Answer = ACKString;
-    return Answer.toLatin1().data();
+    return Answer;
 }
 	
     
-const char* cZDSP1Server::mGetDspBootPath()
+QString cZDSP1Server::mGetDspBootPath()
 {
-    return m_sDspBootPath.toLatin1().data();
+    return m_sDspBootPath;
 }    
 
 
-const char* cZDSP1Server::mGetPCBSerialNumber()
+QString cZDSP1Server::mGetPCBSerialNumber()
 {
-    return m_sDspSerialNumber.toLatin1().data();
+    return m_sDspSerialNumber;
 }
 
 
-const char* cZDSP1Server::mCommand2Dsp(QString& qs)
+QString cZDSP1Server::mCommand2Dsp(QString& qs)
 {
     // we need a client to do the job
     cZDSP1Client* cl = new cZDSP1Client(0, 0, this);
@@ -1325,18 +1325,19 @@ const char* cZDSP1Server::mCommand2Dsp(QString& qs)
 
     delete cl;
 
-    return Answer.toLatin1().data();
+    return Answer;
 }
 
 
-const char* cZDSP1Server::mSetSamplingSystem(QChar *s)
+QString cZDSP1Server::mSetSamplingSystem(QChar *s)
 {
     QString ss;
+
     return mCommand2Dsp(ss = QString("DSPCMDPAR,2,%1;").arg(QString(s)));
 }	
 
 
-const char* cZDSP1Server::mSetCommEncryption(QChar *s)
+QString cZDSP1Server::mSetCommEncryption(QChar *s)
 {
     bool ok;
     QString par = pCmdInterpreter->m_pParser->GetKeyword(&s); // holt den parameter aus dem kommando
@@ -1347,12 +1348,14 @@ const char* cZDSP1Server::mSetCommEncryption(QChar *s)
         cl->SetEncryption(enc);
         Answer = ACKString; // acknowledge
     }
-    else Answer = ERRVALString; // fehler wert
-    return Answer.toLatin1().data();
+    else
+        Answer = ERRVALString; // fehler wert
+
+    return Answer;
 }
 
 
-const char* cZDSP1Server::mGetSamplingSystem()
+QString cZDSP1Server::mGetSamplingSystem()
 {
     do
     {
@@ -1368,19 +1371,21 @@ const char* cZDSP1Server::mGetSamplingSystem()
 
         Answer = QString("%1,%2,%3").arg(n).arg(ss).arg(sm);
     } while (0);
-    return Answer.toLatin1().data();
+
+    return Answer;
 }
 
 
-const char* cZDSP1Server::mGetCommEncryption()
+QString cZDSP1Server::mGetCommEncryption()
 {
     cZDSP1Client* cl = GetClient(ActSock);
     Answer = QString::number(cl->GetEncryption());
-    return Answer.toLatin1().data();
+
+    return Answer;
 }
 
 
-const char* cZDSP1Server::mSetEN61850SourceAdr(QChar* s)
+QString cZDSP1Server::mSetEN61850SourceAdr(QChar* s)
 {
     int i;
     QByteArray* ba = new(QByteArray);
@@ -1413,11 +1418,12 @@ const char* cZDSP1Server::mSetEN61850SourceAdr(QChar* s)
         }
     } while(0);
     delete ba;
-    return Answer.toLatin1().data();
+
+    return Answer;
 }
 
 
-const char* cZDSP1Server::mSetEN61850DestAdr(QChar *s)
+QString cZDSP1Server::mSetEN61850DestAdr(QChar *s)
 {
     int i;
     QByteArray* ba = new(QByteArray);
@@ -1433,7 +1439,7 @@ const char* cZDSP1Server::mSetEN61850DestAdr(QChar *s)
     }
     if (!ok) Answer = NACKString;
     else
-        do
+    do
     {
         Answer = ERREXECString; // vorbesetzen
         QString as;
@@ -1449,25 +1455,26 @@ const char* cZDSP1Server::mSetEN61850DestAdr(QChar *s)
             mCommand2Dsp(as = QString("DSPCMDPAR,6,%1,%2,%3;").arg(pardsp[0]).arg(pardsp[1]).arg(pardsp[2]));
         }
     } while(0);
+
     delete ba;
-    return Answer.toLatin1().data();
+    return Answer;
 }
 
 
-const char* cZDSP1Server::mSetEN61850EthTypeAppId(QChar *s)
+QString cZDSP1Server::mSetEN61850EthTypeAppId(QChar *s)
 {
     QString ss;
     cZDSP1Client* cl = GetClient(ActSock);
     if (! cl->DspVarWrite(ss = QString("ETHTYPEAPPID,%1;").arg(QString(s))) )
-	Answer = ERREXECString;
+        Answer = ERREXECString;
     else
-	Answer = ACKString;
+        Answer = ACKString;
     
-    return Answer.toLatin1().data();
+    return Answer;
 }
 
 
-const char* cZDSP1Server::mGetEN61850EthTypeAppId()
+QString cZDSP1Server::mGetEN61850EthTypeAppId()
 {
     QByteArray* ba = new(QByteArray);
     QString as;
@@ -1484,11 +1491,12 @@ const char* cZDSP1Server::mGetEN61850EthTypeAppId()
         Answer = ERREXECString;
     }
     delete ba;
-    return Answer.toLatin1().data();
+
+    return Answer;
 }
 	
  
-const char* cZDSP1Server::mSetEN61850PriorityTagged(QChar *s)
+QString cZDSP1Server::mSetEN61850PriorityTagged(QChar *s)
 {
     QString ss;
     cZDSP1Client* cl = GetClient(ActSock);
@@ -1497,11 +1505,11 @@ const char* cZDSP1Server::mSetEN61850PriorityTagged(QChar *s)
     else
         Answer = ACKString;
     
-    return Answer.toLatin1().data();
+    return Answer;
 }
 
 
-const char* cZDSP1Server::mGetEN61850PriorityTagged()
+QString cZDSP1Server::mGetEN61850PriorityTagged()
 {
     QByteArray* ba = new(QByteArray);
     QString as;
@@ -1518,25 +1526,26 @@ const char* cZDSP1Server::mGetEN61850PriorityTagged()
         Answer = ERREXECString;
     }
     delete ba;
-    return Answer.toLatin1().data();
+
+    return Answer;
     
 }
 
 
-const char* cZDSP1Server::mSetEN61850EthSync(QChar *s)
+QString cZDSP1Server::mSetEN61850EthSync(QChar *s)
 {
     QString ss;
     cZDSP1Client* cl = GetClient(ActSock);
     if (! cl->DspVarWrite(ss = QString("SYNCASDU,%1;").arg(QString(s))) )
-	Answer = ERREXECString;
+        Answer = ERREXECString;
     else
-	Answer = ACKString;
+        Answer = ACKString;
     
-    return Answer.toLatin1().data();
+    return Answer;
 }
 	
 	
-const char* cZDSP1Server::mGetEN61850EthSync()
+QString cZDSP1Server::mGetEN61850EthSync()
 {
     QByteArray* ba = new(QByteArray);
     QString as;
@@ -1553,13 +1562,14 @@ const char* cZDSP1Server::mGetEN61850EthSync()
         Answer = ERREXECString;
     }
     delete ba;
-    return Answer.toLatin1().data();
+
+    return Answer;
     
 }
 
 
 
-const char* cZDSP1Server::mSetEN61850DataCount(QChar *s)
+QString cZDSP1Server::mSetEN61850DataCount(QChar *s)
 {
     QString ss;
     cZDSP1Client* cl = GetClient(ActSock);
@@ -1568,11 +1578,11 @@ const char* cZDSP1Server::mSetEN61850DataCount(QChar *s)
     else
         Answer = ACKString;
     
-    return Answer.toLatin1().data();
+    return Answer;
 }
  
 
-const char* cZDSP1Server::mGetEN61850DataCount()
+QString cZDSP1Server::mGetEN61850DataCount()
 {
     QByteArray* ba = new(QByteArray);
     QString as;
@@ -1589,24 +1599,25 @@ const char* cZDSP1Server::mGetEN61850DataCount()
         Answer = ERREXECString;
     }
     delete ba;
-    return Answer.toLatin1().data();
+
+    return Answer;
 }
 
 
-const char* cZDSP1Server::mSetEN61850SyncLostCount(QChar *s)
+QString cZDSP1Server::mSetEN61850SyncLostCount(QChar *s)
 {
     QString ss;
     cZDSP1Client* cl = GetClient(ActSock);
     if (! cl->DspVarWrite(ss = QString("ETHSYNCLOSTCOUNT,%1;").arg(QString(s))) )
-	Answer = ERREXECString;
+        Answer = ERREXECString;
     else
-	Answer = ACKString;
+        Answer = ACKString;
 
-    return Answer.toLatin1().data();
+    return Answer;
 }
  
 
-const char* cZDSP1Server::mGetEN61850SyncLostCount()
+QString cZDSP1Server::mGetEN61850SyncLostCount()
 {
     QByteArray* ba = new(QByteArray);
     QString as;
@@ -1623,11 +1634,12 @@ const char* cZDSP1Server::mGetEN61850SyncLostCount()
         Answer = ERREXECString;
     }
     delete ba;
-    return Answer.toLatin1().data();
+
+    return Answer;
 }
 
 
-const char* cZDSP1Server::mGetEN61850SourceAdr()
+QString cZDSP1Server::mGetEN61850SourceAdr()
 {
     QByteArray* ba = new(QByteArray);
     QString as;
@@ -1649,11 +1661,12 @@ const char* cZDSP1Server::mGetEN61850SourceAdr()
         Answer = ERREXECString;
     }
     delete ba;
-    return Answer.toLatin1().data();
+
+    return Answer;
 }
 
 
-const char* cZDSP1Server::mGetEN61850DestAdr()
+QString cZDSP1Server::mGetEN61850DestAdr()
 {
     QByteArray* ba = new(QByteArray);
     QString as;
@@ -1675,26 +1688,27 @@ const char* cZDSP1Server::mGetEN61850DestAdr()
         Answer = ERREXECString;
     }
     delete ba;
-    return Answer.toLatin1().data();
+
+    return Answer;
 }
 
 
-const char* cZDSP1Server::mSetDspCommandStat(QChar *s)
+QString cZDSP1Server::mSetDspCommandStat(QChar *s)
 {
     Answer = ERREXECString;
     QString ss;
 	
     cZDSP1Client* cl = GetClient(ActSock);
     if (! cl->DspVarWrite(ss = QString("DSPACK,%1;").arg(QString(s))) )
-	Answer = ERREXECString;
+        Answer = ERREXECString;
     else
-	Answer = ACKString;
+        Answer = ACKString;
     
-    return Answer.toLatin1().data();
+    return Answer;
 }
 
 
-const char* cZDSP1Server::mGetDspCommandStat()
+QString cZDSP1Server::mGetDspCommandStat()
 {
     int stat;
     cZDSP1Client* cl = GetClient(ActSock);
@@ -1705,27 +1719,27 @@ const char* cZDSP1Server::mGetDspCommandStat()
     else
         Answer = QString("%1").arg(stat);
     
-    return Answer.toLatin1().data();
+    return Answer;
 }
 
 
-const char* cZDSP1Server::mTriggerIntListHKSK(QChar *s)
+QString cZDSP1Server::mTriggerIntListHKSK(QChar *s)
 {
     QString ss(s);
     ulong par = ss.toULong();
     par = (par & 0xFFFF )| (ActSock << 16);
-    return mCommand2Dsp(ss = QString("DSPCMDPAR,4,%1;").arg(par)); // liste mit prozessNr u. HKSK 
+    return mCommand2Dsp(ss = QString("DSPCMDPAR,4,%1;").arg(par)); // liste mit prozessNr u. HKSK
 }
 
 
-const char* cZDSP1Server::mTriggerIntListALL(QChar *)
+QString cZDSP1Server::mTriggerIntListALL(QChar *)
 {
     QString ss;
     return mCommand2Dsp(ss = QString("DSPCMDPAR,1;"));
 }
 
 
-const char* cZDSP1Server::mResetMaxima(QChar *)
+QString cZDSP1Server::mResetMaxima(QChar *)
 {
     QString ss;
     return mCommand2Dsp(ss =  QString("DSPCMDPAR,3;"));
@@ -1758,7 +1772,7 @@ int cZDSP1Server::SetDebugLevel(const char* s)
 }
 
 
-const char* cZDSP1Server::mGetDeviceVersion()
+QString cZDSP1Server::mGetDeviceVersion()
 {
     int r;
     r = ioctl(DevFileDescriptor,IO_READ,VersionNr);
@@ -1778,82 +1792,82 @@ const char* cZDSP1Server::mGetDeviceVersion()
     double d = p.toDouble();
     m_sDspDeviceVersion = QString("DSPLCA: V%1.%2;DSP V%3").arg((r >>8) & 0xff).arg(r & 0xff).arg(d,0,'f',2);
 
-    return m_sDspDeviceVersion.toLatin1().data();
+    return m_sDspDeviceVersion;
 }
 
 
-const char* cZDSP1Server::mGetServerVersion()
+QString cZDSP1Server::mGetServerVersion()
 {
-    return sSoftwareVersion.toLatin1().data();
+    return sSoftwareVersion;
 }
 
 
-const char* cZDSP1Server::mGetDspStatus()
+QString cZDSP1Server::mGetDspStatus()
 {
     if ( Test4DspRunning() )
         Answer = dsprunning;
     else
         Answer = dspnrunning;
 
-    return Answer.toLatin1().data();
+    return Answer;
 }
 
 
-const char* cZDSP1Server::mGetDeviceStatus()
+QString cZDSP1Server::mGetDeviceStatus()
 {
     if ( Test4HWPresent() )
         Answer = devavail;
     else
         Answer = devnavail;
 
-    return Answer.toLatin1().data();
+    return Answer;
 }
 
 
-const char* cZDSP1Server::mGetDeviceLoadAct()
+QString cZDSP1Server::mGetDeviceLoadAct()
 {
     cZDSP1Client* cl = GetClient(ActSock);
     QString p = "BUSY,1;";
     Answer = cl->DspVarListRead(p);  // ab "BUSY"  1 wort lesen
 
-    return Answer.toLatin1().data();
+    return Answer;
 }
 
 
-const char* cZDSP1Server::mGetDeviceLoadMax()
+QString cZDSP1Server::mGetDeviceLoadMax()
 {
     cZDSP1Client* cl = GetClient(ActSock);
     QString p = "BUSYMAX,1;";
     Answer = cl->DspVarListRead(p);  // ab "BUSYMAX"  1 wort lesen
-    return Answer.toLatin1().data();
+    return Answer;
 }
 
 
-const char* cZDSP1Server::mResetDeviceLoadMax()
+QString cZDSP1Server::mResetDeviceLoadMax()
 {
     cZDSP1Client* cl = GetClient(ActSock);
     QString p = "BUSYMAX,0.0";
     Answer = cl->DspVarWriteRM(p);
-    return Answer.toLatin1().data();
+    return Answer;
 }
 
 
-const char* cZDSP1Server::mFetch(QChar* s)
+QString cZDSP1Server::mFetch(QChar* s)
 {
     QString par(s);
     cZDSP1Client* cl = GetClient(ActSock);
     Answer = cl->FetchActValues(par);
-    return Answer.toLatin1().data();
+    return Answer;
 }
 
 
-const char* cZDSP1Server::mInitiate(QChar *s)
+QString cZDSP1Server::mInitiate(QChar *s)
 {
     QString par(s);
     cZDSP1Client* cl = GetClient(ActSock);
     if (cl->InitiateActValues(par)) Answer = ACKString;
     else Answer = ERREXECString;
-    return Answer.toLatin1().data();
+    return Answer;
 }
 
 
@@ -2018,7 +2032,7 @@ bool cZDSP1Server::LoadDSProgram()
 
 
 
-const char* cZDSP1Server::mUnloadCmdList(QChar *)
+QString cZDSP1Server::mUnloadCmdList(QChar *)
 {
     cZDSP1Client* cl = GetClient(ActSock);
     cl->SetActive(false);
@@ -2027,11 +2041,11 @@ const char* cZDSP1Server::mUnloadCmdList(QChar *)
     else
         Answer = ACKString;
 
-    return Answer.toLatin1().data();
+    return Answer;
 }
 
 
-const char* cZDSP1Server::mLoadCmdList(QChar *)
+QString cZDSP1Server::mLoadCmdList(QChar *)
 {
     cZDSP1Client* cl = GetClient(ActSock);
     QString errs;
@@ -2046,67 +2060,67 @@ const char* cZDSP1Server::mLoadCmdList(QChar *)
     else
         Answer = QString("%1 %2").arg(ERRVALString).arg(errs); // das "fehlerhafte" kommando anhängen
 
-    return Answer.toLatin1().data();
+    return Answer;
 }
 
 
-const char* cZDSP1Server::mSetRavList(QChar *s)
+QString cZDSP1Server::mSetRavList(QChar *s)
 {
     QString qs(s);
     cZDSP1Client* cl = GetClient(ActSock);
     Answer  = cl->SetRavList(qs);
 
-    return Answer.toLatin1().data();
+    return Answer;
 }
 
 
-const char* cZDSP1Server::mGetRavList() {
+QString cZDSP1Server::mGetRavList() {
        cZDSP1Client* cl = GetClient(ActSock);
        Answer = cl->GetRavList();
 
-       return Answer.toLatin1().data();
+       return Answer;
 }
 
 
-const char* cZDSP1Server::mSetCmdIntList(QChar *s)
+QString cZDSP1Server::mSetCmdIntList(QChar *s)
 {
     QString par(s);
     cZDSP1Client* cl = GetClient(ActSock);
     Answer = cl->SetCmdIntListDef(par);
 
-    return Answer.toLatin1().data();
+    return Answer;
 }
 
 
-const char* cZDSP1Server::mGetCmdIntList()
+QString cZDSP1Server::mGetCmdIntList()
 {
        cZDSP1Client* cl = GetClient(ActSock);
        Answer = cl->GetCmdIntListDef();
 
-       return Answer.toLatin1().data();
+       return Answer;
 }
 
 
-const char* cZDSP1Server::mSetCmdList(QChar *s)
+QString cZDSP1Server::mSetCmdList(QChar *s)
 {
     QString par(s);
     cZDSP1Client* cl = GetClient(ActSock);
     Answer = cl->SetCmdListDef(par);
 
-    return Answer.toLatin1().data();
+    return Answer;
 }
  
 
-const char* cZDSP1Server::mGetCmdList()
+QString cZDSP1Server::mGetCmdList()
 {
       cZDSP1Client* cl = GetClient(ActSock);
       Answer = cl->GetCmdListDef();
 
-      return Answer.toLatin1().data();
+      return Answer;
 }
  
 
-const char* cZDSP1Server::mMeasure(QChar *s)
+QString cZDSP1Server::mMeasure(QChar *s)
 {
     QString par(s); // holt den parameter aus dem kommando
     cZDSP1Client* cl = GetClient(ActSock);
@@ -2115,7 +2129,7 @@ const char* cZDSP1Server::mMeasure(QChar *s)
     else
         Answer = ERREXECString;
 
-    return Answer.toLatin1().data();
+    return Answer;
 }
 
 
@@ -2191,23 +2205,23 @@ bool cZDSP1Server::Test4DspRunning()
 }	
 	
 	
-const char* cZDSP1Server::mDspMemoryRead(QChar* s)
+QString cZDSP1Server::mDspMemoryRead(QChar* s)
 {
     QString par(s);
     cZDSP1Client* cl = GetClient(ActSock);
     Answer = cl->DspVarListRead(par);
 
-    return Answer.toLatin1().data();
+    return Answer;
 }
 
 
-const char* cZDSP1Server::mDspMemoryWrite(QChar* s)
+QString cZDSP1Server::mDspMemoryWrite(QChar* s)
 {
     QString par(s);
     cZDSP1Client* cl = GetClient(ActSock);
     Answer = cl->DspVarWriteRM(par);
 
-    return Answer.toLatin1().data();
+    return Answer;
 }
 
 
@@ -2382,7 +2396,7 @@ void cZDSP1Server::DelClient(ProtoNetPeer* netClient)
 }
 
 
-const char* cZDSP1Server::SCPICmd(SCPICmdType cmd, QChar *s)
+QString cZDSP1Server::SCPICmd(SCPICmdType cmd, QChar *s)
 {
     switch ((int)cmd)
     {
@@ -2416,11 +2430,12 @@ const char* cZDSP1Server::SCPICmd(SCPICmdType cmd, QChar *s)
     case   ResetDeviceLoadMax:	return mResetDeviceLoadMax();
     }
     Answer = "ProgrammierFehler"; // hier sollten wir nie hinkommen
-    return Answer.toLatin1().data();
+
+    return Answer;
 }
 
 
-const char* cZDSP1Server::SCPIQuery( SCPICmdType cmd)
+QString cZDSP1Server::SCPIQuery( SCPICmdType cmd)
 {
     switch ((int)cmd)
     {
@@ -2447,7 +2462,7 @@ const char* cZDSP1Server::SCPIQuery( SCPICmdType cmd)
     case 		GetDspCommandStat:	return mGetDspCommandStat();
     }
     Answer = "ProgrammierFehler"; // hier sollten wir nie hinkommen
-    return Answer.toLatin1().data();
+    return Answer;
 }
 
 
