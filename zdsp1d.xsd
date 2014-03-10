@@ -106,9 +106,9 @@
                         <xs:element name="samplingsystem">
                                 <xs:complexType>
                                         <xs:sequence>
-                                                <xs:element name="channels" type="channeltype">
-                                                <xs:element name="signalperiod" type="signalperiodtype">
-                                                <xs:element name="measureperiod" type="measureperiodtype">
+                                                <xs:element name="channels" type="channeltype"/>
+                                                <xs:element name="signalperiod" type="signalperiodtype"/>
+                                                <xs:element name="measureperiod" type="measureperiodtype"/>
                                         </xs:sequence>
                                 </xs:complexType>
                         </xs:element>

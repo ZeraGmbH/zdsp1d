@@ -883,7 +883,8 @@ void cZDSP1Server::doSetupServer()
 
     m_sDspDeviceVersion = m_sDspSerialNumber = "Unknown"; // kennen wir erst mal nicht
 
-    m_sDspBootPath = "";
+    m_sDspBootPath = m_pDspSettings->getBootFile();
+
     DSPServer = this;
 
     ActivatedCmdList = 0; // der derzeit aktuelle kommando listen satz (0,1)
@@ -917,13 +918,6 @@ void cZDSP1Server::doSetupServer()
             {
                 if (setSamplingSystem()) // now we try to set the dsp's sampling system
                 {
-
-                    QString par = QString("%1,%2,%3").arg(m_pDspSettings->getChannelNr())
-                                                     .arg(m_pDspSettings->getSamplesSignalPeriod())
-                                                     .arg(m_pDspSettings->getsamplesMeasurePeriod());
-
-
-
                     // our resource mananager connection must be opened after configuration is done
                     m_pRMConnection = new cRMConnection(m_pETHSettings->getRMIPadr(), m_pETHSettings->getPort(resourcemanager), m_pDebugSettings->getDebugLevel());
                     connect(m_pRMConnection, SIGNAL(connectionRMError()), this, SIGNAL(abortInit()));
@@ -2123,18 +2117,17 @@ bool cZDSP1Server::setDspType()
 {
     int r;
     r = readMagicId();
-    QString bfile = m_pDspSettings->getBootFile();
     QString s;
 
     if ( r == MAGIC_ID21262 )
     {
-        return bfile.contains(s = "zdsp21262.ldr");
+        return m_sDspBootPath.contains(s = "zdsp21262.ldr");
         // adressen im dsp stehen für adsp21262 default richtig
     }
     else
     if ( r == MAGIC_ID21362)
     {
-        if (bfile.contains(s = "zdsp21362.ldr"))
+        if (m_sDspBootPath.contains(s = "zdsp21362.ldr"))
         {
             // für adsp21362 schreiben wir die adressen um
             dm32DspWorkspace.StartAdr = dm32DspWorkSpaceBase21362;
