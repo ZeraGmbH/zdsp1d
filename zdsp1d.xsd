@@ -70,10 +70,57 @@
 		</xs:sequence>
 	</xs:complexType>
 
+
+        <xs:simpleType name="bootfiletype">
+                <xs:restriction base="xs:string"/>
+        </xs:simpleType>
+
+
+        <xs:simpleType name="channeltype">
+                <xs:restriction base="xs:integer">
+                        <xs:maxInclusive value='32'/>
+                        <xs:minInclusive value='1'/>
+                </xs:restriction>
+        </xs:simpleType>
+
+
+        <xs:simpleType name="signalperiodtype">
+                <xs:restriction base="xs:integer">
+                        <xs:maxInclusive value='1024'/>
+                        <xs:minInclusive value='64'/>
+                </xs:restriction>
+        </xs:simpleType>
+
+
+        <xs:simpleType name="measureperiodtype">
+                <xs:restriction base="xs:integer">
+                        <xs:maxInclusive value='8192'/>
+                        <xs:minInclusive value='64'/>
+                </xs:restriction>
+        </xs:simpleType>
+
+
+        <xs:complexType name="dspsettingstype">
+                <xs:sequence>
+                        <xs:element name="bootfile" type="bootfiletype"/>
+                        <xs:element name="samplingsystem">
+                                <xs:complexType>
+                                        <xs:sequence>
+                                                <xs:element name="channels" type="channeltype">
+                                                <xs:element name="signalperiod" type="signalperiodtype">
+                                                <xs:element name="measureperiod" type="measureperiodtype">
+                                        </xs:sequence>
+                                </xs:complexType>
+                        </xs:element>
+                </xs:sequence>
+        </xs:complexType>
+
+
 	<xs:element name="zdsp1dconfig">
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element name="connectivity" type="connectivitytype"/>
+                                <xs:element name="dspsettings" type="dspsettingstype"/>
 			</xs:sequence>	
 		</xs:complexType>
 	</xs:element>

@@ -875,8 +875,8 @@ void cZDSP1Server::doConfiguration()
 void cZDSP1Server::doSetupServer()
 {
 
-    quint32 sigStart = 2;
-    write(m_nFPGAfd,(char*) &sigStart, 4);
+    //quint32 sigStart = 2;
+    //write(m_nFPGAfd,(char*) &sigStart, 4);
 
     cParse* parser=new(cParse); // das ist der parser
     pCmdInterpreter=new cCmdInterpreter(this,InitCmdTree(),parser); // das ist der kommando interpreter
@@ -911,25 +911,46 @@ void cZDSP1Server::doSetupServer()
         sigaction(SIGIO, &mySigAction, NULL); // handler für sigio definieren
         SetFASync();
 
-        setDspType(); // now we can interrogate the mounted dsp device type
-
-        if (resetDsp() && bootDsp()) // and try to reset and then boot it
+        if (setDspType()) // interrogate the mounted dsp device type and bootfile match
         {
-            // our resource mananager connection must be opened after configuration is done
-            m_pRMConnection = new cRMConnection(m_pETHSettings->getRMIPadr(), m_pETHSettings->getPort(resourcemanager), m_pDebugSettings->getDebugLevel());
-            connect(m_pRMConnection, SIGNAL(connectionRMError()), this, SIGNAL(abortInit()));
-            // so we must complete our state machine here
-            stateconnect2RM->addTransition(m_pRMConnection, SIGNAL(connected()), stateSendRMIdentandRegister);
+            if (resetDsp() && bootDsp()) // and try to reset and then boot it
+            {
+                if (setSamplingSystem()) // now we try to set the dsp's sampling system
+                {
 
-            emit serverSetup(); // so we enter state machine's next state
+                    QString par = QString("%1,%2,%3").arg(m_pDspSettings->getChannelNr())
+                                                     .arg(m_pDspSettings->getSamplesSignalPeriod())
+                                                     .arg(m_pDspSettings->getsamplesMeasurePeriod());
+
+
+
+                    // our resource mananager connection must be opened after configuration is done
+                    m_pRMConnection = new cRMConnection(m_pETHSettings->getRMIPadr(), m_pETHSettings->getPort(resourcemanager), m_pDebugSettings->getDebugLevel());
+                    connect(m_pRMConnection, SIGNAL(connectionRMError()), this, SIGNAL(abortInit()));
+                    // so we must complete our state machine here
+                    stateconnect2RM->addTransition(m_pRMConnection, SIGNAL(connected()), stateSendRMIdentandRegister);
+
+                    emit serverSetup(); // so we enter state machine's next state
+                }
+                else
+                {
+                    m_nerror = dspSetSamplingError;
+                    emit abortInit();
+                }
+
+            }
+            else
+            {
+                m_nerror = dspBootError;
+                emit abortInit();
+            }
         }
         else
         {
-            m_nerror = dspBootError;
+            m_nerror = dspBootFileError;
             emit abortInit();
         }
     }
-
 }
 
 
@@ -1183,7 +1204,7 @@ const char* cZDSP1Server::mResetDsp(QChar*)
 bool cZDSP1Server::bootDsp()
 {
     QFile f (m_sDspBootPath);
-    qDebug() << m_sDspBootPath;
+    //qDebug() << m_sDspBootPath;
     if (!f.open(QIODevice::Unbuffered | QIODevice::ReadOnly))
     { // dsp bootfile öffnen
         if (DEBUG1)  syslog(LOG_ERR,"error opening dsp boot file: %s\n",m_sDspBootPath.toLatin1().data());
@@ -1197,7 +1218,7 @@ bool cZDSP1Server::bootDsp()
     //f.readLine(BootMem.data(), len);
     BootMem = f.readAll();
     f.close();
-    qDebug() << "md5sum bootfile = " << QString(QCryptographicHash::hash(BootMem, QCryptographicHash::Md5).toHex());
+    //qDebug() << "md5sum bootfile = " << QString(QCryptographicHash::hash(BootMem, QCryptographicHash::Md5).toHex());
 
     int r = ioctl(DevFileDescriptor,ADSP_BOOT,BootMem.data()); // und booten
 
@@ -1210,6 +1231,22 @@ bool cZDSP1Server::bootDsp()
 
     Answer = ACKString;
     return true;
+}
+
+
+bool cZDSP1Server::setSamplingSystem()
+{
+    QString ss;
+    for (int i = 0; i < 10; i++) // we try max. 10 times to set .... this should work
+    {
+        mCommand2Dsp(ss = QString("DSPCMDPAR,2,%1,%2,%3;").arg(m_pDspSettings->getChannelNr())
+                                                                     .arg(m_pDspSettings->getSamplesSignalPeriod())
+                                                                     .arg(m_pDspSettings->getsamplesMeasurePeriod()));
+        if (Answer == ACKString)
+            return true;
+    }
+
+    return false;
 }
 
 
@@ -1290,7 +1327,6 @@ const char* cZDSP1Server::mCommand2Dsp(QString& qs)
     } while (0);
     return Answer.toLatin1().data();
 }
-
 
 
 const char* cZDSP1Server::mSetSamplingSystem(QChar *s)
@@ -2083,37 +2119,48 @@ const char* cZDSP1Server::mMeasure(QChar *s)
 }
 
 
-void cZDSP1Server::setDspType()
+bool cZDSP1Server::setDspType()
 {
     int r;
     r = readMagicId();
+    QString bfile = m_pDspSettings->getBootFile();
+    QString s;
+
     if ( r == MAGIC_ID21262 )
     {
-        if (m_sDspBootPath == "") // wenn der benutzer denselben schon beim programmaufruf mitgesetzt hat, lassen wir das!
-            m_sDspBootPath = "/opt/zera/bin/zdsp21262.ldr"; // default dsp program name
+        return bfile.contains(s = "zdsp21262.ldr");
         // adressen im dsp stehen für adsp21262 default richtig
     }
     else
+    if ( r == MAGIC_ID21362)
     {
-        if (m_sDspBootPath == "") // dito
-            m_sDspBootPath = "/opt/zera/bin/zdsp21362.ldr"; // default dsp program name
-        // für adsp21362 schreiben wir die adressen um
-        dm32DspWorkspace.StartAdr = dm32DspWorkSpaceBase21362;
-        dm32DialogWorkSpace.StartAdr = dm32DialogWorkSpaceBase21362;
-        dm32UserWorkSpace.StartAdr = dm32UserWorkSpaceBase21362;
-        dm32CmdList.StartAdr = dm32CmdListBase21362;
+        if (bfile.contains(s = "zdsp21362.ldr"))
+        {
+            // für adsp21362 schreiben wir die adressen um
+            dm32DspWorkspace.StartAdr = dm32DspWorkSpaceBase21362;
+            dm32DialogWorkSpace.StartAdr = dm32DialogWorkSpaceBase21362;
+            dm32UserWorkSpace.StartAdr = dm32UserWorkSpaceBase21362;
+            dm32CmdList.StartAdr = dm32CmdListBase21362;
 
-        sDspVar* pDspVar = &CmdListVar;
+            sDspVar* pDspVar = &CmdListVar;
 
-        pDspVar->size = IntCmdListLen21362; pDspVar++;
-        pDspVar->size = CmdListLen21362; pDspVar++;
-        pDspVar->size = IntCmdListLen21362; pDspVar++;
-        pDspVar->size = CmdListLen21362;
+            pDspVar->size = IntCmdListLen21362; pDspVar++;
+            pDspVar->size = CmdListLen21362; pDspVar++;
+            pDspVar->size = IntCmdListLen21362; pDspVar++;
+            pDspVar->size = CmdListLen21362;
 
-        pDspVar = &UserWorkSpaceVar;
-        pDspVar->size = uwSpaceSize21362;
+            pDspVar = &UserWorkSpaceVar;
+            pDspVar->size = uwSpaceSize21362;
+
+            return true;
+        }
+
+        else
+            return false;
     }
 
+    else
+        return false;
 }
 
 

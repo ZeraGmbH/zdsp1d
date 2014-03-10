@@ -50,9 +50,15 @@ int main( int argc, char *argv[] )
     if (r == xmlfileError)
         syslog(LOG_EMERG,"Abort, xml file error\n") ;
     if (r == dspDeviceError)
-        syslog(LOG_EMERG,"Abort, device not found\n") ;
+        syslog(LOG_EMERG,"Abort, dsp device not found\n") ;
     if (r == dspBootError)
-        syslog(LOG_EMERG,"Abort, device boot error\n") ;
+        syslog(LOG_EMERG,"Abort, dsp device boot error\n") ;
+    if (r == dspBootFileError)
+        syslog(LOG_EMERG,"Abort, dsp device and bootfile mismatch\n") ;
+    if (r == dspSetSamplingError)
+        syslog(LOG_EMERG,"Abort, dsp device set sampling system error\n") ;
+    if (r == rmConnectionError)
+        syslog(LOG_EMERG,"Abort, resourcemanager connection error\n") ;
 
     syslog(LOG_INFO,"zdsp1d server child process terminated ret = %d\n", r);
     delete zdsp1d;

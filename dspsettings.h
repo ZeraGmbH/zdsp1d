@@ -9,7 +9,11 @@ namespace DSPSettings
 {
     enum configstate
     {
-        setDSPDevNode
+        setDSPDevNode,
+        setDSPBootfile,
+        setDSPChannelNr,
+        setDSPSignalPeriod,
+        setDSPMeasPeriod
     };
 }
 
@@ -30,12 +34,20 @@ class cDSPSettings : public cXMLSettings
 public:
     cDSPSettings(Zera::XMLConfig::cReader *xmlread);
     QString& getDeviceNode();
+    QString& getBootFile();
+    quint8 getChannelNr();
+    quint16 getSamplesSignalPeriod();
+    quint16 getsamplesMeasurePeriod();
 
 public slots:
     virtual void configXMLInfo(QString key);
 
 private:
     QString m_sDeviceNode;
+    QString m_sBootFile;
+    quint8 m_nChannels;
+    quint16 m_nSamplesPerSignalPeriod;
+    quint16 m_nSamplesPerMeasurePeriod;
 };
 
 

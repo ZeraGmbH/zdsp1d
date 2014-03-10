@@ -19,5 +19,16 @@
 			</device>
 		</dsp>		
 	</connectivity>
-	
+
+        <dspsettings>
+                <bootfile>opt/zera/bin/21362.ldr</bootfile>
+                <samplingsystem>
+                        <channels>6</channels>
+                        <samples>
+                                <signalperiod>504</signalperiod>
+                                <measureperiod>504</measureperiod>
+                        </samples>
+                </samplingsystem>
+        </dspsettings>
+
 </zdsp1dconfig> 

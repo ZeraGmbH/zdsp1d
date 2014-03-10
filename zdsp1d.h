@@ -141,6 +141,7 @@ private:
     
     bool resetDsp();
     bool bootDsp();
+    bool setSamplingSystem();
 
     // die routinen für das system modell
     const char* mCommand2Dsp(QString&); // indirekt für system modell    
@@ -207,7 +208,7 @@ private:
     const char* mDspMemoryWrite(QChar *);
     
     bool LoadDSProgram();
-    void setDspType();
+    bool setDspType();
     int readMagicId();
     bool Test4HWPresent(); 
     bool Test4DspRunning();

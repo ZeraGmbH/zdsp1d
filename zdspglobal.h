@@ -36,7 +36,7 @@
 //v1.09:
 //  ressourcemanager support added, linux event loop changed to qt event loop(qcoreapllication)
 //  dsp var decoding uses nhash tables now (qhash)
-//  server configuration with xml implemented
+//  server configuration with xml implemented incl. booting dsp, setting sampling system
 //  new dsp command {"DSPINTPOST,68,CMD1i16,0}
 //  serialized dsp interrupts support implemented
 //  meas. modules merging DSPINTPOST added at end of list
@@ -61,8 +61,9 @@ enum ServerErrors
     xsdfileError,
     xmlfileError,
     dspDeviceError,
+    dspBootFileError,
     dspBootError,
-    pipeError,
+    dspSetSamplingError,
     rmConnectionError
 };
 
