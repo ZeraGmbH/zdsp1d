@@ -1289,11 +1289,12 @@ const char* cZDSP1Server::mGetPCBSerialNumber()
 
 const char* cZDSP1Server::mCommand2Dsp(QString& qs)
 {
+    // we need a client to do the job
+    cZDSP1Client* cl = new cZDSP1Client(0, 0, this);
+
     do
     {
         Answer = ERREXECString;
-
-        cZDSP1Client* cl = GetClient(ActSock);
         int ack;
 
         QString ss;
@@ -1319,6 +1320,9 @@ const char* cZDSP1Server::mCommand2Dsp(QString& qs)
         Answer = ACKString; // sofort fertig melden ....sync. muss die applikation
 
     } while (0);
+
+    delete cl;
+
     return Answer.toLatin1().data();
 }
 
