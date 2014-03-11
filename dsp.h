@@ -53,7 +53,7 @@ enum dType { eInt, eFloat, eUnknown};
 
 
 struct sDspVar { // dient ebenfalls der dekodierung 
-    const char* Name; // name der variablen
+    QString Name; // name der variablen
     ushort size;  // anzahl worte
     dType type; // 
     ulong adr; // die abs. adresse auf welcher sich die variable befindet
