@@ -103,7 +103,6 @@ public:
     virtual QString SCPICmd( SCPICmdType, QChar*);
     virtual QString SCPIQuery( SCPICmdType);
     
-    int m_nFPGAfd;
     void SetFASync(); // async. benachrichtung einschalten
     
     int SetBootPath(const char*);
