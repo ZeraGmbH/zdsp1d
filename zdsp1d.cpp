@@ -2301,7 +2301,10 @@ void cZDSP1Server::executeCommand(google::protobuf::Message *cmd)
             if (m_sOutput.contains((ACKString)))
                 Answer->set_rtype(ProtobufMessage::NetMessage_NetReply_ReplyType_ACK);
             else
+            {
+                Answer->set_rtype(ProtobufMessage::NetMessage_NetReply_ReplyType_ACK);
                 Answer->set_body(m_sOutput.toStdString());
+            }
 
             protobufAnswer.set_clientid(clientId, clientId.count());
             protobufAnswer.set_messagenr(messageNr);
