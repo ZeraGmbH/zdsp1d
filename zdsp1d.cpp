@@ -1899,6 +1899,7 @@ void cZDSP1Server::DspIntHandler()
                         ProtobufMessage::NetMessage::NetReply *intMessage = protobufIntMessage.mutable_reply();
 
                         intMessage->set_body(s.toStdString());
+                        intMessage->set_rtype(ProtobufMessage::NetMessage_NetReply_ReplyType_ACK);
 
                         protobufIntMessage.set_clientid(m_clientIDHash[client2]);
                         protobufIntMessage.set_messagenr(0); // interrupt
