@@ -758,7 +758,7 @@ bool cZDSP1Client::DspVarWrite(QString& s)
 cZDSP1Server* DSPServer;
 int pipeFD[2];
 char pipeBuf[2] = "I";
-
+int anzInt = 0;
 
 void SigHandler(int)
 {
@@ -1900,8 +1900,11 @@ void cZDSP1Server::DspIntHandler(int)
 
     read(pipeFD[0], buf, 1); // first we read the pipe
 
+    if (anzInt ==0)
+    {
     if ((client = clientlist.first()) !=0) // wenn vorhanden nutzen wir immer den 1. client zum lesen
     {
+        anzInt++;
         ba = new QByteArray();
 
         if (client->DspVarRead(s = "CTRLCMDPAR,20", ba)) // 20 worte lesen
@@ -1956,6 +1959,7 @@ void cZDSP1Server::DspIntHandler(int)
     {
         cZDSP1Client *dummyClient = new cZDSP1Client(0, 0, this); // dummyClient einrichten
         dummyClient->DspVarWrite(s = QString("CTRLACK,%1;").arg(CmdDone)); // und rücksetzen
+    }
     }
 }
 
