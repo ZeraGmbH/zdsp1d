@@ -50,16 +50,14 @@ cNodeSCPI* Status;
 			                                  cNodeSCPI* StatusDspLoadMaximumReset;
 	     
 cNodeSCPI* MeasureNode;
-                   cNodeSCPI* MeasureList;
+                  cNodeSCPI* MeasureList;
 		          cNodeSCPI* MeasureListCycList;
 		          cNodeSCPI* MeasureListIntList;
 		          cNodeSCPI* MeasureListRavList;
 		          cNodeSCPI* MeasureListSet;
 		          cNodeSCPI* MeasureListClear;	  
-	     cNodeSCPI* MeasureInitiate; 
-	     cNodeSCPI* MeasureFetch;
-	     
-	     
+
+
 cNodeSCPI* Memory;	     
 	     cNodeSCPI* MemoryRead;
 	     cNodeSCPI* MemoryWrite;
@@ -81,14 +79,12 @@ cNode* InitCmdTree()
 
     // implementiertes measure modell
 
-    MeasureFetch=new cNodeSCPI("FETCH",isCommand,NULL,NULL,Fetch,nixCmd);    
-    MeasureInitiate=new cNodeSCPI("INITIATE",isCommand,MeasureFetch,NULL,Initiate,nixCmd);
     MeasureListClear=new cNodeSCPI("CLEAR",isCommand,NULL,NULL,UnloadCmdList,nixCmd);
     MeasureListSet=new cNodeSCPI("SET",isCommand,MeasureListClear,NULL,LoadCmdList,nixCmd);
     MeasureListRavList=new cNodeSCPI("RAVLIST",isQuery | isCommand,MeasureListSet,NULL,SetRavList,GetRavList);
     MeasureListIntList=new cNodeSCPI("INTLIST",isQuery | isCommand,MeasureListRavList,NULL,SetCmdIntList,GetCmdIntList);
     MeasureListCycList=new cNodeSCPI("CYCLIST",isQuery | isCommand,MeasureListIntList,NULL,SetCmdList,GetCmdList);
-    MeasureList=new cNodeSCPI("LIST",isNode,MeasureInitiate,MeasureListCycList,nixCmd,nixCmd);
+    MeasureList=new cNodeSCPI("LIST",isNode,NULL,MeasureListCycList,nixCmd,nixCmd);
     MeasureNode=new cNodeSCPI("MEASURE",isNode | isCommand,Memory,MeasureList,Measure,nixCmd);	     
     // implementiertes status modell
     
