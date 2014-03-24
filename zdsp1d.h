@@ -9,6 +9,7 @@
 #include <QList>
 #include <QString>
 #include <QStringList>
+#include <QSocketNotifier>
 #include <QMap>
 #include <QHash>
 #include <QVector>
@@ -114,8 +115,6 @@ public:
     int DspDevSeek(int,ulong);
     int DspDevOpen();
     
-    void DspIntHandler();
-
     int DevFileDescriptor; // kerneltreiber wird nur 1x geöffnet und dann gehalten
     int m_nDebugLevel;
     
@@ -137,7 +136,8 @@ private:
     quint8 m_nerror;
     uchar ActivatedCmdList;
     QList<cZDSP1Client*> clientlist; // liste aller clients
-    
+    QSocketNotifier* m_pNotifier;
+
     bool resetDsp();
     bool bootDsp();
     bool setSamplingSystem();
@@ -230,6 +230,7 @@ private slots:
     virtual void deleteConnection();
     virtual void executeCommand(google::protobuf::Message* cmd);
 
+    void DspIntHandler();
     void doConfiguration();
     void doSetupServer();
     void doCloseServer();
