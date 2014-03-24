@@ -342,16 +342,12 @@ void cZDSP1Client::SetActive(bool b)
 
 ulong cZDSP1Client::SetStartAdr(ulong sa)
 {
- //   m_nStartAdr = sa;
     msec.StartAdr = sa;
-    ulong offs = sa;
     ulong len = 0;
-    for (int i = 0; i < m_DspVarList.count(); i++)
+    for (int i = 0; i < msec.n; i++)
     {
-        cDspClientVar var = m_DspVarList.at(i);
-        var.SetOffs(offs);
-        offs += var.size();
-        len += var.size();
+        msec.DspVar[i].adr = sa + msec.DspVar[i].offs;
+        len += msec.DspVar[i].size;
     }
 
     return len;
