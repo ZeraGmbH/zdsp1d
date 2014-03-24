@@ -827,6 +827,8 @@ cZDSP1Server::~cZDSP1Server()
         }
 
     close(DevFileDescriptor); // close dev.
+    close(pipeFD[0]);
+    close(pipeFD[1]);
 }
 
 
@@ -1893,7 +1895,10 @@ void cZDSP1Server::DspIntHandler(int)
     QByteArray *ba;
     QString s;
     cZDSP1Client *client,*client2;
+    char buf[2];
     int process = 0;
+
+    read(pipeFD[0], buf, 1); // first we read the pipe
 
     if ((client = clientlist.first()) !=0) // wenn vorhanden nutzen wir immer den 1. client zum lesen
     {
