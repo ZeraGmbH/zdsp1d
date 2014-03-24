@@ -52,9 +52,8 @@ public:
     cDspCmd GenDspCmd(QString&,bool*); // generiert ein dsp kommando aus einem string
     QString &readActValues(QString&); // liess die messergebnisse (liste)
     bool isActive(); 
-    QString& FetchActValues(QString&); // gibt die messergebnisse aus (liste)
     void SetActive(bool); // merkt sich in m_bActive ob diese liste aktiv ist
-    void SetStartAdr(ulong); // zum relokalisieren der userdaten
+    ulong SetStartAdr(ulong); // zum relokalisieren der userdaten
     QString &DspVarListRead(QString&); // lesen dsp daten ganze Liste
     bool DspVar(QString&,int&); // einen int (32bit) wert lesen
     bool DspVar(QString&,float&); // eine float wert lesen
@@ -63,7 +62,6 @@ public:
     bool DspVarWrite(QString&);  // schreiben  true wenn ok
     QList<cDspCmd>& GetDspCmdList(); // damit der server die komplette liste aller clients
     QList<cDspCmd>& GetDspIntCmdList(); // an den dsp übertragen kann
-    tDspMemArray& GetDspMemData(); 
     int getSocket();
     cDspVarResolver DspVarResolver; // zum auflösen der variablen aus kommandos
     int sock; // socket für den die verbindung besteht
@@ -84,7 +82,6 @@ private:
         
 //    ulong m_nStartAdr; // die absolute adresse an der ein variablen "block" im dsp steht 
     int m_nlen; // länge des gesamten datenblocks (in float bzw. long)
-    tDspMemArray m_fDspMemData; // der datenblock bzw. kopie desselben
     QList<cDspClientVar> m_DspVarList; // liste mit variablen beschreibungen
     QList<cDspCmd> m_DspCmdList; // liste mit dsp kommandos (periodisch)
     QList<cDspCmd>  m_DspIntCmdList; // liste mit dsp kommandos (interrupt)

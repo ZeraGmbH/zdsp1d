@@ -148,8 +148,6 @@ QString& cZDSP1Client::SetRavList(QString& s)
         msec.DspVar = varArray.data();
     }
 
-    m_fDspMemData.resize(m_nlen); // speicher im array reservieren
-
     DspVarResolver.setVarHash(); // wir setzen die hashtabelle neu
 
     return (sOutput);
@@ -342,10 +340,21 @@ void cZDSP1Client::SetActive(bool b)
 }
 
 
-void cZDSP1Client::SetStartAdr(ulong sa)
+ulong cZDSP1Client::SetStartAdr(ulong sa)
 {
  //   m_nStartAdr = sa;
     msec.StartAdr = sa;
+    ulong offs = sa;
+    ulong len = 0;
+    for (int i = 0; i < m_DspVarList.count(); i++)
+    {
+        cDspClientVar var = m_DspVarList.at(i);
+        var.SetOffs(offs);
+        offs += var.size();
+        len += var.size();
+    }
+
+    return len;
 }
 
 
@@ -395,12 +404,6 @@ QList<cDspCmd> &cZDSP1Client::GetDspIntCmdList()
 }
 
 
-tDspMemArray& cZDSP1Client::GetDspMemData()
-{
-    return(m_fDspMemData);
-}
-
-
 int cZDSP1Client::getSocket()
 {
     return sock;
@@ -419,59 +422,7 @@ QString& cZDSP1Client::readActValues(QString& s)
             par += QString("%1,%2;").arg(Var.name()).arg(Var.size());
         }
     }
-
     return DspVarListRead(par);
-}
-
-
-QString& cZDSP1Client::FetchActValues(QString& s)
-{
-    sOutput="";
-    QTextStream ts( &sOutput, QIODevice::WriteOnly );
-    QString tmps=s;
-    QList<cDspClientVar>::iterator it;
-    if (s.isEmpty())
-        for (it = m_DspVarList.begin(); it != m_DspVarList.end(); it++) tmps = tmps + (*it).name() + ";";
-    for (int i=0;;i++) {
-        QString vs = tmps.section(";",i,i);
-        //vs=vs.stripWhiteSpace();
-        vs.remove(' ');
-        if (vs.isEmpty()) break; // dann sind wir fertig
-
-        QList<cDspClientVar>::iterator it;
-        for (it = m_DspVarList.begin(); it != m_DspVarList.end(); it++)
-            if ( (*it).name() == vs) break;
-        if (it == m_DspVarList.end())
-        {
-            sOutput = ERREXECString; // fehler
-            break;
-        }
-
-        int start = (*it).offs();
-        int len = (*it).size();
-        int end = start + len;
-        int j;
-        if (Encryption)
-        {
-            char* c;
-            sOutput += QString("%1%2").arg((*it).name()).arg( ":");
-            float *f = &m_fDspMemData[start];
-            sOutput +=QString(c = qSEncryption((char*) f,len*4));
-            delete c;
-        }
-        else
-        {
-            ts << (*it).name() << ":"; // messwerte sind immer float !!!!! das muss zu erkennen sein !!!!
-            QString vs;
-            for (j = start; j < end -1; j++) {
-                vs = QString ("%1").arg( m_fDspMemData[j], 0, 'e', -1 ); // exp. ist immer float
-                ts << vs << ",";
-            }
-            vs = QString ("%1").arg( m_fDspMemData[j], 0, 'e', -1 );
-            ts << vs << ";";
-        }
-    }
-    return sOutput;
 }
 
 
@@ -1927,12 +1878,11 @@ bool cZDSP1Server::LoadDSProgram()
             client = clientlist.at(i);
             if (client->isActive())
             {
-                client->SetStartAdr(umo);
+                umo += client->SetStartAdr(umo); // relokalisieren der daten im dsp
                 s =  QString( "USERMEMOFFSET(%1)" ).arg(umo);
                 cmd = client->GenDspCmd(s, &ok);
                 mds1 << cmd;
                 mds2 << cmd;
-                umo += (client->GetDspMemData()).size(); // relokalisieren der daten im dsp
                 QList<cDspCmd> cmdl = client->GetDspCmdList();
                 for (int j = 0; j < cmdl.size(); j++ ) mds1 << cmdl[j]; // cycl. liste
                 QList<cDspCmd> cmdl2 = client->GetDspIntCmdList();
