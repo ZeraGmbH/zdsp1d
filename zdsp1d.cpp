@@ -756,11 +756,15 @@ bool cZDSP1Client::DspVarWrite(QString& s)
 
 /* globaler zeiger auf  "den"  server und eine signal behandlungsroutine */
 cZDSP1Server* DSPServer;
+int pipeFD[2];
+char pipeBuf[2] = "I";
+
 
 void SigHandler(int)
 {
     if (DSPServer->m_nDebugLevel & 2) syslog(LOG_INFO,"dsp interrupt received\n");
-    DSPServer->DspIntHandler();
+    // DSPServer->DspIntHandler();
+    write(pipeFD[1], pipeBuf, 1);
 }
 
 
@@ -837,33 +841,46 @@ void cZDSP1Server::doConfiguration()
     }
     else
     {
-        if (myXMLConfigReader->loadSchema(defaultXSDFile))
+        if ( pipe(pipeFD) == -1 )
         {
-            // we want to initialize all settings first
-            m_pDebugSettings = new cDebugSettings(myXMLConfigReader);
-            connect(myXMLConfigReader,SIGNAL(valueChanged(const QString&)),m_pDebugSettings,SLOT(configXMLInfo(const QString&)));
-            m_pETHSettings = new cETHSettings(myXMLConfigReader);
-            connect(myXMLConfigReader,SIGNAL(valueChanged(const QString&)),m_pETHSettings,SLOT(configXMLInfo(const QString&)));
-            m_pDspSettings = new cDSPSettings(myXMLConfigReader);
-            connect(myXMLConfigReader,SIGNAL(valueChanged(const QString&)),m_pDspSettings,SLOT(configXMLInfo(const QString&)));
-
-            QString s = args.at(1);
-
-            if (myXMLConfigReader->loadXML(s)) // the first parameter should be the filename
-            {
-                // xmlfile ok -> nothing to do .. the configreader will emit all configuration
-                // signals and after this the finishedparsingXML signal
-            }
-            else
-            {
-                m_nerror = xmlfileError;
-                emit abortInit();
-            }
+            m_nerror = pipeError;
+            emit abortInit();
         }
         else
         {
-            m_nerror = xsdfileError;
-            emit abortInit();
+            fcntl( pipeFD[1], F_SETFL, O_NONBLOCK);
+            fcntl( pipeFD[0], F_SETFL, O_NONBLOCK);
+            m_pNotifier = new QSocketNotifier(pipeFD[0], QSocketNotifier::Read, this);
+            connect(m_pNotifier, SIGNAL(activated(int)), this, SLOT(DspIntHandler(int)));
+
+            if (myXMLConfigReader->loadSchema(defaultXSDFile))
+            {
+                // we want to initialize all settings first
+                m_pDebugSettings = new cDebugSettings(myXMLConfigReader);
+                connect(myXMLConfigReader,SIGNAL(valueChanged(const QString&)),m_pDebugSettings,SLOT(configXMLInfo(const QString&)));
+                m_pETHSettings = new cETHSettings(myXMLConfigReader);
+                connect(myXMLConfigReader,SIGNAL(valueChanged(const QString&)),m_pETHSettings,SLOT(configXMLInfo(const QString&)));
+                m_pDspSettings = new cDSPSettings(myXMLConfigReader);
+                connect(myXMLConfigReader,SIGNAL(valueChanged(const QString&)),m_pDspSettings,SLOT(configXMLInfo(const QString&)));
+
+                QString s = args.at(1);
+
+                if (myXMLConfigReader->loadXML(s)) // the first parameter should be the filename
+                {
+                    // xmlfile ok -> nothing to do .. the configreader will emit all configuration
+                    // signals and after this the finishedparsingXML signal
+                }
+                else
+                {
+                    m_nerror = xmlfileError;
+                    emit abortInit();
+                }
+            }
+            else
+            {
+                m_nerror = xsdfileError;
+                emit abortInit();
+            }
         }
     }
 }
@@ -1870,7 +1887,7 @@ QDataStream& operator<<(QDataStream& ds,cDspCmd c)
 }
 
 
-void cZDSP1Server::DspIntHandler()
+void cZDSP1Server::DspIntHandler(int)
 { // behandelt den dsp interrupt
 
     QByteArray *ba;

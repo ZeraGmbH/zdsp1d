@@ -230,7 +230,7 @@ private slots:
     virtual void deleteConnection();
     virtual void executeCommand(google::protobuf::Message* cmd);
 
-    void DspIntHandler();
+    void DspIntHandler(int);
     void doConfiguration();
     void doSetupServer();
     void doCloseServer();
