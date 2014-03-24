@@ -45,6 +45,8 @@ int main( int argc, char *argv[] )
 
     if (r == parameterError)
         syslog(LOG_EMERG,"Abort, wrong parameter count\n") ;
+    if (r == pipeError)
+        syslog(LOG_EMERG,"Abort, could not open pipe\n") ;
     if (r == xsdfileError)
         syslog(LOG_EMERG,"Abort, xsd file error\n") ;
     if (r == xmlfileError)
