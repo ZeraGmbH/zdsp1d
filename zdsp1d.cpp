@@ -407,67 +407,20 @@ int cZDSP1Client::getSocket()
 }
 
 
-bool cZDSP1Client::InitiateActValues(QString& s)
+QString& cZDSP1Client::readActValues(QString& s)
 {
-    int fd = myServer->DevFileDescriptor;
-    bool ok = false;
+    QString par(s);
 
-    if (s.isEmpty())
+    if (par.isEmpty())
     { // sonderfall liste leer -> alle messwerte lesen
-        QByteArray ba;
-        ba.resize(m_nlen<<2);
-        QDataStream bas( &ba, QIODevice::Unbuffered | QIODevice::ReadOnly);
-        bas.setByteOrder(QDataStream::LittleEndian);
-        bas.setFloatingPointPrecision(QDataStream::SinglePrecision);
-
-        if (myServer->DspDevSeek(fd, msec.StartAdr/*m_nStartAdr*/) >= 0)
+        for (int i = 0; i < m_DspVarList.count(); i++)
         {
-            if (myServer->DspDevRead(fd, ba.data(), m_nlen<<2) >= 0)
-            {
-                for (int i = 0; i < m_fDspMemData.size(); i++)
-                    bas >> m_fDspMemData[i];
-                return true;
-            }
-        }
-        return(false);
-    }
-    else
-    {
-        for (int i=0;;i++)
-        {
-            QString vs = s.section(";",i,i);
-            //vs=vs.stripWhiteSpace();
-            vs.remove(' ');
-            if (vs.isEmpty())
-            {
-                ok = true;
-                break; // dann sind wir fertig
-            }
-
-            QList<cDspClientVar>::iterator it;
-            for (it = m_DspVarList.begin(); it != m_DspVarList.end(); it++)
-                if ( (*it).name() == vs) break;
-            if (it == m_DspVarList.end()) break; // fehler
-
-            int len = (*it).size(); // in float
-            int of = (*it).offs(); // dito
-            QByteArray ba;
-            ba.resize(len*4); // der benötigte speicher
-            QDataStream bas( &ba, QIODevice::Unbuffered | QIODevice::ReadOnly);
-            bas.setByteOrder(QDataStream::LittleEndian);
-            bas.setFloatingPointPrecision(QDataStream::SinglePrecision);
-            bas.setVersion(QDataStream::Qt_3_3);
-
-            if (myServer->DspDevSeek(fd,msec.StartAdr/* m_nStartAdr*/ + of) < 0) break; // file positionieren
-            if (myServer->DspDevRead(fd, ba.data(), len*4 ) < 0) break; // fehler beim lesen
-
-            for (int j = of; j < of+len; j++)
-            {
-                bas >> m_fDspMemData[j];
-            }
+            cDspClientVar Var = m_DspVarList.at(i);
+            par += QString("%1,%2;").arg(Var.name()).arg(Var.size());
         }
     }
-    return ok;
+
+    return DspVarListRead(par);
 }
 
 
@@ -1863,25 +1816,6 @@ QString cZDSP1Server::mResetDeviceLoadMax()
 }
 
 
-QString cZDSP1Server::mFetch(QChar* s)
-{
-    QString par(s);
-    cZDSP1Client* cl = GetClient(ActSock);
-    Answer = cl->FetchActValues(par);
-    return Answer;
-}
-
-
-QString cZDSP1Server::mInitiate(QChar *s)
-{
-    QString par(s);
-    cZDSP1Client* cl = GetClient(ActSock);
-    if (cl->InitiateActValues(par)) Answer = ACKString;
-    else Answer = ERREXECString;
-    return Answer;
-}
-
-
 QDataStream& operator<<(QDataStream& ds,cDspCmd c)
 {
     ds << (quint32) c.w[0] << (quint32) c.w[1];
@@ -2142,11 +2076,9 @@ QString cZDSP1Server::mGetCmdList()
 QString cZDSP1Server::mMeasure(QChar *s)
 {
     QString par(s); // holt den parameter aus dem kommando
+
     cZDSP1Client* cl = GetClient(ActSock);
-    if (cl->InitiateActValues(par))
-        Answer = cl->FetchActValues(par);
-    else
-        Answer = ERREXECString;
+    Answer = cl->readActValues(par);
 
     return Answer;
 }
@@ -2426,8 +2358,6 @@ QString cZDSP1Server::SCPICmd(SCPICmdType cmd, QChar *s)
     case 	ResetDsp:           return mResetDsp(s);
     case	BootDsp:            return mBootDsp(s);
     case 	SetDspBootPath:     return mSetDspBootPath(s);
-    case  	Fetch:              return mFetch(s);
-    case 	Initiate:			return mInitiate(s);
     case 	SetRavList: 		return mSetRavList(s);
     case 	SetCmdList: 		return mSetCmdList(s);
     case   SetCmdIntList: 		return mSetCmdIntList(s);

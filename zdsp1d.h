@@ -50,12 +50,12 @@ public:
     int GetEncryption();
     bool GenCmdLists(QString&); // baut die cmdlisten  für den dsp zusammen wenn fehler -> false 
     cDspCmd GenDspCmd(QString&,bool*); // generiert ein dsp kommando aus einem string
-    bool InitiateActValues(QString&); // liess die messergebnisse (liste)
+    QString &readActValues(QString&); // liess die messergebnisse (liste)
     bool isActive(); 
     QString& FetchActValues(QString&); // gibt die messergebnisse aus (liste)
     void SetActive(bool); // merkt sich in m_bActive ob diese liste aktiv ist
     void SetStartAdr(ulong); // zum relokalisieren der userdaten
-    QString& DspVarListRead(QString&); // lesen dsp daten ganze Liste
+    QString &DspVarListRead(QString&); // lesen dsp daten ganze Liste
     bool DspVar(QString&,int&); // einen int (32bit) wert lesen
     bool DspVar(QString&,float&); // eine float wert lesen
     sDspVar* DspVarRead(QString&,QByteArray*); // lesen dsp variable;  name , länge stehen im parameter string; werte im anschluss im qbytearray
@@ -187,8 +187,6 @@ private:
   
     // die routinen für das measure modell
     
-    QString mFetch(QChar *);
-    QString mInitiate(QChar*);
     QString mUnloadCmdList(QChar*);
     QString mLoadCmdList(QChar*);
     QString mSetRavList(QChar*);
