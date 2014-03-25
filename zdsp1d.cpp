@@ -1874,7 +1874,6 @@ bool cZDSP1Server::LoadDSProgram()
             if (client->isActive())
             {
                 umo += client->setStartAdr(umo); // relokalisieren der daten im dsp
-                client->DspVarResolver.setVarHash(); // wir setzen die hashtabelle neu
                 s =  QString( "USERMEMOFFSET(%1)" ).arg(umo);
                 cmd = client->GenDspCmd(s, &ok);
                 mds1 << cmd;
