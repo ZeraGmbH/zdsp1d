@@ -139,11 +139,14 @@ QString& cZDSP1Client::SetRavList(QString& s)
     if (msec.n > 0)
     { // wir haben mindestens 1 variable
         varArray.resize(msec.n);
+        ulong offs = 0;
         for (i = 0;i < msec.n; i++)
         { // und machen diese dem resolver zugänglich
             varArray[i].Name = m_DspVarList[i].name();
             varArray[i].size = m_DspVarList[i].size();
+            varArray[i].offs = offs;
             varArray[i].type = (dType)m_DspVarList[i].type();
+            offs += m_DspVarList[i].size();
         }
         msec.DspVar = varArray.data();
     }
@@ -347,7 +350,6 @@ ulong cZDSP1Client::setStartAdr(ulong sa)
     for (int i = 0; i < msec.n; i++)
     {
         msec.DspVar[i].adr = sa + len; // we need the adress for reading back data
-        msec.DspVar[i].offs = len; // we need offs for setting dsp commands because they're relative to usermemory offset
         len += msec.DspVar[i].size;
     }
     return len;
@@ -1874,11 +1876,11 @@ bool cZDSP1Server::LoadDSProgram()
             client = clientlist.at(i);
             if (client->isActive())
             {
-                umo += client->setStartAdr(umo); // relokalisieren der daten im dsp
                 s =  QString( "USERMEMOFFSET(%1)" ).arg(umo);
                 cmd = client->GenDspCmd(s, &ok);
                 mds1 << cmd;
                 mds2 << cmd;
+                umo += client->setStartAdr(umo); // relokalisieren der daten im dsp
                 QList<cDspCmd> cmdl = client->GetDspCmdList();
                 for (int j = 0; j < cmdl.size(); j++ ) mds1 << cmdl[j]; // cycl. liste
                 QList<cDspCmd> cmdl2 = client->GetDspIntCmdList();
