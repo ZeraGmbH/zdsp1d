@@ -346,7 +346,8 @@ ulong cZDSP1Client::setStartAdr(ulong sa)
     ulong len = 0;
     for (int i = 0; i < msec.n; i++)
     {
-        msec.DspVar[i].adr = sa + len;
+        msec.DspVar[i].adr = sa + len; // we need the adress for reading back data
+        msec.DspVar[i].offs = len; // we need offs for setting dsp commands because they're relative to usermemory offset
         len += msec.DspVar[i].size;
     }
     return len;
