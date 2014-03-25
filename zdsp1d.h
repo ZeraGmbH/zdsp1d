@@ -53,7 +53,7 @@ public:
     QString &readActValues(QString&); // liess die messergebnisse (liste)
     bool isActive(); 
     void SetActive(bool); // merkt sich in m_bActive ob diese liste aktiv ist
-    ulong SetStartAdr(ulong); // zum relokalisieren der userdaten
+    ulong setStartAdr(ulong); // zum relokalisieren der userdaten
     QString &DspVarListRead(QString&); // lesen dsp daten ganze Liste
     bool DspVar(QString&,int&); // einen int (32bit) wert lesen
     bool DspVar(QString&,float&); // eine float wert lesen
