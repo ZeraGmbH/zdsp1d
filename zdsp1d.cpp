@@ -148,7 +148,8 @@ QString& cZDSP1Client::SetRavList(QString& s)
         msec.DspVar = varArray.data();
     }
 
-    DspVarResolver.setVarHash(); // wir setzen die hashtabelle neu
+    // keep in mind that we have to set out varhash new when loading cmdlists
+    // DspVarResolver.setVarHash(); // wir setzen die hashtabelle neu
 
     return (sOutput);
 }
@@ -345,11 +346,7 @@ ulong cZDSP1Client::SetStartAdr(ulong sa)
     msec.StartAdr = sa;
     ulong len = 0;
     for (int i = 0; i < msec.n; i++)
-    {
-        msec.DspVar[i].adr = sa + msec.DspVar[i].offs;
         len += msec.DspVar[i].size;
-    }
-
     return len;
 }
 
@@ -1875,6 +1872,7 @@ bool cZDSP1Server::LoadDSProgram()
             if (client->isActive())
             {
                 umo += client->SetStartAdr(umo); // relokalisieren der daten im dsp
+                client->DspVarResolver.setVarHash(); // wir setzen die hashtabelle neu
                 s =  QString( "USERMEMOFFSET(%1)" ).arg(umo);
                 cmd = client->GenDspCmd(s, &ok);
                 mds1 << cmd;
