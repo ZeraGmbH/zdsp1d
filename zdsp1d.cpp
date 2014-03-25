@@ -346,7 +346,7 @@ ulong cZDSP1Client::setStartAdr(ulong sa)
     ulong len = 0;
     for (int i = 0; i < msec.n; i++)
     {
-        msec.DspVar->adr = sa + len;
+        msec.DspVar[i].adr = sa + len;
         len += msec.DspVar[i].size;
     }
     return len;
