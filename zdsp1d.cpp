@@ -2203,6 +2203,46 @@ void cZDSP1Server::executeCommand(google::protobuf::Message *cmd)
             ProtobufMessage::NetMessage protobufAnswer;
             ProtobufMessage::NetMessage::NetReply *Answer = protobufAnswer.mutable_reply();
 
+            // dependent on rtype caller can se ack, nak, error
+            // in case of error the body has to be analysed for details
+
+            if (m_sOutput.contains(ACKString))
+                Answer->set_rtype(ProtobufMessage::NetMessage_NetReply_ReplyType_ACK);
+            else
+            if (m_sOutput.contains(NACKString))
+                Answer->set_rtype(ProtobufMessage::NetMessage_NetReply_ReplyType_NACK);
+            else
+            if (m_sOutput.contains(BUSYString))
+                Answer->set_rtype(ProtobufMessage::NetMessage_NetReply_ReplyType_ERROR);
+            else
+            if (m_sOutput.contains(ERRCONString))
+                Answer->set_rtype(ProtobufMessage::NetMessage_NetReply_ReplyType_ERROR);
+            else
+            if (m_sOutput.contains(ERRAUTString))
+                Answer->set_rtype(ProtobufMessage::NetMessage_NetReply_ReplyType_ERROR);
+            else
+            if (m_sOutput.contains(ERRVALString))
+                Answer->set_rtype(ProtobufMessage::NetMessage_NetReply_ReplyType_ERROR);
+            else
+            if (m_sOutput.contains(ERRXMLString))
+                Answer->set_rtype(ProtobufMessage::NetMessage_NetReply_ReplyType_ERROR);
+            else
+            if (m_sOutput.contains(ERRMMEMString))
+                Answer->set_rtype(ProtobufMessage::NetMessage_NetReply_ReplyType_ERROR);
+            else
+            if (m_sOutput.contains(ERRPATHString))
+                Answer->set_rtype(ProtobufMessage::NetMessage_NetReply_ReplyType_ERROR);
+            else
+            if (m_sOutput.contains(ERREXECString))
+                Answer->set_rtype(ProtobufMessage::NetMessage_NetReply_ReplyType_ERROR);
+            else
+            if (m_sOutput.contains(ERRTIMOString))
+                Answer->set_rtype(ProtobufMessage::NetMessage_NetReply_ReplyType_ERROR);
+            else
+                Answer->set_rtype(ProtobufMessage::NetMessage_NetReply_ReplyType_ACK);
+
+            Answer->set_body(m_sOutput.toStdString()); // in any case we set the body
+
             if (m_sOutput.contains(NACKString))
                 Answer->set_rtype(ProtobufMessage::NetMessage_NetReply_ReplyType_NACK);
             if (m_sOutput.contains((ACKString)))
