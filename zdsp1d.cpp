@@ -828,29 +828,42 @@ void cZDSP1Server::doSetupServer()
 
         if (setDspType()) // interrogate the mounted dsp device type and bootfile match
         {
-            if (resetDsp() && bootDsp()) // and try to reset and then boot it
+            if (m_pDspSettings->isBoot()) // normally dsp gets booted by dsp server
             {
-                if (setSamplingSystem()) // now we try to set the dsp's sampling system
+                if (resetDsp() && bootDsp()) // and try to reset and then boot it
                 {
-                    // our resource mananager connection must be opened after configuration is done
-                    m_pRMConnection = new cRMConnection(m_pETHSettings->getRMIPadr(), m_pETHSettings->getPort(resourcemanager), m_pDebugSettings->getDebugLevel());
-                    connect(m_pRMConnection, SIGNAL(connectionRMError()), this, SIGNAL(abortInit()));
-                    // so we must complete our state machine here
-                    stateconnect2RM->addTransition(m_pRMConnection, SIGNAL(connected()), stateSendRMIdentandRegister);
+                    if (setSamplingSystem()) // now we try to set the dsp's sampling system
+                    {
+                        // our resource mananager connection must be opened after configuration is done
+                        m_pRMConnection = new cRMConnection(m_pETHSettings->getRMIPadr(), m_pETHSettings->getPort(resourcemanager), m_pDebugSettings->getDebugLevel());
+                        connect(m_pRMConnection, SIGNAL(connectionRMError()), this, SIGNAL(abortInit()));
+                        // so we must complete our state machine here
+                        stateconnect2RM->addTransition(m_pRMConnection, SIGNAL(connected()), stateSendRMIdentandRegister);
 
-                    emit serverSetup(); // so we enter state machine's next state
+                        emit serverSetup(); // so we enter state machine's next state
+                    }
+                    else
+                    {
+                        m_nerror = dspSetSamplingError;
+                        emit abortInit();
+                    }
+
                 }
                 else
                 {
-                    m_nerror = dspSetSamplingError;
+                    m_nerror = dspBootError;
                     emit abortInit();
                 }
-
             }
-            else
+            else // but for debugging purpose dsp is booted by ice
             {
-                m_nerror = dspBootError;
-                emit abortInit();
+                // our resource mananager connection must be opened after configuration is done
+                m_pRMConnection = new cRMConnection(m_pETHSettings->getRMIPadr(), m_pETHSettings->getPort(resourcemanager), m_pDebugSettings->getDebugLevel());
+                connect(m_pRMConnection, SIGNAL(connectionRMError()), this, SIGNAL(abortInit()));
+                // so we must complete our state machine here
+                stateconnect2RM->addTransition(m_pRMConnection, SIGNAL(connected()), stateSendRMIdentandRegister);
+
+                emit serverSetup(); // so we enter state machine's next state
             }
         }
         else
