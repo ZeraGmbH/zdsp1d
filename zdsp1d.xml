@@ -22,6 +22,7 @@
 
         <dspsettings>
                 <bootfile>/opt/zera/bin/zdsp21362.ldr</bootfile>
+                <boot>0</boot>
                 <samplingsystem>
                         <channels>6</channels>
                         <signalperiod>504</signalperiod>

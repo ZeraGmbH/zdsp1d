@@ -76,6 +76,14 @@
         </xs:simpleType>
 
 
+        <xs:simpleType name="boottype">
+                <xs:restriction base="xs:integer">
+                        <xs:maxInclusive value='1'/>
+                        <xs:minInclusive value='0'/>
+                </xs:restriction>
+        </xs:simpleType>
+
+
         <xs:simpleType name="channeltype">
                 <xs:restriction base="xs:integer">
                         <xs:maxInclusive value='32'/>
@@ -103,6 +111,7 @@
         <xs:complexType name="dspsettingstype">
                 <xs:sequence>
                         <xs:element name="bootfile" type="bootfiletype"/>
+                        <xs:element name="boot" type="boottype"/>
                         <xs:element name="samplingsystem">
                                 <xs:complexType>
                                         <xs:sequence>
