@@ -11,6 +11,7 @@ namespace DSPSettings
     {
         setDSPDevNode,
         setDSPBootfile,
+        setDSPBoot,
         setDSPChannelNr,
         setDSPSignalPeriod,
         setDSPMeasPeriod
@@ -36,6 +37,7 @@ public:
     QString& getDeviceNode();
     QString& getBootFile();
     quint8 getChannelNr();
+    bool isBoot();
     quint16 getSamplesSignalPeriod();
     quint16 getsamplesMeasurePeriod();
 
@@ -45,6 +47,7 @@ public slots:
 private:
     QString m_sDeviceNode;
     QString m_sBootFile;
+    quint8 m_nBoot; // 0 = no, 1 = yes
     quint8 m_nChannels;
     quint16 m_nSamplesPerSignalPeriod;
     quint16 m_nSamplesPerMeasurePeriod;

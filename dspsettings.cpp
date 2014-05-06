@@ -9,6 +9,7 @@ cDSPSettings::cDSPSettings(Zera::XMLConfig::cReader *xmlread)
     m_pXMLReader = xmlread;
     m_ConfigXMLMap["zdsp1dconfig:connectivity:dsp:device:node"] = DSPSettings::setDSPDevNode;
     m_ConfigXMLMap["zdsp1dconfig:dspsettings:bootfile"] = DSPSettings::setDSPBootfile;
+    m_ConfigXMLMap["zdsp1dconfig:dspsettings:boot"] = DSPSettings::setDSPBoot;
     m_ConfigXMLMap["zdsp1dconfig:dspsettings:samplingsystem:channels"] = DSPSettings::setDSPChannelNr;
     m_ConfigXMLMap["zdsp1dconfig:dspsettings:samplingsystem:signalperiod"] = DSPSettings::setDSPSignalPeriod;
     m_ConfigXMLMap["zdsp1dconfig:dspsettings:samplingsystem:measureperiod"] = DSPSettings::setDSPMeasPeriod;
@@ -30,6 +31,12 @@ QString &cDSPSettings::getBootFile()
 quint8 cDSPSettings::getChannelNr()
 {
     return m_nChannels;
+}
+
+
+bool cDSPSettings::isBoot()
+{
+    return (m_nBoot == 1);
 }
 
 
@@ -58,6 +65,9 @@ void cDSPSettings::configXMLInfo(QString key)
             break;
         case DSPSettings::setDSPBootfile:
             m_sBootFile = m_pXMLReader->getValue(key);
+            break;
+        case DSPSettings::setDSPBoot:
+            m_nBoot = m_pXMLReader->getValue(key).toInt(&ok);
             break;
         case DSPSettings::setDSPChannelNr:
             m_nChannels = m_pXMLReader->getValue(key).toInt(&ok);
