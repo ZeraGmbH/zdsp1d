@@ -1798,7 +1798,8 @@ void cZDSP1Server::DspIntHandler(int)
 
     if (true /*anzInt ==0*/)
     {
-    if ((client = clientlist.first()) !=0) // wenn vorhanden nutzen wir immer den 1. client zum lesen
+
+    if ((!clientlist.isEmpty()) && (client = clientlist.first()) !=0) // wenn vorhanden nutzen wir immer den 1. client zum lesen
     {
         //anzInt++;
         ba = new QByteArray();
