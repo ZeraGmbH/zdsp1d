@@ -10,6 +10,7 @@
 #include <QString>
 #include <QStringList>
 #include <QSocketNotifier>
+#include <QByteArray>
 #include <QMap>
 #include <QHash>
 #include <QVector>
@@ -97,6 +98,7 @@ public:
     virtual ~cZDSP1Server();
     virtual cZDSP1Client* AddClient(ProtoNetPeer *m_pNetClient); // fügt einen client hinzu
     virtual void DelClient(ProtoNetPeer *netClient); // entfernt einen client
+    virtual void DelClient(QByteArray clientId);
 
     virtual QString SCPICmd( SCPICmdType, QChar*);
     virtual QString SCPIQuery( SCPICmdType);

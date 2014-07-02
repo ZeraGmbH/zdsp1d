@@ -2197,6 +2197,16 @@ void cZDSP1Server::executeCommand(google::protobuf::Message *cmd)
 
     if ( (protobufCommand != 0) && (client != 0))
     {
+        if (protobufCommand->has_netcommand() && protobufCommand->has_clientid())
+        {
+            // in case of "lost" clients we delete the clients and its data
+            QByteArray clientId = QByteArray(protobufCommand->clientid().data(), protobufCommand->clientid().size());
+            DelClient(clientId);
+            LoadDSProgram(); // after deleting client we reload dsp program
+        }
+
+        else
+
         if (protobufCommand->has_clientid() && protobufCommand->has_messagenr())
         {
             QByteArray clientId = QByteArray(protobufCommand->clientid().c_str(), protobufCommand->clientid().size());
@@ -2347,8 +2357,20 @@ void cZDSP1Server::DelClient(ProtoNetPeer* netClient)
         client = todeleteList.at(i);
         if DEBUG3 syslog(LOG_INFO,"client %d deleted\n", client->getSocket());
         clientlist.removeOne(client);
+        delete client;
     }
 
+}
+
+
+void cZDSP1Server::DelClient(QByteArray clientId)
+{
+    if (m_zdspdClientHash.contains(clientId))
+    {
+        cZDSP1Client *client = m_zdspdClientHash.take(clientId);
+        m_clientIDHash.remove(client);
+        delete client;
+    }
 }
 
 
