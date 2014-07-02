@@ -2369,6 +2369,7 @@ void cZDSP1Server::DelClient(QByteArray clientId)
     {
         cZDSP1Client *client = m_zdspdClientHash.take(clientId);
         m_clientIDHash.remove(client);
+        clientlist.removeOne(client);
         delete client;
     }
 }
