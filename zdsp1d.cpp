@@ -2267,6 +2267,7 @@ void cZDSP1Server::executeCommand(google::protobuf::Message *cmd)
 
             Answer->set_body(m_sOutput.toStdString()); // in any case we set the body
 
+            /*
             if (m_sOutput.contains(NACKString))
                 Answer->set_rtype(ProtobufMessage::NetMessage_NetReply_ReplyType_NACK);
             if (m_sOutput.contains((ACKString)))
@@ -2276,6 +2277,7 @@ void cZDSP1Server::executeCommand(google::protobuf::Message *cmd)
                 Answer->set_rtype(ProtobufMessage::NetMessage_NetReply_ReplyType_ACK);
                 Answer->set_body(m_sOutput.toStdString());
             }
+            */
 
             protobufAnswer.set_clientid(clientId, clientId.count());
             protobufAnswer.set_messagenr(messageNr);
