@@ -214,7 +214,7 @@ sDspCmd* findDspCmd(QString& s)
 }
 
 
-sDspVar DspWorkspaceVar[15] = 	{ {"FREQENCY",1,eFloat,0,0},			// 1 wert gemessene frequenz
+sDspVar DspWorkspaceVar[16] = 	{ {"FREQENCY",1,eFloat,0,0},			// 1 wert gemessene frequenz
                   {"FREQUENCYVALUE",4,eFloat,0,0},		// 4 werte f. freq. ausgänge
                   {"MAXIMUMSAMPLE",32,eFloat,0,0},		// 32 werte maximumspeicher
                   {"FREQUENCYVALUEFILTER",4,eFloat,0,0},	// 4 gefilterte freq. ausgänge
@@ -228,8 +228,8 @@ sDspVar DspWorkspaceVar[15] = 	{ {"FREQENCY",1,eFloat,0,0},			// 1 wert gemessen
                   {"NSPERIOD",1,eInt,0,0},			// anzahl samples für eine signalperiode
                   {"_NSPERIOD",1,eFloat,0,0},			// 1/ anzahl samples
                   {"SYNCASDU",1,eInt,0,0},			// ob und auf welchen datensatz synchronisiert wird
-                  {"TMCH0",1,eFloat,0,0}};			// periodendauer messsignal kanal0
-
+                  {"TMCH0",1,eFloat,0,0},			// periodendauer messsignal kanal0
+                  {"POWVALS4FOUT",48,eFloat,0,0}};  // 48 leistungs werte für frequenzausgänge
 
 
 sMemSection dm32DspWorkspace = {
