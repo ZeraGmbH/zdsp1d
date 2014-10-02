@@ -40,11 +40,16 @@
 //  new dsp command {"DSPINTPOST,68,CMD1i16,0}
 //  serialized dsp interrupts support implemented
 //  meas. modules merging DSPINTPOST added at end of list
+//v1.10:
+//  new dsp commands added:
+//  {"COPYDATAIND",70,CMD3i16,0}, {"INTERPOLATIONIND",71,CMD3i16,0},
+//  {"COPYMEM",72,CMD3i16,0 }, {"GENADR",73,CMD3i16,0 }
+//  added fout routing field to "POWVALS4FOUT" to dialogworkspace
 
 
 #define DSPDeviceNode "/dev/zFPGA1dsp1"
 #define ServerBasisName "zdsp1d"
-#define ServerVersion "V1.09"
+#define ServerVersion "V1.10"
 #define InpBufSize 4096
 #define defaultXSDFile "/etc/zera/zdsp1d/zdsp1d.xsd"
 
