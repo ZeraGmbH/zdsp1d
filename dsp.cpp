@@ -132,7 +132,7 @@
 
 #include "dsp.h"
 
-static sDspCmd DspCmd[70] = {	{"INVALID", 0, CMD ,0},
+static sDspCmd DspCmd[74] = {	{"INVALID", 0, CMD ,0},
 				{"USERMEMOFFSET", 1, CMD1i32, 0 },
 				{"DSPMEMOFFSET", 2, CMD1i32, 0 },
 				{"COPYDATA", 3, CMD3i16, 0 },	
@@ -201,7 +201,11 @@ static sDspCmd DspCmd[70] = {	{"INVALID", 0, CMD ,0},
                 {"SUBVCC",66,CMD3i16,0},
                 {"SUBVVG",67,CMD3i16,0},
                 {"DSPINTPOST",68,CMD,0},
-                {"SETPEAK",69,CMD2i16,0}};
+                {"SETPEAK",69,CMD2i16,0},
+                {"COPYDATAIND",70,CMD3i16,0},
+                {"INTERPOLATIONIND",71,CMD3i16,0},
+                {"COPYMEM",72,CMD3i16,0 },
+                {"GENADR",73,CMD3i16,0 }};
 
 
 sDspCmd* findDspCmd(QString& s)
@@ -214,7 +218,7 @@ sDspCmd* findDspCmd(QString& s)
 }
 
 
-sDspVar DspWorkspaceVar[16] = 	{ {"FREQENCY",1,eFloat,0,0},			// 1 wert gemessene frequenz
+sDspVar DspWorkspaceVar[15] = 	{ {"FREQENCY",1,eFloat,0,0},			// 1 wert gemessene frequenz
                   {"FREQUENCYVALUE",4,eFloat,0,0},		// 4 werte f. freq. ausgänge
                   {"MAXIMUMSAMPLE",32,eFloat,0,0},		// 32 werte maximumspeicher
                   {"FREQUENCYVALUEFILTER",4,eFloat,0,0},	// 4 gefilterte freq. ausgänge
@@ -228,8 +232,8 @@ sDspVar DspWorkspaceVar[16] = 	{ {"FREQENCY",1,eFloat,0,0},			// 1 wert gemessen
                   {"NSPERIOD",1,eInt,0,0},			// anzahl samples für eine signalperiode
                   {"_NSPERIOD",1,eFloat,0,0},			// 1/ anzahl samples
                   {"SYNCASDU",1,eInt,0,0},			// ob und auf welchen datensatz synchronisiert wird
-                  {"TMCH0",1,eFloat,0,0},			// periodendauer messsignal kanal0
-                  {"POWVALS4FOUT",48,eFloat,0,0}};  // 48 leistungs werte für frequenzausgänge
+                  {"TMCH0",1,eFloat,0,0}};			// periodendauer messsignal kanal0
+
 
 
 sMemSection dm32DspWorkspace = {
@@ -238,7 +242,7 @@ sMemSection dm32DspWorkspace = {
 	DspVar		: DspWorkspaceVar };
 	
 
-sDspVar DialogWorkSpaceVar[19] = 	{ 	  {"DSPCMDPAR",10,eInt,0,0},		// 10 werte cmds, paramter ... ctrl -> dsp
+sDspVar DialogWorkSpaceVar[20] = 	{ 	  {"DSPCMDPAR",10,eInt,0,0},		// 10 werte cmds, paramter ... ctrl -> dsp
                       {"DSPACK",1,eInt,0,0},			// semaphore ackn. dsp -> cntr.
                       {"CTRLCMDPAR",20,eInt,0,0},		// 20 werte cmds, paramter ... dsp -> ctrl
                       {"CTRLACK",1,eInt,0,0},			// semaphore ackn. ctrl. -> dsp
@@ -256,8 +260,8 @@ sDspVar DialogWorkSpaceVar[19] = 	{ 	  {"DSPCMDPAR",10,eInt,0,0},		// 10 werte c
                       {"ETHPRIORITYTAGGED",1,eInt,0,0},
                       {"ETHTYPEAPPID",1,eInt,0,0},
                       {"ETHROUTINGTAB",8,eInt,0,0}, 		// 8*4 = 32 byte 1byte/kanal ASDU / CHN
-                      {"INTERRUPTERROR",1,eInt,0,0} };
-
+                      {"INTERRUPTERROR",1,eInt,0,0},
+                      {"POWVALS4FOUT",48,eFloat,0,0}};  // 48 leistungs werte für frequenzausgänge
 
 sMemSection dm32DialogWorkSpace = {
     StartAdr		: dm32DialogWorkSpaceBase21262,
