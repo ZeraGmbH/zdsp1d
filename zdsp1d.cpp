@@ -1856,6 +1856,7 @@ void cZDSP1Server::DspIntHandler(int)
     {
         cZDSP1Client *dummyClient = new cZDSP1Client(0, 0, this); // dummyClient einrichten
         dummyClient->DspVarWrite(s = QString("CTRLACK,%1;").arg(CmdDone)); // und rücksetzen
+        delete dummyClient;
     }
     }
 }
