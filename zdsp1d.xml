@@ -6,7 +6,7 @@
 		<debuglevel>0</debuglevel>
 		<ethernet>
 			<ipadress>
-				<resourcemanager>192.168.6.124</resourcemanager>
+                                <resourcemanager>127.0.0.1</resourcemanager>
 			</ipadress>	
 			<port>
 				<server>6310</server>
@@ -22,7 +22,7 @@
 
         <dspsettings>
                 <bootfile>/opt/zera/bin/zdsp21362.ldr</bootfile>
-                <boot>0</boot>
+                <boot>1</boot>
                 <samplingsystem>
                         <channels>6</channels>
                         <signalperiod>504</signalperiod>
