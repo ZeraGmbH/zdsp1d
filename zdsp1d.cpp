@@ -1963,6 +1963,7 @@ QString cZDSP1Server::mUnloadCmdList(QChar *)
 
 QString cZDSP1Server::mLoadCmdList(QChar *)
 {
+    static int count = 0;
     cZDSP1Client* cl = GetClient(ActSock);
     QString errs;
     if (cl->GenCmdLists(errs))
@@ -1975,6 +1976,10 @@ QString cZDSP1Server::mLoadCmdList(QChar *)
     }
     else
         Answer = QString("%1 %2").arg(ERRVALString).arg(errs); // das "fehlerhafte" kommando anhängen
+
+    count++;
+    QString s;
+    qDebug() << QString("LoadCmdList(%1)").arg(count);
 
     return Answer;
 }
