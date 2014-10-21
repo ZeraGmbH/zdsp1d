@@ -1903,17 +1903,28 @@ bool cZDSP1Server::LoadDSProgram()
                 for ( int j = 0; j < cmdl2.size(); j++ ) mds2 << cmdl2[j]; // interrupt liste
             }
         }
+
+        client = clientlist.at(0);
+        s = QString( "DSPINTPOST()"); // wir triggern das senden der serialisierten interrupts
+        cmd = client->GenDspCmd(s, &ok);
+        mds1 << cmd;
+
+        s =  QString( "INVALID()");
+        cmd = client->GenDspCmd(s, &ok);
+        mds1 << cmd; // kommando listen ende
+        mds2 << cmd;
     }
 
-    client = clientlist.at(0);
-    s = QString( "DSPINTPOST()"); // wir triggern das senden der serialisierten interrupts
-    cmd = client->GenDspCmd(s, &ok);
-    mds1 << cmd;
+    else
 
-    s =  QString( "INVALID()");
-    cmd = client->GenDspCmd(s, &ok);
-    mds1 << cmd; // kommando listen ende
-    mds2 << cmd;
+    {
+        client = new cZDSP1Client(0, 0, this); // dummyClient einrichten wenn wir keinen mehr haben
+        s =  QString( "INVALID()");
+        cmd = client->GenDspCmd(s, &ok);
+        mds1 << cmd; // kommando listen ende
+        mds2 << cmd;
+        delete client;
+    }
     
     ActivatedCmdList = (ActivatedCmdList + 1) & 1;
     if (ActivatedCmdList == 0)
