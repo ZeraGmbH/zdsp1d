@@ -1909,23 +1909,15 @@ bool cZDSP1Server::LoadDSProgram()
         cmd = client->GenDspCmd(s, &ok);
         mds1 << cmd;
 
-        s =  QString( "INVALID()");
-        cmd = client->GenDspCmd(s, &ok);
-        mds1 << cmd; // kommando listen ende
-        mds2 << cmd;
-    }
-
-    else
-
-    {
-        client = new cZDSP1Client(0, 0, this); // dummyClient einrichten wenn wir keinen mehr haben
-        s =  QString( "INVALID()");
-        cmd = client->GenDspCmd(s, &ok);
-        mds1 << cmd; // kommando listen ende
-        mds2 << cmd;
-        delete client;
     }
     
+    client = new cZDSP1Client(0, 0, this); // dummyClient einrichten damit was jetzt kommt noch
+    s =  QString( "INVALID()"); // funktioniert selbst wenn wenn wir keinen mehr haben
+    cmd = client->GenDspCmd(s, &ok);
+    mds1 << cmd; // kommando listen ende
+    mds2 << cmd;
+
+
     ActivatedCmdList = (ActivatedCmdList + 1) & 1;
     if (ActivatedCmdList == 0)
     {
@@ -1955,6 +1947,9 @@ bool cZDSP1Server::LoadDSProgram()
     QString ss;
     mCommand2Dsp(ss = QString("DSPCMDPAR,7,%1;").arg(ActivatedCmdList));
     // dem dsp die neue liste mitteilen
+
+    delete client;
+
     return true;
 }
 
