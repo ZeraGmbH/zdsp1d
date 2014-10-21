@@ -1808,6 +1808,7 @@ void cZDSP1Server::DspIntHandler(int)
         {        
             ulong* pardsp = (ulong*) ba->data();
             int n = pardsp[0]; // anzahl der interrupts
+            qDebug() << QString("Interrupts n=%1").arg(n);
             for (int i = 1; i < (n+1); i++)
             {
                 process = pardsp[i] >> 16;
@@ -1978,7 +1979,6 @@ QString cZDSP1Server::mLoadCmdList(QChar *)
         Answer = QString("%1 %2").arg(ERRVALString).arg(errs); // das "fehlerhafte" kommando anhängen
 
     count++;
-    QString s;
     qDebug() << QString("LoadCmdList(%1)").arg(count);
 
     return Answer;
