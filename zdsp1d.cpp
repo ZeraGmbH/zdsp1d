@@ -728,6 +728,8 @@ cZDSP1Server::~cZDSP1Server()
             delete cl;
         }
 
+    resetDsp(); // we reset the dsp when we close the server
+
     close(DevFileDescriptor); // close dev.
     close(pipeFD[0]);
     close(pipeFD[1]);
