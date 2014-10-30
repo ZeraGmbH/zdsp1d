@@ -829,6 +829,9 @@ void cZDSP1Server::doSetupServer()
         mySigAction.sa_restorer = NULL;
         sigaction(SIGIO, &mySigAction, NULL); // handler für sigio definieren
         SetFASync();
+        m_nRetryRMConnect = 100;
+        m_retryTimer.setSingleShot(true);
+        connect(&m_retryTimer, SIGNAL(timeout()), this, SIGNAL(serverSetup()));
 
         if (setDspType()) // interrogate the mounted dsp device type and bootfile match
         {
