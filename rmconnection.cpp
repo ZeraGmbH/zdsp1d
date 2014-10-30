@@ -10,11 +10,14 @@
 cRMConnection::cRMConnection(QString ipadr, quint16 port, quint8 dlevel)
     :m_sIPAdr(ipadr), m_nPort(port), m_nDebugLevel(dlevel)
 {
+    m_pResourceManagerClient = 0;
 }
 
 
 void cRMConnection::connect2RM()
 {
+    if (m_pResourceManagerClient)
+        delete m_pResourceManagerClient;
     m_pResourceManagerClient = new ProtoNetPeer(this);
     m_pResourceManagerClient->setWrapper(&m_ProtobufWrapper);
     connect(m_pResourceManagerClient, SIGNAL(sigSocketError(QAbstractSocket::SocketError)), this, SLOT(tcpErrorHandler(QAbstractSocket::SocketError)));
