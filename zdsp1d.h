@@ -11,6 +11,7 @@
 #include <QStringList>
 #include <QSocketNotifier>
 #include <QByteArray>
+#include <QTimer>
 #include <QMap>
 #include <QHash>
 #include <QVector>
@@ -218,9 +219,12 @@ private:
 
     QStateMachine* m_pInitializationMachine;
     QState* stateconnect2RM;
+    QState* stateconnect2RMError;
     QState* stateSendRMIdentandRegister;
     cRMConnection* m_pRMConnection;
 
+    int m_nRetryRMConnect;
+    QTimer m_retryTimer;
 
 private slots:
     virtual void establishNewConnection(ProtoNetPeer* newClient);
@@ -232,6 +236,7 @@ private slots:
     void doSetupServer();
     void doCloseServer();
     void doConnect2RM();
+    void connect2RMError();
     void doIdentAndRegister();
 };
 

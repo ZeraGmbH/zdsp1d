@@ -694,6 +694,7 @@ cZDSP1Server::cZDSP1Server()
     QState* statexmlConfiguration = new QState(stateCONF); // we configure our server with xml file
     QState* statesetupServer = new QState(stateCONF); // we setup our server now
     stateconnect2RM = new QState(stateCONF); // we connect to resource manager
+    stateconnect2RMError = new QState(stateCONF);
     stateSendRMIdentandRegister = new QState(stateCONF); // we send ident. to rm and register our resources
 
     stateCONF->setInitialState(statexmlConfiguration);
@@ -708,6 +709,7 @@ cZDSP1Server::cZDSP1Server()
     QObject::connect(statexmlConfiguration, SIGNAL(entered()), this, SLOT(doConfiguration()));
     QObject::connect(statesetupServer, SIGNAL(entered()), this, SLOT(doSetupServer()));
     QObject::connect(stateconnect2RM, SIGNAL(entered()), this, SLOT(doConnect2RM()));
+    QObject::connect(stateconnect2RMError, SIGNAL(entered()), this, SLOT(connect2RMError()));
     QObject::connect(stateSendRMIdentandRegister, SIGNAL(entered()), this, SLOT(doIdentAndRegister()));
     QObject::connect(stateFINISH, SIGNAL(entered()), this, SLOT(doCloseServer()));
 
@@ -838,10 +840,9 @@ void cZDSP1Server::doSetupServer()
                     {
                         // our resource mananager connection must be opened after configuration is done
                         m_pRMConnection = new cRMConnection(m_pETHSettings->getRMIPadr(), m_pETHSettings->getPort(resourcemanager), m_pDebugSettings->getDebugLevel());
-                        connect(m_pRMConnection, SIGNAL(connectionRMError()), this, SIGNAL(abortInit()));
-                        // so we must complete our state machine here
                         stateconnect2RM->addTransition(m_pRMConnection, SIGNAL(connected()), stateSendRMIdentandRegister);
-
+                        stateconnect2RM->addTransition(m_pRMConnection, SIGNAL(connectionRMError()), stateconnect2RMError);
+                        stateconnect2RMError->addTransition(this, SIGNAL(serverSetup()), stateconnect2RM);
                         emit serverSetup(); // so we enter state machine's next state
                     }
                     else
@@ -859,13 +860,12 @@ void cZDSP1Server::doSetupServer()
             }
             else // but for debugging purpose dsp is booted by ice
             {
-                // our resource mananager connection must be opened after configuration is done
                 m_pRMConnection = new cRMConnection(m_pETHSettings->getRMIPadr(), m_pETHSettings->getPort(resourcemanager), m_pDebugSettings->getDebugLevel());
-                connect(m_pRMConnection, SIGNAL(connectionRMError()), this, SIGNAL(abortInit()));
-                // so we must complete our state machine here
                 stateconnect2RM->addTransition(m_pRMConnection, SIGNAL(connected()), stateSendRMIdentandRegister);
-
+                stateconnect2RM->addTransition(m_pRMConnection, SIGNAL(connectionRMError()), stateconnect2RMError);
+                stateconnect2RMError->addTransition(this, SIGNAL(serverSetup()), stateconnect2RM);
                 emit serverSetup(); // so we enter state machine's next state
+
             }
         }
         else
@@ -887,6 +887,16 @@ void cZDSP1Server::doConnect2RM()
 {
     m_nerror = rmConnectionError; // preset error condition
     m_pRMConnection->connect2RM();
+}
+
+
+void cZDSP1Server::connect2RMError()
+{
+    m_nRetryRMConnect--;
+    if (m_nRetryRMConnect == 0)
+        emit abortInit();
+    else
+        m_retryTimer.start(200);
 }
 
 
