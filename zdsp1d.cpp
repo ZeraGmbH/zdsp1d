@@ -1839,7 +1839,8 @@ void cZDSP1Server::DspIntHandler(int)
                         intMessage->set_body(s.toStdString());
                         intMessage->set_rtype(ProtobufMessage::NetMessage_NetReply_ReplyType_ACK);
 
-                        protobufIntMessage.set_clientid(m_clientIDHash[client2]);
+                        QByteArray idba = m_clientIDHash[client2];
+                        protobufIntMessage.set_clientid(idba.data(), idba.size() );
                         protobufIntMessage.set_messagenr(0); // interrupt
 
                         client2->m_pNetClient->sendMessage(&protobufIntMessage);
