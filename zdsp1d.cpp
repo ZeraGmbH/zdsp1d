@@ -2236,7 +2236,7 @@ void cZDSP1Server::executeCommand(google::protobuf::Message *cmd)
 
         if (protobufCommand->has_clientid() && protobufCommand->has_messagenr())
         {
-            QByteArray clientId = QByteArray(protobufCommand->clientid().c_str(), protobufCommand->clientid().size());
+            QByteArray clientId = QByteArray(protobufCommand->clientid().data(), protobufCommand->clientid().size());
             quint32 messageNr = protobufCommand->messagenr();
             ProtobufMessage::NetMessage::ScpiCommand scpiCmd = protobufCommand->scpi();
 
