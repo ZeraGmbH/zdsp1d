@@ -50,12 +50,12 @@ public:
     QString& GetCmdIntListDef();
     void SetEncryption(int);
     int GetEncryption();
-    bool GenCmdLists(QString&); // baut die cmdlisten  für den dsp zusammen wenn fehler -> false 
-    cDspCmd GenDspCmd(QString&,bool*); // generiert ein dsp kommando aus einem string
+    bool GenCmdLists(QString&, ulong, ulong); // baut die cmdlisten  für den dsp zusammen wenn fehler -> false
+    cDspCmd GenDspCmd(QString&, bool*, ulong, ulong); // generiert ein dsp kommando aus einem string
     QString &readActValues(QString&); // liess die messergebnisse (liste)
     bool isActive(); 
     void SetActive(bool); // merkt sich in m_bActive ob diese liste aktiv ist
-    ulong setStartAdr(ulong); // zum relokalisieren der userdaten
+    ulong setStartAdr(ulong, ulong); // zum relokalisieren der userdaten
     QString &DspVarListRead(QString&); // lesen dsp daten ganze Liste
     bool DspVar(QString&,int&); // einen int (32bit) wert lesen
     bool DspVar(QString&,float&); // eine float wert lesen
@@ -73,7 +73,7 @@ private:
     void init(int socket, ProtoNetPeer *netclient, cZDSP1Server* server);
     cZDSP1Server* myServer; 
     bool m_bActive;
-    bool GenCmdList(QString&, QList<cDspCmd>& ,QString&);
+    bool GenCmdList(QString&, QList<cDspCmd>& ,QString&,ulong,ulong);
     bool syntaxCheck(QString&);
           
     int Encryption;
@@ -135,6 +135,8 @@ private:
     QHash<cZDSP1Client*, QByteArray> m_clientIDHash; // liste der clientID's für die dspclients die über protobuf erzeugt wurden
     quint8 m_nerror;
     uchar ActivatedCmdList;
+    QByteArray CmdMem; // unsere dsp programm listen
+    QByteArray CmdIntMem;
     QList<cZDSP1Client*> clientlist; // liste aller clients
     QSocketNotifier* m_pNotifier;
 
@@ -204,6 +206,7 @@ private:
     QString mDspMemoryRead(QChar *);
     QString mDspMemoryWrite(QChar *);
     
+    bool BuildDSProgram(QString& errs);
     bool LoadDSProgram();
     bool setDspType();
     int readMagicId();

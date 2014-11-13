@@ -234,7 +234,7 @@ bool cZDSP1Client::syntaxCheck(QString& s)
 }
 
 
-cDspCmd cZDSP1Client::GenDspCmd(QString& scmd,bool* ok)
+cDspCmd cZDSP1Client::GenDspCmd(QString& scmd,bool* ok, ulong umo, ulong globalstartadr)
 {
     cParse CmdParser;
     CmdParser.SetDelimiter("(,)"); // setze die trennzeichen für den parser
@@ -259,7 +259,7 @@ cDspCmd cZDSP1Client::GenDspCmd(QString& scmd,bool* ok)
             short par;
             bool t = true;
             sSearch = CmdParser.GetKeyword(&cmds);
-            t &= ( (par = DspVarResolver.offs(sSearch)) > -1); // -1 ist fehlerbedingung
+            t &= ( (par = DspVarResolver.offs(sSearch, umo,globalstartadr)) > -1); // -1 ist fehlerbedingung
             sSearch = CmdParser.GetKeyword(&cmds);
             t &= sSearch.isEmpty();
             if (t) lcmd = cDspCmd(dspcmd->CmdCode,(ushort)par);
@@ -273,7 +273,7 @@ cDspCmd cZDSP1Client::GenDspCmd(QString& scmd,bool* ok)
             for (int i=0; i<2; i++)
             {
                 sSearch = CmdParser.GetKeyword(&cmds);
-                t &= ( (par[i] = DspVarResolver.offs(sSearch)) > -1);
+                t &= ( (par[i] = DspVarResolver.offs(sSearch, umo,globalstartadr)) > -1);
             }
             sSearch = CmdParser.GetKeyword(&cmds);
             t &= sSearch.isEmpty();
@@ -293,7 +293,7 @@ cDspCmd cZDSP1Client::GenDspCmd(QString& scmd,bool* ok)
             {
                 sSearch = CmdParser.GetKeyword(&cmds);
 
-                t &= ( (par[i] = DspVarResolver.offs(sSearch)) > -1);
+                t &= ( (par[i] = DspVarResolver.offs(sSearch, umo,globalstartadr)) > -1);
             }
             sSearch = CmdParser.GetKeyword(&cmds);
             t &= sSearch.isEmpty();
@@ -311,7 +311,7 @@ cDspCmd cZDSP1Client::GenDspCmd(QString& scmd,bool* ok)
             long par;
             bool t;
             sSearch = CmdParser.GetKeyword(&cmds);
-            t = ( (par = DspVarResolver.offs(sSearch)) > -1);
+            t = ( (par = DspVarResolver.offs(sSearch,umo,globalstartadr)) > -1);
             sSearch = CmdParser.GetKeyword(&cmds);
             t &= sSearch.isEmpty();
             if (t) lcmd = cDspCmd(dspcmd->CmdCode,(ulong)par);
@@ -324,7 +324,7 @@ cDspCmd cZDSP1Client::GenDspCmd(QString& scmd,bool* ok)
             long par2 = 0;
             bool t;
             sSearch = CmdParser.GetKeyword(&cmds);
-            *ok = ( (par1 = DspVarResolver.offs(sSearch)) > -1); // -1 ist fehlerbedingung
+            *ok = ( (par1 = DspVarResolver.offs(sSearch,umo,globalstartadr)) > -1); // -1 ist fehlerbedingung
             if (!(*ok))
                 return lcmd; // wenn fehler -> fertig
             sSearch = CmdParser.GetKeyword(&cmds);
@@ -354,20 +354,31 @@ void cZDSP1Client::SetActive(bool b)
 }
 
 
-ulong cZDSP1Client::setStartAdr(ulong sa)
+ulong cZDSP1Client::setStartAdr(ulong sa, ulong globalmemstart)
 {
+    ulong usermemsize, globalmemsize;
+
+    usermemsize = globalmemsize = 0;
     msec.StartAdr = sa;
-    ulong len = 0;
+
     for (int i = 0; i < msec.n; i++)
     {
-        msec.DspVar[i].adr = sa + len; // we need the adress for reading back data
-        len += msec.DspVar[i].size;
+        if (msec.DspVar[i].segment == localSegment)
+        {
+            msec.DspVar[i].adr = sa + usermemsize; // we need the adress for reading back data
+            usermemsize += msec.DspVar[i].size;
+        }
+        else
+        {
+            msec.DspVar[i].adr = globalmemstart+globalmemsize;
+            globalmemsize += msec.DspVar[i].size;
+        }
     }
-    return len;
+    return usermemsize;
 }
 
 
-bool cZDSP1Client::GenCmdList(QString& s, QList<cDspCmd> &cl, QString& errs)
+bool cZDSP1Client::GenCmdList(QString& s, QList<cDspCmd> &cl, QString& errs, ulong umo, ulong globalstartadr)
 {
     bool ok = true;
     cl.clear();
@@ -375,7 +386,7 @@ bool cZDSP1Client::GenCmdList(QString& s, QList<cDspCmd> &cl, QString& errs)
     {
         QString cs = s.section(';',i,i);
         if ( (cs.isEmpty()) || (cs==("Empty")) )break; // liste ist durch
-        cl.append(GenDspCmd(cs, &ok));
+        cl.append(GenDspCmd(cs, &ok, umo,globalstartadr));
         if (!ok)
         {
             errs = cs;
@@ -386,11 +397,11 @@ bool cZDSP1Client::GenCmdList(QString& s, QList<cDspCmd> &cl, QString& errs)
 }
 
 
-bool cZDSP1Client::GenCmdLists(QString& errs)
+bool cZDSP1Client::GenCmdLists(QString& errs, ulong umo, ulong globalstartadr)
 {
     bool ok;
-    ok = GenCmdList(m_sCmdListDef,m_DspCmdList,errs);
-    if (ok) ok =  GenCmdList(m_sIntCmdListDef, m_DspIntCmdList,errs);
+    ok = GenCmdList(m_sCmdListDef,m_DspCmdList,errs,umo,globalstartadr);
+    if (ok) ok =  GenCmdList(m_sIntCmdListDef, m_DspIntCmdList,errs,umo,globalstartadr);
     return ok;
 }
 
@@ -1890,28 +1901,28 @@ void cZDSP1Server::DspIntHandler(int)
 }
 
 
-bool cZDSP1Server::LoadDSProgram()
-{ // die programmlisten aller aktiven clients laden
-    
-    // listen zusammen bauen
+bool cZDSP1Server::BuildDSProgram(QString &errs)
+{
+    // die programmlisten aller aktiven clients zusammen bauen
 
     bool ok;
     ulong umo = dm32UserWorkSpace.StartAdr; // usermememory offset
-    QByteArray CmdMem;
-    QByteArray CmdIntMem;
+
+    CmdMem.clear();
+    CmdIntMem.clear();
     QDataStream mds1 ( &CmdMem, QIODevice::Unbuffered | QIODevice::ReadWrite );
     mds1.setByteOrder(QDataStream::LittleEndian);
     QDataStream mds2 ( &CmdIntMem, QIODevice::Unbuffered | QIODevice::ReadWrite );
     mds2.setByteOrder(QDataStream::LittleEndian);
     cZDSP1Client* client;
     cDspCmd cmd;
-    QString s,s2;
+    QString s;
 
     if (clientlist.count() > 0)
     {
         s =  QString( "DSPMEMOFFSET(%1)" ).arg(dm32DspWorkspace.StartAdr);
         client = clientlist.at(0);
-        cmd = client->GenDspCmd(s, &ok);
+        cmd = client->GenDspCmd(s, &ok, 0, 0);
         mds1 << cmd;
 
         for (int i = 0; i < clientlist.count(); i++)
@@ -1920,10 +1931,15 @@ bool cZDSP1Server::LoadDSProgram()
             if (client->isActive())
             {
                 s =  QString( "USERMEMOFFSET(%1)" ).arg(umo);
-                cmd = client->GenDspCmd(s, &ok);
+                cmd = client->GenDspCmd(s, &ok, 0, 0);
                 mds1 << cmd;
                 mds2 << cmd;
-                umo += client->setStartAdr(umo); // relokalisieren der daten im dsp
+
+                if (!client->GenCmdLists(errs, umo, UserWorkSpaceGlobalSegmentAdr))
+                    return false;
+
+                umo += client->setStartAdr(umo, UserWorkSpaceGlobalSegmentAdr); // relokalisieren der daten im dsp
+
                 QList<cDspCmd> cmdl = client->GetDspCmdList();
                 for (int j = 0; j < cmdl.size(); j++ ) mds1 << cmdl[j]; // cycl. liste
                 QList<cDspCmd> cmdl2 = client->GetDspIntCmdList();
@@ -1933,17 +1949,28 @@ bool cZDSP1Server::LoadDSProgram()
 
         client = clientlist.at(0);
         s = QString( "DSPINTPOST()"); // wir triggern das senden der serialisierten interrupts
-        cmd = client->GenDspCmd(s, &ok);
+        cmd = client->GenDspCmd(s, &ok, 0, 0);
         mds1 << cmd;
 
     }
-    
+
     client = new cZDSP1Client(0, 0, this); // dummyClient einrichten damit was jetzt kommt noch
+
     s =  QString( "INVALID()"); // funktioniert selbst wenn wenn wir keinen mehr haben
-    cmd = client->GenDspCmd(s, &ok);
+    cmd = client->GenDspCmd(s, &ok, 0, 0);
     mds1 << cmd; // kommando listen ende
     mds2 << cmd;
 
+    delete client;
+
+    return true;
+}
+
+
+bool cZDSP1Server::LoadDSProgram()
+{
+    // die programmlisten aller aktiven clients laden
+    QString s,s2;
 
     ActivatedCmdList = (ActivatedCmdList + 1) & 1;
     if (ActivatedCmdList == 0)
@@ -1956,6 +1983,8 @@ bool cZDSP1Server::LoadDSProgram()
         s = QString("ALTCMDLIST");
         s2=QString("ALTINTCMDLIST");
     };
+
+    cZDSP1Client* client = new cZDSP1Client(0, 0, this); // dummyClient einrichten zum laden der kette
 
     ulong offset = client->DspVarResolver.adr(s) ;
     if (DspDevSeek(DevFileDescriptor, offset) < 0 )  // startadr im treiber setzen
@@ -1984,9 +2013,11 @@ bool cZDSP1Server::LoadDSProgram()
 
 QString cZDSP1Server::mUnloadCmdList(QChar *)
 {
+    QString error;
     cZDSP1Client* cl = GetClient(ActSock);
     cl->SetActive(false);
-    if (!LoadDSProgram())
+    BuildDSProgram(error); // wir bauen neu
+    if (!LoadDSProgram()) // und laden
         Answer = ERREXECString;
     else
         Answer = ACKString;
@@ -2000,16 +2031,22 @@ QString cZDSP1Server::mLoadCmdList(QChar *)
     static int count = 0;
     cZDSP1Client* cl = GetClient(ActSock);
     QString errs;
-    if (cl->GenCmdLists(errs))
+    cl->SetActive(true);
+    if (BuildDSProgram(errs))
     { // die cmdlisten und die variablen waren schlüssig
-        cl->SetActive(true);
         if (!LoadDSProgram())
+        {
             Answer = ERREXECString;
+            cl->SetActive(false);
+        }
         else
             Answer = ACKString;
     }
     else
+    {
+        cl->SetActive(false);
         Answer = QString("%1 %2").arg(ERRVALString).arg(errs); // das "fehlerhafte" kommando anhängen
+    }
 
     count++;
     qDebug() << QString("LoadCmdList(%1)").arg(count);
