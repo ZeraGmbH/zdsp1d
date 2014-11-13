@@ -51,6 +51,7 @@ struct sDspCmd { // wird zum ausdekodieren der dsp kommandos benötigt
 sDspCmd* findDspCmd(QString&);
 enum dType { eInt, eFloat, eUnknown};
 
+enum sectionType { systemSection, userSection};
 
 struct sDspVar { // dient ebenfalls der dekodierung 
     QString Name; // name der variablen
@@ -62,6 +63,7 @@ struct sDspVar { // dient ebenfalls der dekodierung
 
 
 struct sMemSection { // beschreibt eine dsp memory section
+    sectionType Section;
     long StartAdr;
     int n; // anzahl der sdspvar elemente
     sDspVar *DspVar;
@@ -83,6 +85,7 @@ private:
     cParse VarParser;
 //    sDspVar *SearchedVar; // zeiger auf die gesuchte variable;
 //    long offs(QString&, sMemSection**, int *);
+    void initMemsection(sMemSection* psec); // zum initialisieren einer memory section
     void setQHash(sMemSection* psec); // zum setzen der qhash
 //    sMemSection *sec;
     QList<sMemSection*> MemSectionList;

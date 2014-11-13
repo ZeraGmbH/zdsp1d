@@ -237,6 +237,7 @@ sDspVar DspWorkspaceVar[15] = 	{ {"FREQENCY",1,eFloat,0,0},			// 1 wert gemessen
 
 
 sMemSection dm32DspWorkspace = {
+    Section: systemSection,
     StartAdr		: dm32DspWorkSpaceBase21262,
 	n 		: 15,
 	DspVar		: DspWorkspaceVar };
@@ -264,6 +265,7 @@ sDspVar DialogWorkSpaceVar[20] = 	{ 	  {"DSPCMDPAR",10,eInt,0,0},		// 10 werte c
                       {"POWVALS4FOUT",48,eFloat,0,0}};  // 48 leistungs werte für frequenzausgänge
 
 sMemSection dm32DialogWorkSpace = {
+    Section: systemSection,
     StartAdr		: dm32DialogWorkSpaceBase21262,
 	n		: 18,
 	DspVar		: DialogWorkSpaceVar };
@@ -273,6 +275,7 @@ sDspVar UserWorkSpaceVar[1] = { {"UWSPACE",uwSpaceSize21262,eFloat,0,0} };
 
 
 sMemSection dm32UserWorkSpace = {
+    Section: systemSection,
     StartAdr		: dm32UserWorkSpaceBase21262,
 	n 		: 1,
     DspVar		: UserWorkSpaceVar };
@@ -285,6 +288,7 @@ sDspVar CmdListVar[4] = 	{	{"INTCMDLIST",IntCmdListLen21262,eInt,0,0},          
 
 
 sMemSection dm32CmdList = {
+    Section: systemSection,
     StartAdr		: dm32CmdListBase21262,
 	n 		: 4,
 	DspVar		: CmdListVar };
@@ -301,8 +305,9 @@ sDspVar ChannelNr[32] = 	{ 	{"CH0",1,eInt,0,0}, {"CH1",1,eInt,0,0}, {"CH2",1,eIn
 
 
 sMemSection symbConsts1 = {
-              StartAdr		: 0,
-	      n 		: 32,      
+    Section: systemSection,
+    StartAdr		: 0,
+    n 		: 32,
 	DspVar		: ChannelNr };
 
 
@@ -379,7 +384,10 @@ void cDspVarResolver::setVarHash()
 {
     mVarHash.clear();
     for (int i = 0; i < MemSectionList.count(); i++)
+    {
+        initMemsection(MemSectionList.at(i));
         setQHash(MemSectionList.at(i));
+    }
 }
 
 
@@ -449,16 +457,26 @@ long cDspVarResolver::offs(QString& s,  sMemSection** pSec, int *type)
 }
 */
 
+void cDspVarResolver::initMemsection(sMemSection *psec)
+{
+    if (psec->Section == systemSection) // wir initialisieren nur system sections
+    {
+        long offs = 0;
+        for (int i = 0; i< (psec->n); i++)
+        {
+            psec->DspVar[i].offs = offs;
+            psec->DspVar[i].adr = psec->StartAdr + offs;
+            offs += psec->DspVar[i].size;
+        }
+    }
+
+}
+
+
 void cDspVarResolver::setQHash(sMemSection* psec) // zum setzen der qhash
 {
-    long offs = 0;
     for (int i = 0; i< (psec->n); i++)
-    {
-        psec->DspVar[i].offs = offs;
-        psec->DspVar[i].adr = psec->StartAdr + offs;
         mVarHash[psec->DspVar[i].Name] = &(psec->DspVar[i]);
-        offs += psec->DspVar[i].size;
-    }
 }
 
 
