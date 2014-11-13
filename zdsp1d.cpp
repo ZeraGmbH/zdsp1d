@@ -97,7 +97,7 @@ void cZDSP1Client::init(int socket, ProtoNetPeer *netclient, cZDSP1Server *serve
     DspVarResolver.addSection( &dm32CmdList);
     DspVarResolver.addSection( &symbConsts1);
     DspVarResolver.addSection( &msec);
-    msec.StartAdr = msec.n = 0;
+    msec.StartAdr = msec.n = 0; msec.Section = userSection;
     DspVarResolver.setVarHash(); // wir setzen die hashtabelle und initialisieren diese
 
     Encryption = 0; // es werden alle var. abfragen im klartext gesendet
@@ -139,14 +139,14 @@ QString& cZDSP1Client::SetRavList(QString& s)
     if (msec.n > 0)
     { // wir haben mindestens 1 variable
         varArray.resize(msec.n);
-        ulong offs = 0;
+        // ulong offs = 0;
         for (i = 0;i < msec.n; i++)
         { // und machen diese dem resolver zugänglich
             varArray[i].Name = m_DspVarList[i].name();
             varArray[i].size = m_DspVarList[i].size();
-            varArray[i].offs = offs;
+            varArray[i].offs = m_DspVarList[i].offs();
             varArray[i].type = (dType)m_DspVarList[i].type();
-            offs += m_DspVarList[i].size();
+            // offs += m_DspVarList[i].size();
         }
         msec.DspVar = varArray.data();
     }
