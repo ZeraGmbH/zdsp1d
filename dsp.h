@@ -27,6 +27,8 @@ const int dm32DialogWorkSpaceBase21262 = 0x83800;
 const int dm32DialogWorkSpaceBase21362 = 0xE1800;
 const int dm32UserWorkSpaceBase21262 = 0x84800;
 const int dm32UserWorkSpaceBase21362 = 0x98180;
+const int dm32UserWorkSpaceGlobal21262 = 0x87000;
+const int dm32UserWorkSpaceGlobal21362 = 0x9F000;
 const int dm32CmdListBase21262 = 0x84000;
 const int dm32CmdListBase21362 = 0xE2000;
 
