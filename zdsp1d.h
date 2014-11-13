@@ -83,7 +83,7 @@ private:
     QString m_sIntCmdListDef; // interrupt kommando  liste defintion
         
 //    ulong m_nStartAdr; // die absolute adresse an der ein variablen "block" im dsp steht 
-    int m_nlen; // länge des gesamten datenblocks (in float bzw. long)
+//    int m_nlen; // länge des gesamten datenblocks (in float bzw. long)
     QList<cDspClientVar> m_DspVarList; // liste mit variablen beschreibungen
     QList<cDspCmd> m_DspCmdList; // liste mit dsp kommandos (periodisch)
     QList<cDspCmd>  m_DspIntCmdList; // liste mit dsp kommandos (interrupt)
@@ -137,6 +137,8 @@ private:
     uchar ActivatedCmdList;
     QList<cZDSP1Client*> clientlist; // liste aller clients
     QSocketNotifier* m_pNotifier;
+
+    ulong UserWorkSpaceGlobalSegmentAdr;
 
     bool resetDsp();
     bool bootDsp();

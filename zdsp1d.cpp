@@ -106,9 +106,11 @@ void cZDSP1Client::init(int socket, ProtoNetPeer *netclient, cZDSP1Server *serve
 
 QString& cZDSP1Client::SetRavList(QString& s)
 {
-    int i = 0;
-    m_DspVarList.clear(); // liste löschen
-    m_nlen = 0; // belegt keinen speicher
+    int i;
+    int localOffset, globaloffset;
+
+    i = localOffset = globaloffset = 0;
+    m_DspVarList.clear(); // liste löschen 
 
     sOutput = ACKString;
     if (!s.isEmpty())
@@ -120,14 +122,22 @@ QString& cZDSP1Client::SetRavList(QString& s)
             if (t.isEmpty()) break; // dann sind wir fertig
             if ( v.Init(t) )
             {
-                v.SetOffs(m_nlen);
+                if (v.segment() == localSegment)
+                {
+                    v.SetOffs(localOffset);
+                    localOffset += v.size();
+                }
+                else
+                {
+                    v.SetOffs(globaloffset);
+                    globaloffset += v.size();
+                }
+
                 m_DspVarList.append(v);
-                m_nlen += v.size();
             }
             else
             { // fehlerfall
                 m_DspVarList.clear(); // liste löschen
-                m_nlen = 0; // belegt keinen speicher
                 sOutput = NACKString;
                 break;
             }
@@ -139,15 +149,16 @@ QString& cZDSP1Client::SetRavList(QString& s)
     if (msec.n > 0)
     { // wir haben mindestens 1 variable
         varArray.resize(msec.n);
-        // ulong offs = 0;
+
         for (i = 0;i < msec.n; i++)
         { // und machen diese dem resolver zugänglich
             varArray[i].Name = m_DspVarList[i].name();
             varArray[i].size = m_DspVarList[i].size();
             varArray[i].offs = m_DspVarList[i].offs();
             varArray[i].type = (dType)m_DspVarList[i].type();
-            // offs += m_DspVarList[i].size();
+            varArray[i].segment = (segmentType)m_DspVarList[i].segment();
         }
+
         msec.DspVar = varArray.data();
     }
 
@@ -2082,12 +2093,14 @@ bool cZDSP1Server::setDspType()
 
     if ( r == MAGIC_ID21262 )
     {
+        UserWorkSpaceGlobalSegmentAdr = dm32UserWorkSpaceGlobal21262;
         return m_sDspBootPath.contains(s = "zdsp21262.ldr");
         // adressen im dsp stehen für adsp21262 default richtig
     }
     else
     if ( r == MAGIC_ID21362)
     {
+        UserWorkSpaceGlobalSegmentAdr = dm32UserWorkSpaceGlobal21362;
         if (m_sDspBootPath.contains(s = "zdsp21362.ldr"))
         {
             // für adsp21362 schreiben wir die adressen um
