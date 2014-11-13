@@ -52,6 +52,7 @@ sDspCmd* findDspCmd(QString&);
 enum dType { eInt, eFloat, eUnknown};
 
 enum sectionType { systemSection, userSection};
+enum segmentType { localSegment, globalSegment};
 
 struct sDspVar { // dient ebenfalls der dekodierung 
     QString Name; // name der variablen
@@ -59,6 +60,7 @@ struct sDspVar { // dient ebenfalls der dekodierung
     dType type; // 
     ulong adr; // die abs. adresse auf welcher sich die variable befindet
     ulong offs; // der offset innerhalb der memory section
+    segmentType segment; // segment info, nur relevant für client sections
 };
 
 
@@ -101,11 +103,14 @@ public:
     int size();
     int type();
     ulong offs();
+    int segment();
+
 private:    
     QString m_sName; // eine dsp variable hat einen namen
     int m_nOffsAdr; // hat eine rel. start adresse
     int m_nSize; // und eine anzahl von elementen
     int m_nType; // der typ der variablen (efloat oder eint)
+    int m_nSegment; //
 };
 
 

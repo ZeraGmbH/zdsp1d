@@ -132,80 +132,82 @@
 
 #include "dsp.h"
 
-static sDspCmd DspCmd[74] = {	{"INVALID", 0, CMD ,0},
-				{"USERMEMOFFSET", 1, CMD1i32, 0 },
-				{"DSPMEMOFFSET", 2, CMD1i32, 0 },
-				{"COPYDATA", 3, CMD3i16, 0 },	
-				{"COPYDIFF", 4, CMD3i16, 0 },
-				{"COPYPROD", 5, CMD3i16, 0 },
-				{"DIFFCCC", 6, CMD3i16, 0 },
-				{"RMS", 7, CMD2i16, 0 },
-				{"MULCCC", 8, CMD3i16, 0 },
-				{"DFT", 9, CMD3i16, 0 },
-				{"SETVAL", 10, CMD1i161fi32, 0 },
-				{"ROTATE", 11, CMD1i161fi32, 0 },
-				{"MULVVV", 12, CMD3i16, 0 },
-				{"ADDVVG", 13, CMD3i16, 0 }, // wie apparentg (allgemeingültiger)
-				{"CLKOUT", 14, CMD, 0 },
-				{"AVERAGE1", 15, CMD3i16, 0 },
-				{"INTEGRAL", 16, CMD3i16, 0 }, 
-				{"ADDVVV", 17, CMD3i16, 0 },
-				{"COPYUD", 18, CMD3i16, 0 },
-				{"COPYDU", 19, CMD3i16, 0 },
-				{"CMPAVERAGE1", 20, CMD3i16, 0 },
-				{"CLEARN", 21, CMD2i16, 0 },
-				{"MULCCV", 22, CMD3i16, 0 }, // wie powerx (allgemeingültiger)
-				{"INTERPOLATION", 23, CMD3i16, 0 },
-				{"FFTREAL", 24, CMD3i16, 0 },	
-				{"FFTCOMPLEX", 25, CMD3i16, 0 },
-				{"THDN", 26, CMD2i16, 0 },
-				{"ADDCCC", 27, CMD3i16, 0 },
-				{"MULCV", 28, CMD1i161fi32, 0 },
-				{"STARTCHAIN", 29, CMD3i16, 1 },
-				{"STOPCHAIN", 30, CMD2i16, 1 },
-				{"ACTIVATECHAIN", 31, CMD2i16, 1 },
-				{"DEACTIVATECHAIN", 32, CMD2i16, 1 },
-				{"TESTVCSKIPEQ", 33, CMD1i161fi32, 0 },
-				{"TESTVCSKIPGT", 34, CMD1i161fi32, 0 },
-				{"TESTVCSKIPLT", 35, CMD1i161fi32, 0 },
-                {"TESTVVSKIPEQ", 36, CMD2i16, 0 },
-				{"TESTVVSKIPGT", 37, CMD2i16, 0 },
-				{"TESTVVSKIPLT", 38, CMD2i16, 0 },
-				{"WRITEINTCMD", 39, CMD2i16, 1 },
-				{"CTRLINTTRIGGER", 40, CMD, 0 },
-				{"DSPINTTRIGGER", 41, CMD2i16, 1 },
-				{"HANNING", 42, CMD2i16, 0 },
-				{"WRITEPORT", 43, CMD2i16, 0 },
-				{"SINUS", 44, CMD3i16, 0 },
-				{"COSINUS", 45, CMD3i16, 0 }, 
-				{"AUTOKORRELATION", 46, CMD3i16, 0 },
-                {"SUBVVV", 47, CMD3i16, 0 },
-				{"NORMVC", 48, CMD1i161fi32, 0 },
-                {"ARCTAN", 49, CMD3i16, 0 },
-				{"DIVVVV", 50, CMD3i16, 0 },
-                {"SYMPHI", 51, CMD2i16, 0 },
-                {"BREAK", 52, CMD1i16,0 },
-                {"FLATTOP", 53, CMD2i16, 0 },
-				{"INC", 54, CMD1i16, 0 },
-                {"COPYINDDATA", 55, CMD3i16, 0 },
-                {"TESTSYNCPPSSKIPEQ",56,CMD,0},
-                {"RESETSYNCPPS",57,CMD,0},
-                {"RMSN",58,CMD3i16,0},
-                {"MULNCC",59,CMD3i16,0},
-                {"SQRT",60,CMD2i16,0},
-                {"COPYVAL",61,CMD2i16,0},
-                {"CMPCLK",62,CMD3i16,0},
-                {"CLKMODE",63,CMD1i16,0},
-                {"GETSTIME",64,CMD1i16,0},
-                {"TESTTIMESKIPNEX",65,CMD2i16,0},
-                {"SUBVCC",66,CMD3i16,0},
-                {"SUBVVG",67,CMD3i16,0},
-                {"DSPINTPOST",68,CMD,0},
-                {"SETPEAK",69,CMD2i16,0},
-                {"COPYDATAIND",70,CMD3i16,0},
-                {"INTERPOLATIONIND",71,CMD3i16,0},
-                {"COPYMEM",72,CMD3i16,0 },
-                {"GENADR",73,CMD3i16,0 }};
+static sDspCmd DspCmd[74] =
+
+{{"INVALID", 0, CMD ,0},
+{"USERMEMOFFSET", 1, CMD1i32, 0 },
+{"DSPMEMOFFSET", 2, CMD1i32, 0 },
+{"COPYDATA", 3, CMD3i16, 0 },
+{"COPYDIFF", 4, CMD3i16, 0 },
+{"COPYPROD", 5, CMD3i16, 0 },
+{"DIFFCCC", 6, CMD3i16, 0 },
+{"RMS", 7, CMD2i16, 0 },
+{"MULCCC", 8, CMD3i16, 0 },
+{"DFT", 9, CMD3i16, 0 },
+{"SETVAL", 10, CMD1i161fi32, 0 },
+{"ROTATE", 11, CMD1i161fi32, 0 },
+{"MULVVV", 12, CMD3i16, 0 },
+{"ADDVVG", 13, CMD3i16, 0 }, // wie apparentg (allgemeingültiger)
+{"CLKOUT", 14, CMD, 0 },
+{"AVERAGE1", 15, CMD3i16, 0 },
+{"INTEGRAL", 16, CMD3i16, 0 },
+{"ADDVVV", 17, CMD3i16, 0 },
+{"COPYUD", 18, CMD3i16, 0 },
+{"COPYDU", 19, CMD3i16, 0 },
+{"CMPAVERAGE1", 20, CMD3i16, 0 },
+{"CLEARN", 21, CMD2i16, 0 },
+{"MULCCV", 22, CMD3i16, 0 }, // wie powerx (allgemeingültiger)
+{"INTERPOLATION", 23, CMD3i16, 0 },
+{"FFTREAL", 24, CMD3i16, 0 },
+{"FFTCOMPLEX", 25, CMD3i16, 0 },
+{"THDN", 26, CMD2i16, 0 },
+{"ADDCCC", 27, CMD3i16, 0 },
+{"MULCV", 28, CMD1i161fi32, 0 },
+{"STARTCHAIN", 29, CMD3i16, 1 },
+{"STOPCHAIN", 30, CMD2i16, 1 },
+{"ACTIVATECHAIN", 31, CMD2i16, 1 },
+{"DEACTIVATECHAIN", 32, CMD2i16, 1 },
+{"TESTVCSKIPEQ", 33, CMD1i161fi32, 0 },
+{"TESTVCSKIPGT", 34, CMD1i161fi32, 0 },
+{"TESTVCSKIPLT", 35, CMD1i161fi32, 0 },
+{"TESTVVSKIPEQ", 36, CMD2i16, 0 },
+{"TESTVVSKIPGT", 37, CMD2i16, 0 },
+{"TESTVVSKIPLT", 38, CMD2i16, 0 },
+{"WRITEINTCMD", 39, CMD2i16, 1 },
+{"CTRLINTTRIGGER", 40, CMD, 0 },
+{"DSPINTTRIGGER", 41, CMD2i16, 1 },
+{"HANNING", 42, CMD2i16, 0 },
+{"WRITEPORT", 43, CMD2i16, 0 },
+{"SINUS", 44, CMD3i16, 0 },
+{"COSINUS", 45, CMD3i16, 0 },
+{"AUTOKORRELATION", 46, CMD3i16, 0 },
+{"SUBVVV", 47, CMD3i16, 0 },
+{"NORMVC", 48, CMD1i161fi32, 0 },
+{"ARCTAN", 49, CMD3i16, 0 },
+{"DIVVVV", 50, CMD3i16, 0 },
+{"SYMPHI", 51, CMD2i16, 0 },
+{"BREAK", 52, CMD1i16,0 },
+{"FLATTOP", 53, CMD2i16, 0 },
+{"INC", 54, CMD1i16, 0 },
+{"COPYINDDATA", 55, CMD3i16, 0 },
+{"TESTSYNCPPSSKIPEQ",56,CMD,0},
+{"RESETSYNCPPS",57,CMD,0},
+{"RMSN",58,CMD3i16,0},
+{"MULNCC",59,CMD3i16,0},
+{"SQRT",60,CMD2i16,0},
+{"COPYVAL",61,CMD2i16,0},
+{"CMPCLK",62,CMD3i16,0},
+{"CLKMODE",63,CMD1i16,0},
+{"GETSTIME",64,CMD1i16,0},
+{"TESTTIMESKIPNEX",65,CMD2i16,0},
+{"SUBVCC",66,CMD3i16,0},
+{"SUBVVG",67,CMD3i16,0},
+{"DSPINTPOST",68,CMD,0},
+{"SETPEAK",69,CMD2i16,0},
+{"COPYDATAIND",70,CMD3i16,0},
+{"INTERPOLATIONIND",71,CMD3i16,0},
+{"COPYMEM",72,CMD3i16,0 },
+{"GENADR",73,CMD3i16,0 }};
 
 
 sDspCmd* findDspCmd(QString& s)
@@ -218,21 +220,22 @@ sDspCmd* findDspCmd(QString& s)
 }
 
 
-sDspVar DspWorkspaceVar[15] = 	{ {"FREQENCY",1,eFloat,0,0},			// 1 wert gemessene frequenz
-                  {"FREQUENCYVALUE",4,eFloat,0,0},		// 4 werte f. freq. ausgänge
-                  {"MAXIMUMSAMPLE",32,eFloat,0,0},		// 32 werte maximumspeicher
-                  {"FREQUENCYVALUEFILTER",4,eFloat,0,0},	// 4 gefilterte freq. ausgänge
-                  {"FREQUENCYSCALE",4,eFloat,0,0},		// 4 freq. skalierungswerte
-                  {"KREISFREQKOEFF",1,eFloat,0,0},		// kreisfrequenz korrektur koeffizient
-                  {"ETHERRORS",1,eInt,0,0},			// ethernet fehler speicher
-                  {"ETHSYNCLOSTCOUNT",1,eInt,0,0},		// ethernet synclost counter
-                  {"ETHDATACOUNT",2,eInt,0,0},		// anzahl sync. verluste mu
-                  {"NCHANNELS",1,eInt,0,0},			// anzahl messkanäle sampling system
-                  {"NSMEAS",1,eInt,0,0},			// anzahl samples für 1 messperiode
-                  {"NSPERIOD",1,eInt,0,0},			// anzahl samples für eine signalperiode
-                  {"_NSPERIOD",1,eFloat,0,0},			// 1/ anzahl samples
-                  {"SYNCASDU",1,eInt,0,0},			// ob und auf welchen datensatz synchronisiert wird
-                  {"TMCH0",1,eFloat,0,0}};			// periodendauer messsignal kanal0
+sDspVar DspWorkspaceVar[15] =
+{ {"FREQENCY",1,eFloat,0,0, localSegment},            // 1 wert gemessene frequenz
+{"FREQUENCYVALUE",4,eFloat,0,0, localSegment},        // 4 werte f. freq. ausgänge
+{"MAXIMUMSAMPLE",32,eFloat,0,0, localSegment},        // 32 werte maximumspeicher
+{"FREQUENCYVALUEFILTER",4,eFloat,0,0, localSegment},  // 4 gefilterte freq. ausgänge
+{"FREQUENCYSCALE",4,eFloat,0,0, localSegment},        // 4 freq. skalierungswerte
+{"KREISFREQKOEFF",1,eFloat,0,0, localSegment},        // kreisfrequenz korrektur koeffizient
+{"ETHERRORS",1,eInt,0,0, localSegment},               // ethernet fehler speicher
+{"ETHSYNCLOSTCOUNT",1,eInt,0,0, localSegment},        // ethernet synclost counter
+{"ETHDATACOUNT",2,eInt,0,0, localSegment},            // anzahl sync. verluste mu
+{"NCHANNELS",1,eInt,0,0, localSegment},               // anzahl messkanäle sampling system
+{"NSMEAS",1,eInt,0,0, localSegment},                  // anzahl samples für 1 messperiode
+{"NSPERIOD",1,eInt,0,0, localSegment},                // anzahl samples für eine signalperiode
+{"_NSPERIOD",1,eFloat,0,0, localSegment},             // 1/ anzahl samples
+{"SYNCASDU",1,eInt,0,0, localSegment},                // ob und auf welchen datensatz synchronisiert wird
+{"TMCH0",1,eFloat,0,0, localSegment}};                // periodendauer messsignal kanal0
 
 
 
@@ -243,26 +246,28 @@ sMemSection dm32DspWorkspace = {
 	DspVar		: DspWorkspaceVar };
 	
 
-sDspVar DialogWorkSpaceVar[20] = 	{ 	  {"DSPCMDPAR",10,eInt,0,0},		// 10 werte cmds, paramter ... ctrl -> dsp
-                      {"DSPACK",1,eInt,0,0},			// semaphore ackn. dsp -> cntr.
-                      {"CTRLCMDPAR",20,eInt,0,0},		// 20 werte cmds, paramter ... dsp -> ctrl
-                      {"CTRLACK",1,eInt,0,0},			// semaphore ackn. ctrl. -> dsp
-                      {"FREQUENCYNORM",4,eFloat,0,0},		// 4 freq. normierungswerte
-                      {"GAINCORRECTION",32,eFloat,0,0},		// 32 verstärkungskorrekturwerte
-                      {"PHASECORRECTION",32,eFloat,0,0},	// 32 phasenkorrekturwerte
-                      {"OFFSETCORRECTION",32,eFloat,0,0},	// 32 offsetkorrekturwerte
-                      {"BUSYMAX",1,eFloat,0,0},			// akuelle auslastung [%]
-                      {"BUSY",1,eFloat,0,0},			// max. auslastung seit reset
-                      {"VNR",1,eFloat,0,0},				// versionsnummer
-                      {"GAINCORRECTION2",32,eFloat,0,0},	// 32 verstärkungskorrekturwerte 2.stufe
-                      {"PHASECORRECTION2",32,eFloat,0,0},	// 32 phasenkorrekturwerte 2. stufe
-                      {"OFFSETCORRECTION2",32,eFloat,0,0},	// 32 offsetkorrekturwerte 2. stufe
-                      {"ETHDESTSOURCEADRESS",3,eInt,0,0},	// 3*32bit -> 2*48bit
-                      {"ETHPRIORITYTAGGED",1,eInt,0,0},
-                      {"ETHTYPEAPPID",1,eInt,0,0},
-                      {"ETHROUTINGTAB",8,eInt,0,0}, 		// 8*4 = 32 byte 1byte/kanal ASDU / CHN
-                      {"INTERRUPTERROR",1,eInt,0,0},
-                      {"POWVALS4FOUT",48,eFloat,0,0}};  // 48 leistungs werte für frequenzausgänge
+sDspVar DialogWorkSpaceVar[20] =
+{{"DSPCMDPAR",10,eInt,0,0, localSegment},		    // 10 werte cmds, paramter ... ctrl -> dsp
+{"DSPACK",1,eInt,0,0, localSegment},			    // semaphore ackn. dsp -> cntr.
+{"CTRLCMDPAR",20,eInt,0,0, localSegment},		    // 20 werte cmds, paramter ... dsp -> ctrl
+{"CTRLACK",1,eInt,0,0, localSegment},			    // semaphore ackn. ctrl. -> dsp
+{"FREQUENCYNORM",4,eFloat,0,0, localSegment},		// 4 freq. normierungswerte
+{"GAINCORRECTION",32,eFloat,0,0, localSegment},     // 32 verstärkungskorrekturwerte
+{"PHASECORRECTION",32,eFloat,0,0, localSegment},	// 32 phasenkorrekturwerte
+{"OFFSETCORRECTION",32,eFloat,0,0, localSegment},   // 32 offsetkorrekturwerte
+{"BUSYMAX",1,eFloat,0,0, localSegment},             // akuelle auslastung [%]
+{"BUSY",1,eFloat,0,0, localSegment},			    // max. auslastung seit reset
+{"VNR",1,eFloat,0,0, localSegment},                 // versionsnummer
+{"GAINCORRECTION2",32,eFloat,0,0, localSegment},	// 32 verstärkungskorrekturwerte 2.stufe
+{"PHASECORRECTION2",32,eFloat,0,0, localSegment},	// 32 phasenkorrekturwerte 2. stufe
+{"OFFSETCORRECTION2",32,eFloat,0,0, localSegment},  // 32 offsetkorrekturwerte 2. stufe
+{"ETHDESTSOURCEADRESS",3,eInt,0,0, localSegment},	// 3*32bit -> 2*48bit
+{"ETHPRIORITYTAGGED",1,eInt,0,0, localSegment},
+{"ETHTYPEAPPID",1,eInt,0,0, localSegment},
+{"ETHROUTINGTAB",8,eInt,0,0, localSegment}, 		// 8*4 = 32 byte 1byte/kanal ASDU / CHN
+{"INTERRUPTERROR",1,eInt,0,0, localSegment},
+{"POWVALS4FOUT",48,eFloat,0,0, localSegment}};      // 48 leistungs werte für frequenzausgänge
+
 
 sMemSection dm32DialogWorkSpace = {
     Section: systemSection,
@@ -271,7 +276,8 @@ sMemSection dm32DialogWorkSpace = {
 	DspVar		: DialogWorkSpaceVar };
 
 
-sDspVar UserWorkSpaceVar[1] = { {"UWSPACE",uwSpaceSize21262,eFloat,0,0} };
+sDspVar UserWorkSpaceVar[1] =
+{{"UWSPACE",uwSpaceSize21262,eFloat,0,0, localSegment}};
 
 
 sMemSection dm32UserWorkSpace = {
@@ -281,10 +287,11 @@ sMemSection dm32UserWorkSpace = {
     DspVar		: UserWorkSpaceVar };
 
 
-sDspVar CmdListVar[4] = 	{	{"INTCMDLIST",IntCmdListLen21262,eInt,0,0},                // interrupt kommando
-                {"CMDLIST",CmdListLen21262,eInt,0,0},		// cycl. kommando liste
-                {"ALTINTCMDLIST",IntCmdListLen21262,eInt,0,0}, 	// alternative kommando listen
-                {"ALTCMDLIST",CmdListLen21262,eInt,0,0}};
+sDspVar CmdListVar[4] =
+{{"INTCMDLIST",IntCmdListLen21262,eInt,0,0, localSegment},      // interrupt kommando
+{"CMDLIST",CmdListLen21262,eInt,0,0, localSegment},             // cycl. kommando liste
+{"ALTINTCMDLIST",IntCmdListLen21262,eInt,0,0, localSegment},    //alternative kommando listen
+{"ALTCMDLIST",CmdListLen21262,eInt,0,0, localSegment}};
 
 
 sMemSection dm32CmdList = {
@@ -294,14 +301,23 @@ sMemSection dm32CmdList = {
 	DspVar		: CmdListVar };
 
 
-sDspVar ChannelNr[32] = 	{ 	{"CH0",1,eInt,0,0}, {"CH1",1,eInt,0,0}, {"CH2",1,eInt,0,0}, {"CH3",1,eInt,0,0},
-                {"CH4",1,eInt,0,0}, {"CH5",1,eInt,0,0}, {"CH6",1,eInt,0,0}, {"CH7",1,eInt,0,0},
-                {"CH8",1,eInt,0,0}, {"CH9",1,eInt,0,0}, {"CH10",1,eInt,0,0}, {"CH11",1,eInt,0,0},
-                {"CH12",1,eInt,0,0}, {"CH13",1,eInt,0,0}, {"CH14",1,eInt,0,0}, {"CH15",1,eInt,0,0},
-                {"CH16",1,eInt,0,0}, {"CH17",1,eInt,0,0}, {"CH18",1,eInt,0,0}, {"CH19",1,eInt,0,0},
-                {"CH20",1,eInt,0,0}, {"CH21",1,eInt,0,0}, {"CH22",1,eInt,0,0}, {"CH23",1,eInt,0,0},
-                {"CH24",1,eInt,0,0}, {"CH25",1,eInt,0,0}, {"CH26",1,eInt,0,0}, {"CH27",1,eInt,0,0},
-                {"CH28",1,eInt,0,0}, {"CH29",1,eInt,0,0}, {"CH30",1,eInt,0,0}, {"CH31",1,eInt,0,0} };
+sDspVar ChannelNr[32] =
+{{"CH0",1,eInt,0,0,localSegment}, {"CH1",1,eInt,0,0,localSegment},
+ {"CH2",1,eInt,0,0,localSegment}, {"CH3",1,eInt,0,0,localSegment},
+ {"CH4",1,eInt,0,0,localSegment}, {"CH5",1,eInt,0,0,localSegment},
+ {"CH6",1,eInt,0,0,localSegment}, {"CH7",1,eInt,0,0,localSegment},
+ {"CH8",1,eInt,0,0,localSegment}, {"CH9",1,eInt,0,0,localSegment},
+ {"CH10",1,eInt,0,0,localSegment}, {"CH11",1,eInt,0,0,localSegment},
+ {"CH12",1,eInt,0,0,localSegment}, {"CH13",1,eInt,0,0,localSegment},
+ {"CH14",1,eInt,0,0,localSegment}, {"CH15",1,eInt,0,0,localSegment},
+ {"CH16",1,eInt,0,0,localSegment}, {"CH17",1,eInt,0,0,localSegment},
+ {"CH18",1,eInt,0,0,localSegment}, {"CH19",1,eInt,0,0,localSegment},
+ {"CH20",1,eInt,0,0,localSegment}, {"CH21",1,eInt,0,0,localSegment},
+ {"CH22",1,eInt,0,0,localSegment}, {"CH23",1,eInt,0,0,localSegment},
+ {"CH24",1,eInt,0,0,localSegment}, {"CH25",1,eInt,0,0,localSegment},
+ {"CH26",1,eInt,0,0,localSegment}, {"CH27",1,eInt,0,0,localSegment},
+ {"CH28",1,eInt,0,0,localSegment}, {"CH29",1,eInt,0,0,localSegment},
+ {"CH30",1,eInt,0,0,localSegment}, {"CH31",1,eInt,0,0,localSegment}};
 
 
 sMemSection symbConsts1 = {
@@ -317,26 +333,40 @@ cDspClientVar::cDspClientVar()
 
 bool cDspClientVar::Init(QString& s)
 {
-    bool ret = false;
-    int n,fs;
+    bool ok;
+    bool ret = true;
+    int n, fs;
     if ( (n = s.count(',')) > 0 )
     {
         m_sName = s.section(',',0,0).remove(' ');
-        fs = s.section(',',1,1).remove(' ').toInt(&ret); // der erste parameter ist die feldgrösse
-        if (ret)
+        fs = s.section(',',1,1).remove(' ').toInt(&ok); // der erste parameter ist die feldgrösse
+        if ((ret = ret && ok))
             m_nSize = fs;
 
         if (n > 1) // wir haben noch einen parameter, dann ist das der typ
         {
-            fs = s.section(',',2,2).remove(' ').toInt(&ret);
-            if (ret)
+            fs = s.section(',',2,2).remove(' ').toInt(&ok);
+            if ((ret = ret && ok))
             {
-                if ( (ret = ( (fs == eInt) || (fs == eFloat) )))
+                if ( (ret = ret && ( (fs == eInt) || (fs == eFloat) )))
                     m_nType = fs;
             }
         }
         else
             m_nType = eFloat; // default ist es ein float
+
+        if (n > 2) // wir haben noch einen parameter, dann ist das der typ
+        {
+            fs = s.section(',',3,3).remove(' ').toInt(&ok);
+            if ((ret = ret && ok))
+            {
+                if ( (ret = ret && ( (fs == localSegment) || (fs == globalSegment) )))
+                    m_nSegment = fs;
+            }
+        }
+        else
+            m_nSegment = localSegment; // default ist es ein float
+
     }
     return ret;
 }
@@ -363,6 +393,12 @@ int cDspClientVar::type()
 ulong cDspClientVar::offs()
 {
     return m_nOffsAdr;
+}
+
+
+int cDspClientVar::segment()
+{
+    return m_nSegment;
 }
 
 
