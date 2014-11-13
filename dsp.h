@@ -79,7 +79,7 @@ public:
     cDspVarResolver();
     void setVarHash();
     void addSection(sMemSection*); // sections werden im konstruktor erstmal fest eingebunden
-    long offs(QString&); // gibt die offs. adresse einer variablen zurück, -1 wenn es die variable nicht gibt, zum generiren der dsp kommandos
+    long offs(QString&, ulong, ulong); // gibt die offs. adresse einer variablen zurück, -1 wenn es die variable nicht gibt, zum generiren der dsp kommandos
     long adr(QString&); // gibt die abs. adresse einer variablen im dsp zurück, -1 wenn es die variable nicht gibt, zum schreiben in den dsp
     sDspVar* vadr(QString&); //  gibt einen zeiger auf sDspVar zurück, zum lesen von daten aus dem dsp
     int type(QString &s);

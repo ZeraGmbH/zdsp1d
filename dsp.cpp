@@ -516,7 +516,7 @@ void cDspVarResolver::setQHash(sMemSection* psec) // zum setzen der qhash
 }
 
 
-long cDspVarResolver::offs(QString& s)
+long cDspVarResolver::offs(QString& s, ulong umo, ulong globalstartadr)
 {
     long offset;
     bool ok;
@@ -525,23 +525,31 @@ long cDspVarResolver::offs(QString& s)
     QString sSearch=VarParser.GetKeyword(&cts); // der namen der variable, die gesucht ist
     if (mVarHash.contains(sSearch))
     {
+        ulong retoffs;
         sDspVar* pDspVar = mVarHash.value(sSearch);
+        retoffs = pDspVar->offs;
+
         ts = ts.remove(' ');
         ts = ts.remove(sSearch); // name raus
         if (ts.length() > 0)
         { // wenn noch was da, dann muss das ein +/- offset sein
             offset = ts.toLong(&ok,10); // prüfen auf dez. konstante
             if (ok)
-                return pDspVar->offs + offset;
-
-            offset = ts.toLong(&ok,16); // mal hex versuchen
-            if (ok)
-                return pDspVar->offs +offset;
-
-            return -1; // sonst ist das ein fehler
+                retoffs += offset;
+            else
+            {
+                offset = ts.toLong(&ok,16); // mal hex versuchen
+                if (ok)
+                    retoffs += offset;
+                else
+                    return -1; // sonst ist das ein fehler
+            }
         }
 
-        return pDspVar->offs;
+        if (pDspVar->segment == globalSegment) // wenn daten im globalen segment liegen
+            retoffs += (globalstartadr - umo);
+
+        return retoffs;
     }
 
     offset = s.toLong(&ok,10); // prüfen auf dez. konstante
