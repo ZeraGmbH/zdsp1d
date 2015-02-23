@@ -246,7 +246,7 @@ sMemSection dm32DspWorkspace = {
 	DspVar		: DspWorkspaceVar };
 	
 
-sDspVar DialogWorkSpaceVar[20] =
+sDspVar DialogWorkSpaceVar[21] =
 {{"DSPCMDPAR",10,eInt,0,0, localSegment},		    // 10 werte cmds, paramter ... ctrl -> dsp
 {"DSPACK",1,eInt,0,0, localSegment},			    // semaphore ackn. dsp -> cntr.
 {"CTRLCMDPAR",20,eInt,0,0, localSegment},		    // 20 werte cmds, paramter ... dsp -> ctrl
@@ -266,7 +266,8 @@ sDspVar DialogWorkSpaceVar[20] =
 {"ETHTYPEAPPID",1,eInt,0,0, localSegment},
 {"ETHROUTINGTAB",8,eInt,0,0, localSegment}, 		// 8*4 = 32 byte 1byte/kanal ASDU / CHN
 {"INTERRUPTERROR",1,eInt,0,0, localSegment},
-{"POWVALS4FOUT",48,eFloat,0,0, localSegment}};      // 48 leistungs werte für frequenzausgänge
+{"POWVALS4FOUT",48,eFloat,0,0, localSegment},       // 48 leistungs werte für frequenzausgänge
+{"SUBDC",1,eInt,0,0, localSegment}};                // 32 bit 1/kanal wenn gesetzt -> subdc wenn copydata, copydiff
 
 
 sMemSection dm32DialogWorkSpace = {
