@@ -273,7 +273,7 @@ sDspVar DialogWorkSpaceVar[21] =
 sMemSection dm32DialogWorkSpace = {
     Section: systemSection,
     StartAdr		: dm32DialogWorkSpaceBase21262,
-	n		: 18,
+    n		: 21,
 	DspVar		: DialogWorkSpaceVar };
 
 
