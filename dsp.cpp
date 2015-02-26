@@ -264,7 +264,7 @@ sDspVar DialogWorkSpaceVar[21] =
 {"ETHDESTSOURCEADRESS",3,eInt,0,0, localSegment},	// 3*32bit -> 2*48bit
 {"ETHPRIORITYTAGGED",1,eInt,0,0, localSegment},
 {"ETHTYPEAPPID",1,eInt,0,0, localSegment},
-{"ETHROUTINGTAB",8,eInt,0,0, localSegment}, 		// 8*4 = 32 byte 1byte/kanal ASDU / CHN
+{"ETHROUTINGTAB",16,eInt,0,0, localSegment}, 		// 8*4 = 2Byte/routing, max. 32 routings = 64byte = 16worte
 {"INTERRUPTERROR",1,eInt,0,0, localSegment},
 {"POWVALS4FOUT",48,eFloat,0,0, localSegment},       // 48 leistungs werte für frequenzausgänge
 {"SUBDC",1,eInt,0,0, localSegment}};                // 32 bit 1/kanal wenn gesetzt -> subdc wenn copydata, copydiff
