@@ -132,7 +132,7 @@
 
 #include "dsp.h"
 
-static sDspCmd DspCmd[74] =
+static sDspCmd DspCmd[75] =
 
 {{"INVALID", 0, CMD ,0},
 {"USERMEMOFFSET", 1, CMD1i32, 0 },
@@ -207,7 +207,8 @@ static sDspCmd DspCmd[74] =
 {"COPYDATAIND",70,CMD3i16,0},
 {"INTERPOLATIONIND",71,CMD3i16,0},
 {"COPYMEM",72,CMD3i16,0 },
-{"GENADR",73,CMD3i16,0 }};
+{"GENADR",73,CMD3i16,0 },
+{"COPYDATAWDC", 3, CMD3i16, 0 }};
 
 
 sDspCmd* findDspCmd(QString& s)
