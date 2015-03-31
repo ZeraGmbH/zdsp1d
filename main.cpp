@@ -17,7 +17,7 @@ int main( int argc, char *argv[] )
     cZDSP1Server* zdsp1d = new cZDSP1Server(); // this is our server
 
     int r = 0;
-#ifndef ZDSP1DDEBUG
+#if !defined(ZDSP1DDEBUG) && !defined(SYSTEMD_NOTIFICATION)
     pid_t pid;
     if ( (pid=fork() ) < 0 ) // we generate a child process
     {

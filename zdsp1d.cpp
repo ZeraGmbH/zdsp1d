@@ -46,6 +46,9 @@
 #include "ethsettings.h"
 #include "rmconnection.h"
 
+#ifdef SYSTEMD_NOTIFICATION
+#include <systemd/sd-daemon.h>
+#endif
 
 #define ADSP_IOC_MAGIC 'a'
 /* ioctl commands */
@@ -950,6 +953,9 @@ void cZDSP1Server::doIdentAndRegister()
     m_pRMConnection->SendCommand(cmd = QString("RESOURCE:ADD"), par = QString("DSP1;USERMEM;%1;DSP UserMemory;%2;")
                                  .arg(pDspVar->size)
                                  .arg(port));
+#ifdef SYSTEMD_NOTIFICATION
+    sd_notify(0, "READY=1");
+#endif
 }
 
 

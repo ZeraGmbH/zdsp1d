@@ -11,6 +11,11 @@ LIBS +=  -lprotobuf
 LIBS +=  -lproto-net-qt
 LIBS +=  -lzera-resourcemanager-protobuf
 
+systemd_notification {
+	DEFINES += SYSTEMD_NOTIFICATION
+	LIBS +=  -lsystemd
+}
+
 CONFIG	+= qt debug
 
 HEADERS	+= zdspglobal.h \
