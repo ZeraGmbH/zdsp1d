@@ -21,6 +21,7 @@ google::protobuf::Message *cZDSPDProtobufWrapper::byteArrayToProtobuf(QByteArray
 
 QByteArray cZDSPDProtobufWrapper::protobufToByteArray(google::protobuf::Message *pMessage)
 {
-    return QByteArray(pMessage->SerializeAsString().c_str(), pMessage->ByteSize());
+    ba = QByteArray(pMessage->SerializeAsString().c_str(), pMessage->ByteSize());
+    return ba;
 }
 
