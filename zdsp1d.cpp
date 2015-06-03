@@ -2349,7 +2349,8 @@ void cZDSP1Server::executeCommand(google::protobuf::Message *cmd)
             else
                 Answer->set_rtype(ProtobufMessage::NetMessage_NetReply_ReplyType_ACK);
 
-            Answer->set_body(m_sOutput.toStdString()); // in any case we set the body
+            QByteArray ba = m_sOutput.toUtf8();
+            Answer->set_body(ba.data()); // in any case we set the body
 
             protobufAnswer.set_clientid(clientId, clientId.count());
             protobufAnswer.set_messagenr(messageNr);
