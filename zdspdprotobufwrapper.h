@@ -12,8 +12,6 @@ public:
   google::protobuf::Message *byteArrayToProtobuf(QByteArray bA);
 
   QByteArray protobufToByteArray(google::protobuf::Message *pMessage);
-private:
-  QByteArray ba;
 };
 
 #endif // ZDSPDPROTOBUFWRAPPER_H
