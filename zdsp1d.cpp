@@ -531,6 +531,7 @@ QString& cZDSP1Client::DspVarListRead(QString& s)
     bool ok=false;
     sOutput="";
     QTextStream ts( &sOutput, QIODevice::WriteOnly );
+    ts.setRealNumberPrecision(8);
     QByteArray *ba = new QByteArray();
     
     for (int i=0;;i++)
@@ -2258,7 +2259,7 @@ cZDSP1Client* cZDSP1Server::GetClient(ProtoNetPeer *peer)
 
 void cZDSP1Server::establishNewConnection(ProtoNetPeer *newClient)
 {
-    connect(newClient, SIGNAL(sigMessageReceived(google::protobuf::Message*)), this, SLOT(executeCommand(google::protobuf::Message*)));
+    connect(newClient, SIGNAL(sigMessageReceived(google::protobuf::Message*)), this, SLOT(meaCommand(google::protobuf::Message*)));
     connect(newClient, SIGNAL(sigConnectionClosed()), this, SLOT(deleteConnection()));
     AddClient(newClient); // we additionally add the client to our list
 }
