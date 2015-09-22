@@ -208,7 +208,7 @@ static sDspCmd DspCmd[75] =
 {"INTERPOLATIONIND",71,CMD3i16,0},
 {"COPYMEM",72,CMD3i16,0 },
 {"GENADR",73,CMD3i16,0 },
-{"COPYDATAWDC", 3, CMD3i16, 0 }};
+{"COPYDATAWDC", 74, CMD3i16, 0 }};
 
 
 sDspCmd* findDspCmd(QString& s)
