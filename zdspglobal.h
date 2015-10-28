@@ -33,12 +33,15 @@
 // neue befehle für dsp
 // {"SUBVCC",66,CMD3i16,0}}
 //  eingeführt. ..... läuft aber erst mit dsp ab version 3.08
-
+//v1.09
+// im en61850 decoder war eine änderung notwendig...diese wurde im dsp ab v3.16 realisiert
+// mittlerweile hatte sich das memory mapping in dialogworkspace geändert und musste daher
+// angepasst werden.
 
 
 #define DSPDeviceNode "/dev/zFPGA1dsp1"
 #define ServerBasisName "zdsp1d"
-#define ServerVersion "V1.08"
+#define ServerVersion "V1.09"
 #define InpBufSize 4096
 
 // wenn DEBUG -> kein fork() 

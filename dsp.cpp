@@ -238,7 +238,7 @@ sMemSection dm32DspWorkspace = {
 
 sDspVar DialogWorkSpaceVar[18] = 	{ 	  {"DSPCMDPAR",10,eInt,0},		// 10 werte cmds, paramter ... ctrl -> dsp
 					  {"DSPACK",1,eInt,0},			// semaphore ackn. dsp -> cntr.
-					  {"CTRLCMDPAR",10,eInt,0},		// 10 werte cmds, paramter ... dsp -> ctrl
+                      {"CTRLCMDPAR",20,eInt,0},		// 10 werte cmds, paramter ... dsp -> ctrl
 					  {"CTRLACK",1,eInt,0},			// semaphore ackn. ctrl. -> dsp
 					  {"FREQUENCYNORM",4,eFloat,0},		// 4 freq. normierungswerte
 					  {"GAINCORRECTION",32,eFloat,0},		// 32 verstärkungskorrekturwerte
@@ -253,7 +253,7 @@ sDspVar DialogWorkSpaceVar[18] = 	{ 	  {"DSPCMDPAR",10,eInt,0},		// 10 werte cmd
 					  {"ETHDESTSOURCEADRESS",3,eInt,0},	// 3*32bit -> 2*48bit
 					  {"ETHPRIORITYTAGGED",1,eInt,0},
 					  {"ETHTYPEAPPID",1,eInt,0},
-					  {"ETHROUTINGTAB",8,eInt,0} };		// 8*4 = 32 byte 1byte/kanal ASDU / CHN
+                      {"ETHROUTINGTAB",16,eInt,0} };		// 8*4 = 32 byte 1byte/kanal ASDU / CHN
 
 
 
