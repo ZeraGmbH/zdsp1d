@@ -1704,8 +1704,13 @@ bool cZDSP1Server::LoadDSProgram()
             for ( int i = 0; i < cmdl2.size(); i++ ) mds2 << cmdl2[i]; // interrupt liste
         }
     }
-    s =  QString( "INVALID()");
+
     client = it.toFirst();
+    s = QString( "DSPINTPOST()"); // wir triggern das senden der serialisierten interrupts
+    cmd = client->GenDspCmd(s, &ok);
+    mds1 << cmd;
+
+    s =  QString( "INVALID()");
     cmd = client->GenDspCmd(s, &ok);
     mds1 << cmd; // kommando listen ende
     mds2 << cmd;
