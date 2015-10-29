@@ -111,7 +111,6 @@ public:
     int DspDevSeek(int,ulong);
     int DspDevOpen();
     
-    void DspIntService(int);
     int DevFileDescriptor; // kerneltreiber wird nur 1x geöffnet und dann gehalten
     int DebugLevel;
     

@@ -756,11 +756,11 @@ cZDSP1Server::~cZDSP1Server()
     close(DevFileDescriptor); // close dev.
 }
 
-
+/*
 void cZDSP1Server::DspIntService(int)
 {
 }
-
+*/
 
 int cZDSP1Server::DspDevOpen()
 {
@@ -1621,7 +1621,7 @@ QDataStream& operator<<(QDataStream& ds,cDspCmd c)
     return ds;
 }
 
-
+/*
 void cZDSP1Server::DspIntHandler()
 { // behandelt den dsp interrupt
     int IRQCode;
@@ -1660,6 +1660,51 @@ void cZDSP1Server::DspIntHandler()
     }
 
     return ;
+}
+*/
+
+void cZDSP1Server::DspIntHandler()
+{ // behandelt den dsp interrupt
+
+    QByteArray *ba;
+    QString s;
+    cZDSP1Client *client,*client2;
+    int process = 0;
+
+    if ((!clientlist.isEmpty()) && (client = clientlist.first()) !=0) // wenn vorhanden nutzen wir immer den 1. client zum lesen
+    {
+        //anzInt++;
+        ba = new QByteArray();
+
+        if (client->DspVarRead(s = "CTRLCMDPAR,20", ba)) // 20 worte lesen
+        {
+            ulong* pardsp = (ulong*) ba->data();
+            int n = pardsp[0]; // anzahl der interrupts
+            //qDebug() << QString("Interrupts n=%1").arg(n);
+            for (int i = 1; i < (n+1); i++)
+            {
+                process = pardsp[i] >> 16;
+                if ((client2 = GetClient(process)) !=0) // gibts den client noch, der den interrupt haben wollte
+                {
+                    s = QString("DSPINT:%1").arg(pardsp[i] & 0xFFFF);
+                    client2->AddAsyncMessage((char*)s.latin1()); // die async. meldung
+
+                }
+            }
+
+        }
+
+        client->DspVarWrite(s = QString("CTRLACK,%1;").arg(CmdDone)); // jetzt in jedem fall acknowledge
+        delete ba;
+    }
+
+    else
+
+    {
+        cZDSP1Client *dummyClient = new cZDSP1Client(0, this); // dummyClient einrichten
+        dummyClient->DspVarWrite(s = QString("CTRLACK,%1;").arg(CmdDone)); // und rücksetzen
+        delete dummyClient;
+    }
 }
 
 
