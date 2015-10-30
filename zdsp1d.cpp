@@ -756,11 +756,6 @@ cZDSP1Server::~cZDSP1Server()
     close(DevFileDescriptor); // close dev.
 }
 
-/*
-void cZDSP1Server::DspIntService(int)
-{
-}
-*/
 
 int cZDSP1Server::DspDevOpen()
 {
