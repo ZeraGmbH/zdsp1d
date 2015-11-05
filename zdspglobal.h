@@ -36,7 +36,10 @@
 //v1.09
 // im en61850 decoder war eine änderung notwendig...diese wurde im dsp ab v3.16 realisiert
 // mittlerweile hatte sich das memory mapping in dialogworkspace geändert und musste daher
-// angepasst werden.
+// angepasst werden. es wurde ein dsp cmd DSPINTPOST eingeführt welches ans ende aller
+// kommandoliste angehängt werden muss, weil wir aus gründen von interrupt latenzen im
+// dsp auf queued interrupts umgestellt hatten. darüber hinaus musste der interrupt handler
+// geändert werden.
 
 
 #define DSPDeviceNode "/dev/zFPGA1dsp1"
