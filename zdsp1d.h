@@ -33,6 +33,8 @@ class cDebugSettings;
 class cETHSettings;
 class cDSPSettings;
 class cRMConnection;
+class QTcpServer;
+class QTcpSocket;
 
 class cZDSP1Client
 {
@@ -100,6 +102,8 @@ public:
     virtual cZDSP1Client* AddClient(ProtoNetPeer *m_pNetClient); // fügt einen client hinzu
     virtual void DelClient(ProtoNetPeer *netClient); // entfernt einen client
     virtual void DelClient(QByteArray clientId);
+    virtual cZDSP1Client* AddSCPIClient();
+    virtual void DelSCPIClient();
 
     virtual QString SCPICmd( SCPICmdType, QChar*);
     virtual QString SCPIQuery( SCPICmdType);
@@ -128,11 +132,15 @@ signals:
     void abortInit();
 
 private:
-    ProtoNetServer* myServer; // the real server that does the communication job
+    ProtoNetServer* myProtonetServer; // the real server that does the communication job
     cZDSPDProtobufWrapper m_ProtobufWrapper;
     quint16 m_nSocketIdentifier; // we will use this instead of real sockets, because protobuf extension clientId
     QHash<QByteArray, cZDSP1Client*> m_zdspdClientHash;
     QHash<cZDSP1Client*, QByteArray> m_clientIDHash; // liste der clientID's für die dspclients die über protobuf erzeugt wurden
+    QTcpServer* m_pSCPIServer;
+    QTcpSocket* m_pSCPISocket;
+    cZDSP1Client* m_pSCPIClient;
+
     quint8 m_nerror;
     uchar ActivatedCmdList;
     QByteArray CmdMem; // unsere dsp programm listen
@@ -235,6 +243,10 @@ private slots:
     virtual void establishNewConnection(ProtoNetPeer* newClient);
     virtual void deleteConnection();
     virtual void executeCommand(google::protobuf::Message* cmd);
+
+    virtual void setSCPIConnection();
+    virtual void SCPIInput();
+    virtual void SCPIdisconnect();
 
     void DspIntHandler(int);
     void doConfiguration();

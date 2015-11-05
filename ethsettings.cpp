@@ -9,8 +9,10 @@ cETHSettings::cETHSettings(Zera::XMLConfig::cReader *xmlread)
 {
     m_pXMLReader = xmlread;
     m_ConfigXMLMap["zdsp1dconfig:connectivity:ethernet:ipadress:resourcemanager"] = setRMIPAdress;
-    m_ConfigXMLMap["zdsp1dconfig:connectivity:ethernet:port:server"] = setServerPort;
+    m_ConfigXMLMap["zdsp1dconfig:connectivity:ethernet:port:protobufserver"] = setprotobufServerPort;
+    m_ConfigXMLMap["zdsp1dconfig:connectivity:ethernet:port:scpiserver"] = setscpiServerPort;
     m_ConfigXMLMap["zdsp1dconfig:connectivity:ethernet:port:resourcemanager"] = setRMPort;
+    m_ConfigXMLMap["com5003dconfig:connectivity:ethernet:scpiactive"] = setSCPIactive;
 }
 
 
@@ -26,8 +28,11 @@ quint16 cETHSettings::getPort(ethmember member)
 
     switch (member)
     {
-    case server:
-        port = m_nServerPort;
+    case protobufserver:
+        port = m_nProtobufServerPort;
+        break;
+    case scpiserver:
+        port = m_nSCPIServerPort;
         break;
     case resourcemanager:
         port = m_nRMPort;
@@ -35,6 +40,12 @@ quint16 cETHSettings::getPort(ethmember member)
     }
 
     return port;
+}
+
+
+bool cETHSettings::isSCPIactive()
+{
+    return m_bSCPIactive;
 }
 
 
@@ -49,11 +60,17 @@ void cETHSettings::configXMLInfo(QString key)
         case setRMIPAdress:
             m_sRMIPAdr = m_pXMLReader->getValue(key);
             break;
-        case setServerPort:
-            m_nServerPort = m_pXMLReader->getValue(key).toInt(&ok);
+        case setprotobufServerPort:
+            m_nProtobufServerPort = m_pXMLReader->getValue(key).toInt(&ok);
+            break;
+        case setscpiServerPort:
+            m_nSCPIServerPort = m_pXMLReader->getValue(key).toInt(&ok);
             break;
         case setRMPort:
             m_nRMPort = m_pXMLReader->getValue(key).toInt(&ok);
+            break;
+        case setSCPIactive:
+            m_bSCPIactive = (m_pXMLReader->getValue(key).toInt(&ok) == 1);
             break;
         }
     }

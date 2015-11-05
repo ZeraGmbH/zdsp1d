@@ -44,11 +44,13 @@
 						<xs:element name="port">
 							<xs:complexType>
 								<xs:sequence>
-									<xs:element name="server" type="porttype"/>
+                                                                        <xs:element name="protobufserver" type="porttype"/>
+                                                                        <xs:element name="scpiserver" type="porttype"/>
 									<xs:element name="resourcemanager" type="porttype"/>
 								</xs:sequence>	
 							</xs:complexType>	
 						</xs:element>
+                                                <xs:element name="scpiactive" type="yesnotype"/>
 					</xs:sequence>	
 				</xs:complexType>	
 			</xs:element>

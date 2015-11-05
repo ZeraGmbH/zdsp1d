@@ -28,6 +28,7 @@
 #include <QFile>
 #include <qbuffer.h>
 #include <QTcpSocket>
+#include <QTcpServer>
 #include <QCryptographicHash>
 
 #include <QTextStream>
@@ -835,10 +836,17 @@ void cZDSP1Server::doSetupServer()
 
     m_nDebugLevel = m_pDebugSettings->getDebugLevel();
 
-    myServer =  new ProtoNetServer(this);
-    myServer->setDefaultWrapper(&m_ProtobufWrapper);
-    connect(myServer, SIGNAL(sigClientConnected(ProtoNetPeer*)), this, SLOT(establishNewConnection(ProtoNetPeer*)));
-    myServer->startServer(m_pETHSettings->getPort(server)); // and can start the server now
+    myProtonetServer =  new ProtoNetServer(this);
+    myProtonetServer->setDefaultWrapper(&m_ProtobufWrapper);
+    connect(myProtonetServer, SIGNAL(sigClientConnected(ProtoNetPeer*)), this, SLOT(establishNewConnection(ProtoNetPeer*)));
+    myProtonetServer->startServer(m_pETHSettings->getPort(protobufserver)); // and can start the server now
+
+    if (m_pETHSettings->isSCPIactive())
+    {
+        m_pSCPIServer = new QTcpServer();
+        m_pSCPIServer->setMaxPendingConnections(1); // we only accept 1 client to connect
+        connect(m_pSCPIServer, SIGNAL(newConnection()), this, SLOT(setSCPIConnection()));
+    }
 
     m_sDspDeviceNode = m_pDspSettings->getDeviceNode(); // we try to open the dsp device
     if (DspDevOpen() < 0)
@@ -933,7 +941,7 @@ void cZDSP1Server::doIdentAndRegister()
 {
     m_pRMConnection->SendIdent(sServerName);
 
-    quint32 port = m_pETHSettings->getPort(server);
+    quint32 port = m_pETHSettings->getPort(protobufserver);
 
     QString cmd, par;
 
@@ -1886,7 +1894,13 @@ void cZDSP1Server::DspIntHandler(int)
                         out.device()->seek(0);
                         out << (qint32)(block.size() - sizeof(qint32));
 
-                        client2->m_pNetClient->getTcpSocket()->write(block);
+                        ProtoNetPeer* pNetclient;
+                        pNetclient = client2->m_pNetClient;
+
+                        if (pNetclient == 0)
+                            m_pSCPISocket->write(block);
+                        else
+                            pNetclient->getTcpSocket()->write(block);
                     }
                 }
             }
@@ -2381,6 +2395,48 @@ void cZDSP1Server::executeCommand(google::protobuf::Message *cmd)
 }
 
 
+void cZDSP1Server::setSCPIConnection()
+{
+    m_pSCPISocket = m_pSCPIServer->nextPendingConnection();
+
+    m_pSCPIClient = AddSCPIClient();
+
+    connect(m_pSCPISocket, SIGNAL(readyRead()), this, SLOT(SCPIInput()));
+    connect(m_pSCPISocket, SIGNAL(disconnected()), this, SLOT(SCPIdisconnect()));
+}
+
+
+void cZDSP1Server::SCPIInput()
+{
+    QString m_sInput, m_sOutput;
+
+    m_sInput = "";
+    while ( m_pSCPISocket->canReadLine() )
+        m_sInput += m_pSCPISocket->readLine();
+
+    m_sInput.remove('\r'); // we remove cr lf
+    m_sInput.remove('\n');
+
+    m_sOutput = pCmdInterpreter->CmdExecute(m_sInput);
+
+    QByteArray block;
+
+    QDataStream out(&block, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_4_0);
+    out << m_sOutput.toUtf8();
+
+    m_pSCPISocket->write(block);
+}
+
+
+void cZDSP1Server::SCPIdisconnect()
+{
+    disconnect(m_pSCPISocket, 0, 0, 0); // we disconnect everything
+    DelSCPIClient();
+}
+
+
+
 void cZDSP1Server::SetFASync()
 {
     fcntl(DevFileDescriptor, F_SETOWN, getpid()); // wir sind "besitzer" des device
@@ -2449,6 +2505,20 @@ void cZDSP1Server::DelClient(QByteArray clientId)
         delete client;
         LoadDSProgram(); // after deleting client we reload dsp program ... means unload dsp for this client
     }
+}
+
+
+cZDSP1Client *cZDSP1Server::AddSCPIClient()
+{
+    return AddClient(0); // we add this client with netclient (protonetpeer) = 0 because it is no protonetpeer but
+}
+
+
+void cZDSP1Server::DelSCPIClient()
+{
+    clientlist.removeAll(m_pSCPIClient);
+    LoadDSProgram(); // after deleting client we reload dsp program ... means unload dsp for this client
+
 }
 
 

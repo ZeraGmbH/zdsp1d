@@ -9,9 +9,11 @@
                                 <resourcemanager>127.0.0.1</resourcemanager>
 			</ipadress>	
 			<port>
-				<server>6310</server>
+                                <protobufserver>6310</protobufserver>
+                                <scpiserver>6311</scpiserver>
 				<resourcemanager>6312</resourcemanager>
 			</port>
+                        <scpiactive>1</scpiactive>
 		</ethernet>
 		<dsp>
 			<device> 
