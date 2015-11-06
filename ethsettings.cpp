@@ -12,7 +12,7 @@ cETHSettings::cETHSettings(Zera::XMLConfig::cReader *xmlread)
     m_ConfigXMLMap["zdsp1dconfig:connectivity:ethernet:port:protobufserver"] = setprotobufServerPort;
     m_ConfigXMLMap["zdsp1dconfig:connectivity:ethernet:port:scpiserver"] = setscpiServerPort;
     m_ConfigXMLMap["zdsp1dconfig:connectivity:ethernet:port:resourcemanager"] = setRMPort;
-    m_ConfigXMLMap["com5003dconfig:connectivity:ethernet:scpiactive"] = setSCPIactive;
+    m_ConfigXMLMap["zdsp1dconfig:connectivity:ethernet:scpiactive"] = setSCPIactive;
 }
 
 
