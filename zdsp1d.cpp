@@ -846,6 +846,7 @@ void cZDSP1Server::doSetupServer()
         m_pSCPIServer = new QTcpServer();
         m_pSCPIServer->setMaxPendingConnections(1); // we only accept 1 client to connect
         connect(m_pSCPIServer, SIGNAL(newConnection()), this, SLOT(setSCPIConnection()));
+        m_pSCPIServer->listen(QHostAddress::AnyIPv4, m_pETHSettings->getPort(scpiserver));
     }
 
     m_sDspDeviceNode = m_pDspSettings->getDeviceNode(); // we try to open the dsp device
