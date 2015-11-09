@@ -2418,13 +2418,13 @@ void cZDSP1Server::SCPIInput()
     m_sInput.remove('\r'); // we remove cr lf
     m_sInput.remove('\n');
 
-    m_sOutput = pCmdInterpreter->CmdExecute(m_sInput);
+    m_sOutput = pCmdInterpreter->CmdExecute(m_sInput) + "\n";
 
     QByteArray block;
 
     QDataStream out(&block, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_4_0);
-    out << m_sOutput.toUtf8();
+    out << m_sOutput.toLatin1();
 
     m_pSCPISocket->write(block);
 }
