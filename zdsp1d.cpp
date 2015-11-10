@@ -2420,13 +2420,11 @@ void cZDSP1Server::SCPIInput()
 
     m_sOutput = pCmdInterpreter->CmdExecute(m_sInput) + "\n";
 
-    QByteArray block;
+    QByteArray ba;
 
-    QDataStream out(&block, QIODevice::WriteOnly);
-    out.setVersion(QDataStream::Qt_4_0);
-    out << m_sOutput.toLatin1();
+    ba = m_sOutput.toLatin1();
+    m_pSCPISocket->write(ba);
 
-    m_pSCPISocket->write(block.constData(), block.length());
 }
 
 
