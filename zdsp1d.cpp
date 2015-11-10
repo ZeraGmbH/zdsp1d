@@ -2426,7 +2426,7 @@ void cZDSP1Server::SCPIInput()
     out.setVersion(QDataStream::Qt_4_0);
     out << m_sOutput.toLatin1();
 
-    m_pSCPISocket->write(block);
+    m_pSCPISocket->write(block.constData(), block.length());
 }
 
 
