@@ -40,11 +40,15 @@
 // kommandoliste angehängt werden muss, weil wir aus gründen von interrupt latenzen im
 // dsp auf queued interrupts umgestellt hatten. darüber hinaus musste der interrupt handler
 // geändert werden.
-
+//v1.10
+// es wurden mehrere Kommandos für den dsp ergänzt. die liste war für den com5003 bereits gewachsen
+// und für die wm3000 musste ein kommando ergänzt werden damit der dc aus den messperioden herausgerechnet
+// werden kann. dies ist erforderlich für die amplitudenjustage weil zera referenzgeräte immer noch ohne
+// dc arbeiten.
 
 #define DSPDeviceNode "/dev/zFPGA1dsp1"
 #define ServerBasisName "zdsp1d"
-#define ServerVersion "V1.09"
+#define ServerVersion "V1.10"
 #define InpBufSize 4096
 
 // wenn DEBUG -> kein fork() 
