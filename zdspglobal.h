@@ -55,7 +55,7 @@
 
 #define DSPDeviceNode "/dev/adsp21262-1/0"
 #define ServerBasisName "zdsp1d"
-#define ServerVersion "V1.09"
+#define ServerVersion "V1.10"
 
 #define InpBufSize 4096
 
