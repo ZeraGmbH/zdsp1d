@@ -14,7 +14,7 @@ class Message;
 
 
 class QString;
-class ProtoNetPeer;
+class XiQNetPeer;
 
 
 class cRMConnection: public QObject
@@ -34,12 +34,12 @@ private:
     quint16 m_nPort;
     quint8 m_nDebugLevel;
     QString m_sCommand;
-    ProtoNetPeer* m_pResourceManagerClient;
+    XiQNetPeer* m_pResourceManagerClient;
     cZDSPDProtobufWrapper m_ProtobufWrapper;
 
 private slots:
     void tcpErrorHandler(QAbstractSocket::SocketError errorCode);
-    void responseHandler(google::protobuf::Message* message);
+    void responseHandler(std::shared_ptr<google::protobuf::Message> message);
 
 signals:
     void connectionRMError();

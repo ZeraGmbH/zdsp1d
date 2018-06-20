@@ -7,20 +7,21 @@ cZDSPDProtobufWrapper::cZDSPDProtobufWrapper()
 }
 
 
-google::protobuf::Message *cZDSPDProtobufWrapper::byteArrayToProtobuf(QByteArray bA)
+std::shared_ptr<google::protobuf::Message> cZDSPDProtobufWrapper::byteArrayToProtobuf(QByteArray bA)
 {
-    ProtobufMessage::NetMessage *proto = new ProtobufMessage::NetMessage();
-    if(!proto->ParseFromArray(bA, bA.size()))
+    ProtobufMessage::NetMessage *intermediate = new ProtobufMessage::NetMessage();
+    if(!intermediate->ParseFromArray(bA, bA.size()))
     {
-        ProtobufMessage::NetMessage::ScpiCommand *cmd = proto->mutable_scpi();
+        ProtobufMessage::NetMessage::ScpiCommand *cmd = intermediate->mutable_scpi();
         cmd->set_command(bA.data(), bA.size() );
     }
+    std::shared_ptr<google::protobuf::Message> proto {intermediate};
     return proto;
 }
 
 
-QByteArray cZDSPDProtobufWrapper::protobufToByteArray(google::protobuf::Message *pMessage)
+QByteArray cZDSPDProtobufWrapper::protobufToByteArray(const google::protobuf::Message &pMessage)
 {
-    return QByteArray(pMessage->SerializeAsString().c_str(), pMessage->ByteSize());
+    return QByteArray(pMessage.SerializeAsString().c_str(), pMessage.ByteSize());
 }
 

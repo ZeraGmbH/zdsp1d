@@ -8,7 +8,7 @@ QMAKE_CXXFLAGS += -O0
 
 LIBS +=  -lzeraxmlconfig
 LIBS +=  -lprotobuf
-LIBS +=  -lproto-net-qt
+LIBS +=  -lxiqnet
 LIBS +=  -lzera-resourcemanager-protobuf
 
 systemd_notification {

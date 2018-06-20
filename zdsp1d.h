@@ -15,7 +15,7 @@
 #include <QMap>
 #include <QHash>
 #include <QVector>
-#include <protonetserver.h>
+#include <xiqnetserver.h>
 
 #include "dsp1scpi.h"
 #include "zhserver.h"
@@ -40,10 +40,10 @@ class cZDSP1Client
 {
 public:
     cZDSP1Client(){}
-    cZDSP1Client(int socket, ProtoNetPeer *netclient, cZDSP1Server *server);
+    cZDSP1Client(int socket, XiQNetPeer *netclient, cZDSP1Server *server);
     ~cZDSP1Client(){} //  allokierten speicher ggf. freigeben
-    
-    
+
+
     QString& SetRavList(QString&);
     QString& GetRavList();
     QString& SetCmdListDef(QString& );
@@ -55,7 +55,7 @@ public:
     bool GenCmdLists(QString&, ulong, ulong); // baut die cmdlisten  für den dsp zusammen wenn fehler -> false
     cDspCmd GenDspCmd(QString&, bool*, ulong, ulong); // generiert ein dsp kommando aus einem string
     QString &readActValues(QString&); // liess die messergebnisse (liste)
-    bool isActive(); 
+    bool isActive();
     void SetActive(bool); // merkt sich in m_bActive ob diese liste aktiv ist
     ulong setStartAdr(ulong, ulong); // zum relokalisieren der userdaten
     QString &DspVarListRead(QString&); // lesen dsp daten ganze Liste
@@ -69,22 +69,22 @@ public:
     int getSocket();
     cDspVarResolver DspVarResolver; // zum auflösen der variablen aus kommandos
     int sock; // socket für den die verbindung besteht
-    ProtoNetPeer* m_pNetClient; // our network client
+    XiQNetPeer* m_pNetClient; // our network client
 
 private:
-    void init(int socket, ProtoNetPeer *netclient, cZDSP1Server* server);
-    cZDSP1Server* myServer; 
+    void init(int socket, XiQNetPeer *netclient, cZDSP1Server* server);
+    cZDSP1Server* myServer;
     bool m_bActive;
     bool GenCmdList(QString&, QList<cDspCmd>& ,QString&,ulong,ulong);
     bool syntaxCheck(QString&);
-          
+
     int Encryption;
     char* qSEncryption(char*,int );
     QString sOutput;
     QString m_sCmdListDef; // kommando liste defintion
     QString m_sIntCmdListDef; // interrupt kommando  liste defintion
-        
-//    ulong m_nStartAdr; // die absolute adresse an der ein variablen "block" im dsp steht 
+
+//    ulong m_nStartAdr; // die absolute adresse an der ein variablen "block" im dsp steht
 //    int m_nlen; // länge des gesamten datenblocks (in float bzw. long)
     QList<cDspClientVar> m_DspVarList; // liste mit variablen beschreibungen
     QList<cDspCmd> m_DspCmdList; // liste mit dsp kommandos (periodisch)
@@ -99,29 +99,29 @@ class cZDSP1Server: public QObject, public cZHServer, public cbIFace {
 public:
     cZDSP1Server();
     virtual ~cZDSP1Server();
-    virtual cZDSP1Client* AddClient(ProtoNetPeer *m_pNetClient); // fügt einen client hinzu
-    virtual void DelClient(ProtoNetPeer *netClient); // entfernt einen client
+    virtual cZDSP1Client* AddClient(XiQNetPeer *m_pNetClient); // fügt einen client hinzu
+    virtual void DelClient(XiQNetPeer *netClient); // entfernt einen client
     virtual void DelClient(QByteArray clientId);
     virtual cZDSP1Client* AddSCPIClient();
     virtual void DelSCPIClient();
 
     virtual QString SCPICmd( SCPICmdType, QChar*);
     virtual QString SCPIQuery( SCPICmdType);
-    
+
     void SetFASync(); // async. benachrichtung einschalten
-    
+
     int SetBootPath(const char*);
     int SetDeviceNode(char*);
     int SetDebugLevel(const char*);
-    
-    int DspDevRead(int, char*, int); 
+
+    int DspDevRead(int, char*, int);
     int DspDevWrite(int, char*, int);
     int DspDevSeek(int,ulong);
     int DspDevOpen();
-    
+
     int DevFileDescriptor; // kerneltreiber wird nur 1x geöffnet und dann gehalten
     int m_nDebugLevel;
-    
+
     cDebugSettings* m_pDebugSettings;
     cETHSettings* m_pETHSettings;
     cDSPSettings* m_pDspSettings;
@@ -132,7 +132,7 @@ signals:
     void abortInit();
 
 private:
-    ProtoNetServer* myProtonetServer; // the real server that does the communication job
+    XiQNetServer* myProtonetServer; // the real server that does the communication job
     cZDSPDProtobufWrapper m_ProtobufWrapper;
     quint16 m_nSocketIdentifier; // we will use this instead of real sockets, because protobuf extension clientId
     QHash<QByteArray, cZDSP1Client*> m_zdspdClientHash;
@@ -156,7 +156,7 @@ private:
 
     // die routinen für das system modell
     QString mCommand2Dsp(QString&); // indirekt für system modell
-    
+
     QString mTestDsp(QChar *);
     QString mResetDsp(QChar*);
     QString mBootDsp(QChar*);
@@ -188,17 +188,17 @@ private:
     QString mTriggerIntListHKSK(QChar*);
     QString mTriggerIntListALL(QChar*);
     QString mResetMaxima(QChar*);
-        
+
     // die routinen für das status modell
-    
+
     QString mResetDeviceLoadMax();
     QString mGetDeviceLoadMax();
     QString mGetDeviceLoadAct();
     QString mGetDspStatus();
     QString mGetDeviceStatus();
-  
+
     // die routinen für das measure modell
-    
+
     QString mUnloadCmdList(QChar*);
     QString mLoadCmdList(QChar*);
     QString mSetRavList(QChar*);
@@ -208,20 +208,20 @@ private:
     QString mSetCmdList(QChar*);
     QString mGetCmdList();
     QString mMeasure(QChar*);
-    
+
     // die routinen für das memory modell
-    
+
     QString mDspMemoryRead(QChar *);
     QString mDspMemoryWrite(QChar *);
-    
+
     bool BuildDSProgram(QString& errs);
     bool LoadDSProgram();
     bool setDspType();
     int readMagicId();
-    bool Test4HWPresent(); 
+    bool Test4HWPresent();
     bool Test4DspRunning();
     cZDSP1Client* GetClient(int s);
-    cZDSP1Client* GetClient(ProtoNetPeer* peer);
+    cZDSP1Client* GetClient(XiQNetPeer* peer);
     QString m_sDspDeviceVersion; // version der hardware
     QString m_sDspSerialNumber; // seriennummer der hardware
     QString m_sDspDeviceNode; // für den zugriff zur hardware
@@ -240,9 +240,9 @@ private:
     QTimer m_retryTimer;
 
 private slots:
-    virtual void establishNewConnection(ProtoNetPeer* newClient);
+    virtual void establishNewConnection(XiQNetPeer* newClient);
     virtual void deleteConnection();
-    virtual void executeCommand(google::protobuf::Message* cmd);
+    virtual void executeCommand(std::shared_ptr<google::protobuf::Message> cmd);
 
     virtual void setSCPIConnection();
     virtual void SCPIInput();
