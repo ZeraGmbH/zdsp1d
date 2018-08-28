@@ -45,11 +45,12 @@
 //  {"COPYDATAIND",70,CMD3i16,0}, {"INTERPOLATIONIND",71,CMD3i16,0},
 //  {"COPYMEM",72,CMD3i16,0 }, {"GENADR",73,CMD3i16,0 }
 //  added fout routing field to "POWVALS4FOUT" to dialogworkspace
-
+//v1.11:
+//  new network connection zdsp1d.socket
 
 #define DSPDeviceNode "/dev/zFPGA1dsp1"
 #define ServerBasisName "zdsp1d"
-#define ServerVersion "V1.10"
+#define ServerVersion "V1.11"
 #define InpBufSize 4096
 #define defaultXSDFile "/etc/zera/zdsp1d/zdsp1d.xsd"
 
