@@ -11,9 +11,9 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 #Set project Version
-set(zdsp1d_VERSION_MAJOR "0")
-set(zdsp1d_VERSION_MINOR "0")
-set(zdsp1d_VERSION_PATCH "1")
+set(zdsp1d_VERSION_MAJOR "1")
+set(zdsp1d_VERSION_MINOR "12")
+set(zdsp1d_VERSION_PATCH "0")
 
 set(PROJECT_VERSION "${zdsp1d_VERSION_MAJOR}.${zdsp1d_VERSION_MINOR}.${zdsp1d_VERSION_PATCH}")
 
