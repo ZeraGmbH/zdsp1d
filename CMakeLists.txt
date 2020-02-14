@@ -17,6 +17,8 @@ set(zdsp1d_VERSION_PATCH "0")
 
 set(PROJECT_VERSION "${zdsp1d_VERSION_MAJOR}.${zdsp1d_VERSION_MINOR}.${zdsp1d_VERSION_PATCH}")
 
+option(useSystemd "Enable systemd notification" ON)
+
 #Adding cmake functions like feature_summary()
 include(FeatureSummary)
 include(GNUInstallDirs)
@@ -27,6 +29,11 @@ find_package(xiqnet REQUIRED)
 find_package(zeraprotobuf REQUIRED)
 find_package(zeraxmlconfig REQUIRED)
 
+if(${useSystemd})
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(Systemd REQUIRED libsystemd)
+    add_definitions(-DSYSTEMD_NOTIFICATION)
+endif()
 
 #sum up project Files 
 file(GLOB SOURCES
@@ -65,7 +72,12 @@ target_link_libraries(zdsp1d
     ZeraClasses::zeraxmlconfig
     )	
 
-
+if(${Systemd_FOUND})
+    target_link_libraries(zdsp1d
+        PRIVATE
+        systemd
+    )
+endif()
 
 
 
@@ -94,9 +106,3 @@ install(
 
 # spawn out some info on configuration
 feature_summary(WHAT ALL FATAL_ON_MISSING_REQUIRED_PACKAGES)
-
-
-
-
-
-
