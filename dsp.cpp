@@ -213,13 +213,21 @@ static sDspCmd DspCmd[78] =
 {"INTEGRALNEG", 76, CMD3i16, 0 },
 {"SUBNVC", 77, CMD3i16, 0 }};
 
+static QHash<QString, sDspCmd*> dspCmdHash;
 
 sDspCmd* findDspCmd(QString& s)
 {
-    int len = sizeof(DspCmd)/sizeof(sDspCmd);
-    for (int i=0; i < len; i++)
-        if (s == DspCmd[i].Name) return &DspCmd[i]; // zeiger wenn wir das kommando kennen
-
+    // fill hash on 1st call
+    if(dspCmdHash.isEmpty()) {
+        int len = sizeof(DspCmd) / sizeof(sDspCmd);
+        for (int i=0; i < len; i++) {
+            dspCmdHash[DspCmd[i].Name] = &DspCmd[i];
+        }
+    }
+    QHash<QString, sDspCmd*>::const_iterator iter = dspCmdHash.find(s);
+    if(iter != dspCmdHash.end()) { // found
+        return iter.value();
+    }
     return NULL; // sonst 0
 }
 
