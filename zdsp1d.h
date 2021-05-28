@@ -16,11 +16,11 @@
 #include <QHash>
 #include <QVector>
 #include <xiqnetserver.h>
+#include <xiqnetwrapper.h>
 
 #include "dsp1scpi.h"
 #include "zhserver.h"
 #include "dsp.h"
-#include "zdspdprotobufwrapper.h"
 
 
 typedef QVector<float> tDspMemArray;
@@ -133,7 +133,7 @@ signals:
 
 private:
     XiQNetServer* myProtonetServer; // the real server that does the communication job
-    cZDSPDProtobufWrapper m_ProtobufWrapper;
+    XiQNetWrapper m_ProtobufWrapper;
     quint16 m_nSocketIdentifier; // we will use this instead of real sockets, because protobuf extension clientId
     QHash<QByteArray, cZDSP1Client*> m_zdspdClientHash;
     QHash<cZDSP1Client*, QByteArray> m_clientIDHash; // liste der clientID's für die dspclients die über protobuf erzeugt wurden
