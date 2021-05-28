@@ -6,12 +6,9 @@
 class cZDSPDProtobufWrapper : public XiQNetWrapper
 {
 public:
-  cZDSPDProtobufWrapper();
+    cZDSPDProtobufWrapper();
 
-
-  std::shared_ptr<google::protobuf::Message> byteArrayToProtobuf(QByteArray bA) override;
-
-  QByteArray protobufToByteArray(const google::protobuf::Message &pMessage) override;
+    std::shared_ptr<google::protobuf::Message> byteArrayToProtobuf(QByteArray bA) override;
 };
 
 #endif // ZDSPDPROTOBUFWRAPPER_H

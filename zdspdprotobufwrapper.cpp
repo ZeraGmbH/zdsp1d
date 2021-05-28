@@ -18,10 +18,3 @@ std::shared_ptr<google::protobuf::Message> cZDSPDProtobufWrapper::byteArrayToPro
     std::shared_ptr<google::protobuf::Message> proto {intermediate};
     return proto;
 }
-
-
-QByteArray cZDSPDProtobufWrapper::protobufToByteArray(const google::protobuf::Message &pMessage)
-{
-    return QByteArray(pMessage.SerializeAsString().c_str(), pMessage.ByteSize());
-}
-
