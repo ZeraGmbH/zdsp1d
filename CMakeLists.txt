@@ -24,13 +24,14 @@ include(FeatureSummary)
 include(GNUInstallDirs)
 
 #Find dependecies
+find_package(PkgConfig REQUIRED)
 find_package(Qt5 COMPONENTS Core Xml Network CONFIG REQUIRED)
+find_package(Protobuf REQUIRED)
 find_package(zeraprotobuf REQUIRED)
 find_package(xiqnet REQUIRED)
 find_package(zeraxmlconfig REQUIRED)
 
 if(${useSystemd})
-    find_package(PkgConfig REQUIRED)
     pkg_check_modules(Systemd REQUIRED libsystemd)
     add_definitions(-DSYSTEMD_NOTIFICATION)
 endif()
@@ -63,14 +64,16 @@ add_executable(zdsp1d
 
 #link dependencies
 target_link_libraries(zdsp1d
-    PRIVATE
+    PUBLIC
     Qt5::Core
+    VeinMeta::xiqnet
+    ${Protobuf_LIBRARIES}
+    VeinMeta::zeraprotobuf
+    ZeraClasses::zeraxmlconfig
+    PRIVATE
     Qt5::Xml
     Qt5::Network
-    VeinMeta::xiqnet
-    VeinMeta::zeraprotobuf 
-    ZeraClasses::zeraxmlconfig
-    )	
+    )
 
 if(${Systemd_FOUND})
     target_link_libraries(zdsp1d
