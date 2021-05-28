@@ -25,8 +25,8 @@ include(GNUInstallDirs)
 
 #Find dependecies
 find_package(Qt5 COMPONENTS Core Xml Network CONFIG REQUIRED)
-find_package(xiqnet REQUIRED)
 find_package(zeraprotobuf REQUIRED)
+find_package(xiqnet REQUIRED)
 find_package(zeraxmlconfig REQUIRED)
 
 if(${useSystemd})
