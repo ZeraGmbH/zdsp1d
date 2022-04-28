@@ -1,9 +1,7 @@
 #ifndef DSPSETTINGS_H
 #define DSPSETTINGS_H
 
-#include <QObject>
-
-#include "xmlsettings.h"
+#include <xmlsettings.h>
 
 namespace DSPSettings
 {
@@ -18,17 +16,7 @@ namespace DSPSettings
     };
 }
 
-
-namespace Zera
-{
-namespace XMLConfig
-{
-    class cReader;
-}
-}
-
-
-class cDSPSettings : public cXMLSettings
+class cDSPSettings : public XMLSettings
 {
     Q_OBJECT
 

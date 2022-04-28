@@ -799,14 +799,7 @@ void cZDSP1Server::doConfiguration()
                 connect(myXMLConfigReader,SIGNAL(valueChanged(const QString&)),m_pDspSettings,SLOT(configXMLInfo(const QString&)));
 
                 QString s = args.at(1);
-
-                if (myXMLConfigReader->loadXML(s)) // the first parameter should be the filename
-                {
-                    // xmlfile ok -> nothing to do .. the configreader will emit all configuration
-                    // signals and after this the finishedparsingXML signal
-                }
-                else
-                {
+                if(!myXMLConfigReader->loadXMLFile(s)) {
                     m_nerror = xmlfileError;
                     emit abortInit();
                 }
